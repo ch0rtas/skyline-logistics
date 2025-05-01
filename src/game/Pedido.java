@@ -111,6 +111,14 @@ public class Pedido {
     }
 
     /**
+     * Establece los días restantes para la entrega
+     * @param diasRestantes Nuevo número de días restantes
+     */
+    public void setDiasRestantes(int diasRestantes) {
+        this.diasRestantes = diasRestantes;
+    }
+
+    /**
      * Obtiene la ciudad de destino
      * @return String con el destino
      */
