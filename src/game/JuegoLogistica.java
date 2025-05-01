@@ -16,13 +16,13 @@ public class JuegoLogistica {
     private Random random;
     private Map<String, Pedido> pedidos;
     private List<Pedido> pedidosPendientes;
+    private List<Pedido> pedidosEnCurso;
     private int diaActual;
     private String region;
     private String dificultad;
     private int satisfaccionClientes;
     private int enviosExitosos;
     private int enviosTotales;
-    private static final int MULTA_RECHAZO = 6514;
 
     /**
      * Constructor del juego
@@ -32,15 +32,51 @@ public class JuegoLogistica {
     public JuegoLogistica(String region, String dificultad) {
         this.region = region.toUpperCase();
         this.dificultad = dificultad.toLowerCase();
-        this.jugador = new Jugador("Jugador", 50000);
+        this.jugador = new Jugador("Jugador", calcularBalanceInicial());
         this.scanner = new Scanner(System.in);
         this.random = new Random();
         this.pedidos = new HashMap<>();
         this.pedidosPendientes = new ArrayList<>();
+        this.pedidosEnCurso = new ArrayList<>();
         this.diaActual = 1;
         this.satisfaccionClientes = 100;
         this.enviosExitosos = 0;
         this.enviosTotales = 0;
+    }
+
+    /**
+     * Calcula el balance inicial según la dificultad
+     * @return int con el balance inicial
+     */
+    private int calcularBalanceInicial() {
+        switch (dificultad) {
+            case "easy":
+                return 50000;
+            case "medium":
+                return 25000;
+            case "hard":
+                return 10000;
+            default:
+                return 25000;
+        }
+    }
+
+    /**
+     * Calcula la multa por rechazar un pedido según la dificultad
+     * @return int con el monto de la multa
+     */
+    private int calcularMultaRechazo() {
+        int base = 5000;
+        switch (dificultad) {
+            case "easy":
+                return base;
+            case "medium":
+                return base * 2;
+            case "hard":
+                return base * 3;
+            default:
+                return base;
+        }
     }
 
     /**
@@ -64,7 +100,7 @@ public class JuegoLogistica {
      */
     private void mostrarBienvenida() {
         System.out.println("\n✅ Sistema iniciado en región: " + region);
-        System.out.println("💰 Presupuesto inicial: $" + jugador.getPresupuesto());
+        System.out.println("💰 Balance inicial: $" + jugador.getPresupuesto());
     }
 
     /**
@@ -85,10 +121,11 @@ public class JuegoLogistica {
         System.out.println("📅 DÍA " + diaActual + " | ALMACÉN PRINCIPAL: LIMA");
         System.out.println("==============================================");
         System.out.println("\n1. Ver pedidos pendientes");
-        System.out.println("2. Gestionar pedido");
-        System.out.println("3. Ver estadísticas");
-        System.out.println("4. Pasar al siguiente día");
-        System.out.println("5. Salir");
+        System.out.println("2. Ver pedidos en curso");
+        System.out.println("3. Gestionar pedido");
+        System.out.println("4. Ver estadísticas");
+        System.out.println("5. Pasar al siguiente día");
+        System.out.println("6. Salir");
         System.out.print("\nSeleccione una opción: ");
     }
 
@@ -102,15 +139,18 @@ public class JuegoLogistica {
                 mostrarPedidosPendientes();
                 break;
             case "2":
-                gestionarPedido();
+                mostrarPedidosEnCurso();
                 break;
             case "3":
-                mostrarEstadisticas();
+                gestionarPedido();
                 break;
             case "4":
-                pasarDia();
+                mostrarEstadisticas();
                 break;
             case "5":
+                pasarDia();
+                break;
+            case "6":
                 System.exit(0);
                 break;
             default:
@@ -190,6 +230,25 @@ public class JuegoLogistica {
     }
 
     /**
+     * Muestra los pedidos en curso
+     */
+    private void mostrarPedidosEnCurso() {
+        if (pedidosEnCurso.isEmpty()) {
+            System.out.println("\n📭 No hay pedidos en curso");
+            return;
+        }
+
+        System.out.println("\n📦 PEDIDOS EN CURSO:");
+        for (Pedido pedido : pedidosEnCurso) {
+            System.out.println("\n   ID: #" + pedido.getId());
+            System.out.println("   Cliente: " + pedido.getCliente());
+            System.out.println("   Carga: " + pedido.getCarga());
+            System.out.println("   Prioridad: " + pedido.getPrioridad());
+            System.out.println("   Pago ofrecido: $" + pedido.getPago());
+        }
+    }
+
+    /**
      * Permite gestionar un pedido
      */
     private void gestionarPedido() {
@@ -210,21 +269,21 @@ public class JuegoLogistica {
 
         System.out.println("\n¿Qué desea hacer con el pedido #" + idPedido + "?");
         System.out.println("1. Enviar");
-        System.out.println("2. Rechazar (Multa: $" + MULTA_RECHAZO + ")");
+        System.out.println("2. Rechazar (Multa: $" + calcularMultaRechazo() + ")");
         System.out.print("\nOpción: ");
         String opcion = scanner.nextLine();
 
         if (opcion.equals("2")) {
             System.out.println("\n⚠️ ¿Está seguro de rechazar el pedido #" + idPedido + "?");
-            System.out.println("   - Multa por rechazo: $" + MULTA_RECHAZO);
+            System.out.println("   - Multa por rechazo: $" + calcularMultaRechazo());
             System.out.print("   - Confirmar (S/N): ");
             
             String confirmacion = scanner.nextLine().toUpperCase();
             if (confirmacion.equals("S")) {
-                jugador.recibirDanio(MULTA_RECHAZO);
+                jugador.recibirDanio(calcularMultaRechazo());
                 pedidosPendientes.remove(pedido);
                 System.out.println("❌ Pedido #" + idPedido + " rechazado");
-                System.out.println("💰 Multa aplicada: $" + MULTA_RECHAZO);
+                System.out.println("💰 Multa aplicada: $" + calcularMultaRechazo());
             }
             return;
         }
@@ -240,11 +299,20 @@ public class JuegoLogistica {
         System.out.print("\nSeleccione ruta (1-2): ");
         String ruta = scanner.nextLine();
 
+        int costoRuta = 0;
         if (ruta.equals("2")) {
+            costoRuta = 4500;
             System.out.println("\n⏳ Aplicando patrón *Strategy*: Cambiando a estrategia rápida...");
-            System.out.println("✈ Envío #" + idPedido + " asignado a AVIÓN (Costo total: $4,500).");
+            System.out.println("✈ Envío #" + idPedido + " asignado a AVIÓN (Costo total: $" + costoRuta + ").");
         } else {
-            System.out.println("\n🚚 Envío #" + idPedido + " asignado a CAMIÓN (Costo total: $1,200).");
+            costoRuta = 1200;
+            System.out.println("\n🚚 Envío #" + idPedido + " asignado a CAMIÓN (Costo total: $" + costoRuta + ").");
+        }
+
+        // Verificar si hay balance suficiente
+        if (jugador.getPresupuesto() < costoRuta) {
+            System.out.println("❌ Balance insuficiente para realizar el envío");
+            return;
         }
 
         // Añadir servicios
@@ -271,8 +339,19 @@ public class JuegoLogistica {
             }
         }
 
+        // Verificar balance total
+        int costoTotal = costoRuta + costoExtra;
+        if (jugador.getPresupuesto() < costoTotal) {
+            System.out.println("❌ Balance insuficiente para los servicios seleccionados");
+            return;
+        }
+
         System.out.println("\n💡 Servicios añadidos:");
         System.out.println("   - Costo adicional: $" + costoExtra);
+        System.out.println("   - Costo total: $" + costoTotal);
+
+        // Descontar el costo del balance
+        jugador.recibirDanio(costoTotal);
 
         // Resolver incidente si ocurre
         if (random.nextBoolean()) {
@@ -280,6 +359,7 @@ public class JuegoLogistica {
         }
 
         pedidosPendientes.remove(pedido);
+        pedidosEnCurso.add(pedido);
         System.out.println("\n✅ Pedido #" + idPedido + " gestionado exitosamente");
     }
 
@@ -325,10 +405,11 @@ public class JuegoLogistica {
      */
     private void mostrarEstadisticas() {
         System.out.println("\n📊 Métricas actuales:");
-        System.out.println("   - 💰 Presupuesto: $" + jugador.getPresupuesto());
+        System.out.println("   - 💰 Balance: $" + jugador.getPresupuesto());
         System.out.println("   - 😊 Satisfacción clientes: " + satisfaccionClientes + "%");
         System.out.println("   - 🚚 Envíos exitosos: " + enviosExitosos + "/" + enviosTotales);
         System.out.println("   - 📦 Pedidos pendientes: " + pedidosPendientes.size());
+        System.out.println("   - 📦 Pedidos en curso: " + pedidosEnCurso.size());
     }
 
     /**
@@ -346,17 +427,21 @@ public class JuegoLogistica {
         System.out.println("==============================================");
         
         // Simular resultados de envíos
-        for (Map.Entry<String, Pedido> entry : pedidos.entrySet()) {
+        for (Pedido pedido : pedidosEnCurso) {
             boolean exito = random.nextBoolean();
             if (exito) {
                 enviosExitosos++;
-                jugador.recuperarPresupuesto(entry.getValue().getPago());
+                jugador.recuperarPresupuesto(pedido.getPago());
+                System.out.println("✅ Envío #" + pedido.getId() + " completado exitosamente");
+                System.out.println("💰 Ganancia: $" + pedido.getPago());
             } else {
                 satisfaccionClientes -= 5;
+                System.out.println("❌ Envío #" + pedido.getId() + " falló");
             }
             enviosTotales++;
         }
         
+        pedidosEnCurso.clear();
         pedidos.clear();
         generarPedidosDia();
         mostrarEstadisticas();
@@ -369,7 +454,7 @@ public class JuegoLogistica {
         System.out.println("\n==============================================");
         System.out.println("🎮 GAME OVER");
         System.out.println("==============================================");
-        System.out.println("💰 Presupuesto final: $" + jugador.getPresupuesto());
+        System.out.println("💰 Balance final: $" + jugador.getPresupuesto());
         System.out.println("😊 Satisfacción final: " + satisfaccionClientes + "%");
         System.out.println("🚚 Envíos totales: " + enviosTotales);
         System.out.println("✅ Envíos exitosos: " + enviosExitosos);
