@@ -57,6 +57,9 @@ public class JuegoLogistica {
         {450, 800, 700, 800, 600, 900, 800, 0, 0, 300, 700, 700, 300, 200, 0}  // Gijón
     };
 
+    private List<Vehiculo> vehiculosMercado;
+    private static final String[] TIPOS_CARGA = {"NORMAL", "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"};
+
     /**
      * Constructor del juego
      * @param almacenPrincipal Provincia seleccionada como almacén principal
@@ -154,6 +157,7 @@ public class JuegoLogistica {
     public void iniciar() {
         mostrarBienvenida();
         inicializarFlota();
+        generarVehiculosMercado();
         generarPedidosDia();
         
         while (!jugador.estaDerrotado()) {
@@ -181,22 +185,22 @@ public class JuegoLogistica {
         switch (dificultad) {
             case "easy":
                 // 2 furgonetas, 1 camión, 1 barco, 1 avión
-                flota.add(new Vehiculo("Furgoneta", "F1", 1000, 80, 2, "REFRIGERADO"));
-                flota.add(new Vehiculo("Furgoneta", "F2", 1000, 80, 2, "FRÁGIL"));
-                flota.add(new Vehiculo("Camión", "C1", 5000, 60, 3, "PELIGROSO", "ESCOLTADO"));
-                flota.add(new Vehiculo("Barco", "B1", 20000, 30, 4, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
-                flota.add(new Vehiculo("Avión", "A1", 10000, 500, 10, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Furgoneta", "F01", 1000, 80, 2, "REFRIGERADO"));
+                flota.add(new Vehiculo("Furgoneta", "F02", 1000, 80, 2, "FRÁGIL"));
+                flota.add(new Vehiculo("Camión", "C01", 5000, 60, 3, "PELIGROSO", "ESCOLTADO"));
+                flota.add(new Vehiculo("Barco", "B01", 20000, 30, 4, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Avión", "A01", 10000, 500, 10, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
                 break;
             case "medium":
                 // 1 furgoneta, 1 camión, 1 barco
-                flota.add(new Vehiculo("Furgoneta", "F1", 1000, 80, 2, "REFRIGERADO"));
-                flota.add(new Vehiculo("Camión", "C1", 5000, 60, 3, "PELIGROSO"));
-                flota.add(new Vehiculo("Barco", "B1", 20000, 30, 4, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Furgoneta", "F01", 1000, 80, 2, "REFRIGERADO"));
+                flota.add(new Vehiculo("Camión", "C01", 5000, 60, 3, "PELIGROSO"));
+                flota.add(new Vehiculo("Barco", "B01", 20000, 30, 4, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
                 break;
             case "hard":
                 // 1 furgoneta, 1 barco
-                flota.add(new Vehiculo("Furgoneta", "F1", 1000, 80, 2));
-                flota.add(new Vehiculo("Barco", "B1", 20000, 30, 4, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Furgoneta", "F01", 1000, 80, 2));
+                flota.add(new Vehiculo("Barco", "B01", 20000, 30, 4, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
                 break;
         }
 
@@ -214,12 +218,12 @@ public class JuegoLogistica {
     }
 
     /**
-     * Muestra la flota de vehículos y sus pedidos asignados
+     * Muestra la flota de vehículos y el mercado
      */
     private void mostrarFlota() {
         System.out.println("\n🚗 FLOTA DE VEHÍCULOS:");
-        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | ESTADO                    | CARGAS PERMITIDAS");
-        System.out.println("----------|---------|-----------|-----------|----------|---------------------------|-----------------");
+        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | ESTADO                          | CARGAS PERMITIDAS");
+        System.out.println("----------|---------|-----------|-----------|----------|---------------------------------|-----------------");
         for (Vehiculo vehiculo : flota) {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
@@ -229,7 +233,7 @@ public class JuegoLogistica {
             } else {
                 estado = "Disponible";
             }
-            System.out.printf("%-9s| %-8s| %-10d| %-10d| $%-8d| %-26s| %s%n",
+            System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| %-26s| %s%n",
                 vehiculo.getTipo(),
                 vehiculo.getId(),
                 vehiculo.getCapacidad(),
@@ -239,6 +243,78 @@ public class JuegoLogistica {
                 String.join(", ", vehiculo.getTiposPaquetesPermitidos())
             );
         }
+
+        // Mostrar mercado de vehículos
+        System.out.println("\n🛒 MERCADO DE VEHÍCULOS (Disponibles mañana):");
+        System.out.println("ID      | TIPO      | CAPACIDAD | VELOCIDAD | COSTE/KM | PRECIO     | CARGAS PERMITIDAS");
+        System.out.println("--------|-----------|-----------|-----------|----------|------------|-----------------");
+        
+        for (int i = 0; i < vehiculosMercado.size(); i++) {
+            Vehiculo vehiculo = vehiculosMercado.get(i);
+            int precio = calcularPrecioVehiculo(vehiculo);
+            System.out.printf("%-8s| %-10s| %-10d| %-10d| $%-8d| $%-10d| %s%n",
+                vehiculo.getId(),
+                vehiculo.getTipo(),
+                vehiculo.getCapacidad(),
+                vehiculo.getVelocidad(),
+                vehiculo.getCostePorKm(),
+                precio,
+                String.join(", ", vehiculo.getTiposPaquetesPermitidos())
+            );
+        }
+
+        System.out.println("\n¿Desea comprar algún vehículo? (S/N)");
+        String opcion = scanner.nextLine().toUpperCase();
+        
+        if (opcion.equals("S")) {
+            System.out.print("Ingrese el ID del vehículo a comprar: ");
+            String idVehiculo = scanner.nextLine().toUpperCase();
+            
+            Vehiculo vehiculoSeleccionado = null;
+            for (Vehiculo v : vehiculosMercado) {
+                if (v.getId().equals(idVehiculo)) {
+                    vehiculoSeleccionado = v;
+                    break;
+                }
+            }
+            
+            if (vehiculoSeleccionado != null) {
+                int precio = calcularPrecioVehiculo(vehiculoSeleccionado);
+                if (jugador.getPresupuesto() >= precio) {
+                    System.out.println("\n✅ Vehículo comprado exitosamente");
+                    System.out.println("   - Costo: $" + precio);
+                    System.out.println("   - Disponible a partir de mañana");
+                    flota.add(vehiculoSeleccionado);
+                    vehiculosMercado.remove(vehiculoSeleccionado);
+                } else {
+                    System.out.println("❌ Fondos insuficientes para comprar este vehículo");
+                }
+            } else {
+                System.out.println("❌ ID de vehículo no válido");
+            }
+        }
+    }
+
+    /**
+     * Calcula el precio de un vehículo según sus características
+     * @param vehiculo Vehículo a calcular precio
+     * @return int con el precio calculado
+     */
+    private int calcularPrecioVehiculo(Vehiculo vehiculo) {
+        int precioBase = vehiculo.getCapacidad() * 2 + vehiculo.getVelocidad() * 10 + vehiculo.getCostePorKm() * 100;
+        precioBase += vehiculo.getTiposPaquetesPermitidos().size() * 1000; // Cada tipo adicional suma 1000
+        
+        // Ajuste según dificultad
+        switch (dificultad) {
+            case "easy":
+                precioBase *= 0.8; // 20% más barato
+                break;
+            case "hard":
+                precioBase *= 1.2; // 20% más caro
+                break;
+        }
+        
+        return precioBase;
     }
 
     /**
@@ -810,6 +886,43 @@ public class JuegoLogistica {
     }
 
     /**
+     * Genera vehículos aleatorios para el mercado
+     */
+    private void generarVehiculosMercado() {
+        vehiculosMercado = new ArrayList<>();
+        Random random = new Random();
+        
+        for (int i = 0; i < 5; i++) {
+            String tipo = random.nextBoolean() ? "Furgoneta" : "Camión";
+            // Generar ID con formato 1Letra2Numeros
+            String id = tipo.charAt(0) + String.format("%02d", random.nextInt(100));
+            int capacidad = tipo.equals("Furgoneta") ? 1000 + random.nextInt(1000) : 5000 + random.nextInt(5000);
+            int velocidad = tipo.equals("Furgoneta") ? 80 + random.nextInt(20) : 60 + random.nextInt(20);
+            int costePorKm = tipo.equals("Furgoneta") ? 2 + random.nextInt(3) : 5 + random.nextInt(5);
+            
+            // Generar tipos de carga permitidos aleatorios (mínimo 1, máximo 3)
+            int numTipos = 1 + random.nextInt(3);
+            List<String> tiposPermitidos = new ArrayList<>();
+            tiposPermitidos.add("NORMAL"); // Siempre permitido
+            
+            for (int j = 1; j < numTipos; j++) {
+                String tipoCarga;
+                do {
+                    tipoCarga = TIPOS_CARGA[1 + random.nextInt(TIPOS_CARGA.length - 1)];
+                } while (tiposPermitidos.contains(tipoCarga));
+                tiposPermitidos.add(tipoCarga);
+            }
+            
+            // Calcular precio base según características
+            int precioBase = capacidad * 2 + velocidad * 10 + costePorKm * 100;
+            precioBase += tiposPermitidos.size() * 1000; // Cada tipo adicional suma 1000
+            
+            vehiculosMercado.add(new Vehiculo(tipo, id, capacidad, velocidad, costePorKm, 
+                tiposPermitidos.toArray(new String[0])));
+        }
+    }
+
+    /**
      * Avanza al siguiente día
      */
     private void pasarDia() {
@@ -821,9 +934,9 @@ public class JuegoLogistica {
         diaActual++;
         fechaActual.add(Calendar.DAY_OF_MONTH, 1); // Añadir un día a la fecha actual
         
-        System.out.println("\n==============================================");
+        System.out.println("\n==================================================");
         System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ENTREGA FINAL");
-        System.out.println("==============================================");
+        System.out.println("==================================================");
         
         // Procesar accidentes
         procesarAccidentes();
@@ -852,6 +965,9 @@ public class JuegoLogistica {
         
         // Procesar impuestos
         procesarImpuestos();
+        
+        // Generar nuevos vehículos en el mercado
+        generarVehiculosMercado();
         
         pedidos.clear();
         generarPedidosDia();
