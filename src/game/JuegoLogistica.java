@@ -37,6 +37,26 @@ public class JuegoLogistica {
         "Alicante", "Córdoba", "Valladolid", "Vigo", "Gijón"
     };
 
+    // Matriz de distancias entre provincias (en km)
+    private static final int[][] DISTANCIAS = {
+        // Madrid, Barcelona, Valencia, Sevilla, Zaragoza, Málaga, Murcia, Palma, Las Palmas, Bilbao, Alicante, Córdoba, Valladolid, Vigo, Gijón
+        {0, 621, 352, 538, 325, 530, 400, 0, 0, 395, 420, 400, 193, 599, 450}, // Madrid
+        {621, 0, 349, 1000, 296, 1000, 600, 0, 0, 610, 500, 900, 800, 1000, 800}, // Barcelona
+        {352, 349, 0, 650, 300, 600, 250, 0, 0, 600, 166, 500, 500, 800, 700}, // Valencia
+        {538, 1000, 650, 0, 800, 200, 400, 0, 0, 800, 500, 140, 600, 900, 800}, // Sevilla
+        {325, 296, 300, 800, 0, 700, 500, 0, 0, 300, 400, 600, 300, 700, 600}, // Zaragoza
+        {530, 1000, 600, 200, 700, 0, 300, 0, 0, 800, 400, 200, 700, 1000, 900}, // Málaga
+        {400, 600, 250, 400, 500, 300, 0, 0, 0, 700, 100, 300, 600, 900, 800}, // Murcia
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // Palma de Mallorca
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // Las Palmas
+        {395, 610, 600, 800, 300, 800, 700, 0, 0, 0, 600, 700, 280, 400, 300}, // Bilbao
+        {420, 500, 166, 500, 400, 400, 100, 0, 0, 600, 0, 400, 500, 800, 700}, // Alicante
+        {400, 900, 500, 140, 600, 200, 300, 0, 0, 700, 400, 0, 500, 800, 700}, // Córdoba
+        {193, 800, 500, 600, 300, 700, 600, 0, 0, 280, 500, 500, 0, 400, 300}, // Valladolid
+        {599, 1000, 800, 900, 700, 1000, 900, 0, 0, 400, 800, 800, 400, 0, 200}, // Vigo
+        {450, 800, 700, 800, 600, 900, 800, 0, 0, 300, 700, 700, 300, 200, 0}  // Gijón
+    };
+
     /**
      * Constructor del juego
      * @param almacenPrincipal Provincia seleccionada como almacén principal
@@ -412,30 +432,95 @@ public class JuegoLogistica {
     }
 
     /**
+     * Obtiene la distancia entre dos provincias
+     * @param origen Provincia de origen
+     * @param destino Provincia de destino
+     * @return int con la distancia en km
+     */
+    private int obtenerDistancia(String origen, String destino) {
+        int indiceOrigen = -1;
+        int indiceDestino = -1;
+        
+        for (int i = 0; i < PROVINCIAS.length; i++) {
+            if (PROVINCIAS[i].equalsIgnoreCase(origen)) {
+                indiceOrigen = i;
+            }
+            if (PROVINCIAS[i].equalsIgnoreCase(destino)) {
+                indiceDestino = i;
+            }
+        }
+        
+        if (indiceOrigen == -1 || indiceDestino == -1) {
+            return 0;
+        }
+        
+        return DISTANCIAS[indiceOrigen][indiceDestino];
+    }
+
+    /**
+     * Verifica si una provincia es una isla
+     * @param provincia Nombre de la provincia
+     * @return true si es una isla, false si no
+     */
+    private boolean esIsla(String provincia) {
+        return provincia.equalsIgnoreCase("Palma de Mallorca") || 
+               provincia.equalsIgnoreCase("Las Palmas");
+    }
+
+    /**
      * Muestra los vehículos disponibles para un pedido
      * @param pedido Pedido a transportar
      * @return Lista de vehículos disponibles
      */
     private List<Vehiculo> mostrarVehiculosDisponibles(Pedido pedido) {
         List<Vehiculo> disponibles = new ArrayList<>();
+        int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
+        boolean origenEsIsla = esIsla(almacenPrincipal);
+        boolean destinoEsIsla = esIsla(pedido.getDestino());
+        
         System.out.println("\n🚗 VEHÍCULOS DISPONIBLES:");
-        System.out.println("ID      | TIPO     | CAPACIDAD | VELOCIDAD | COSTE/KM | TIPOS PERMITIDOS");
-        System.out.println("--------|----------|-----------|-----------|----------|-----------------");
+        System.out.println("ID      | TIPO     | CAPACIDAD | VELOCIDAD | COSTE/KM | COSTE TOTAL | TIPOS PERMITIDOS");
+        System.out.println("--------|----------|-----------|-----------|----------|-------------|-----------------");
         
         for (Vehiculo vehiculo : flota) {
+            // Verificar restricciones de transporte
+            boolean vehiculoPermitido = true;
+            
             if (vehiculo.getPedidoAsignado() == null && 
                 vehiculo.getCapacidad() >= pedido.getPeso() && 
                 vehiculo.puedeTransportarTipo(pedido.getTipoPaquete())) {
                 
-                disponibles.add(vehiculo);
-                System.out.printf("%-8s| %-9s| %-10d| %-10d| $%-8d| %s%n",
-                    vehiculo.getId(),
-                    vehiculo.getTipo(),
-                    vehiculo.getCapacidad(),
-                    vehiculo.getVelocidad(),
-                    vehiculo.getCostePorKm(),
-                    String.join(", ", vehiculo.getTiposPaquetesPermitidos())
-                );
+                // Si el origen es una isla
+                if (origenEsIsla) {
+                    // Solo permitir furgoneta y camión para envíos en la misma provincia
+                    if (!almacenPrincipal.equalsIgnoreCase(pedido.getDestino())) {
+                        vehiculoPermitido = false;
+                    } else if (!vehiculo.getTipo().equals("Furgoneta") && !vehiculo.getTipo().equals("Camión")) {
+                        vehiculoPermitido = false;
+                    }
+                }
+                
+                // Si el destino es una isla
+                if (destinoEsIsla) {
+                    // Solo permitir barco o avión
+                    if (!vehiculo.getTipo().equals("Barco") && !vehiculo.getTipo().equals("Avión")) {
+                        vehiculoPermitido = false;
+                    }
+                }
+                
+                if (vehiculoPermitido) {
+                    disponibles.add(vehiculo);
+                    int costeTotal = vehiculo.getCostePorKm() * distancia;
+                    System.out.printf("%-8s| %-9s| %-10d| %-10d| $%-8d| $%-11d| %s%n",
+                        vehiculo.getId(),
+                        vehiculo.getTipo(),
+                        vehiculo.getCapacidad(),
+                        vehiculo.getVelocidad(),
+                        vehiculo.getCostePorKm(),
+                        costeTotal,
+                        String.join(", ", vehiculo.getTiposPaquetesPermitidos())
+                    );
+                }
             }
         }
         
@@ -443,6 +528,20 @@ public class JuegoLogistica {
             System.out.println("❌ No hay vehículos disponibles para este pedido");
             System.out.println("   - Peso del pedido: " + pedido.getPeso() + " kg");
             System.out.println("   - Tipo de paquete: " + pedido.getTipoPaquete());
+            if (origenEsIsla && !almacenPrincipal.equalsIgnoreCase(pedido.getDestino())) {
+                System.out.println("   - ⚠️ No se pueden realizar envíos fuera de la isla desde " + almacenPrincipal);
+            }
+            if (destinoEsIsla) {
+                System.out.println("   - ⚠️ Solo se pueden utilizar barcos o aviones para envíos a " + pedido.getDestino());
+            }
+        } else {
+            System.out.println("\n   - Distancia a recorrer: " + distancia + " km");
+            if (origenEsIsla) {
+                System.out.println("   - ⚠️ Solo se permiten envíos dentro de " + almacenPrincipal);
+            }
+            if (destinoEsIsla) {
+                System.out.println("   - ⚠️ Solo se permiten barcos o aviones para " + pedido.getDestino());
+            }
         }
         
         return disponibles;
@@ -510,7 +609,8 @@ public class JuegoLogistica {
         }
 
         // Calcular costo total
-        int costoTotal = vehiculoSeleccionado.getCostePorKm() * 100; // Asumimos 100km de distancia promedio
+        int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
+        int costoTotal = vehiculoSeleccionado.getCostePorKm() * distancia;
         
         // Verificar balance
         if (jugador.getPresupuesto() < costoTotal) {
