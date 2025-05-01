@@ -11,6 +11,10 @@ public class Pedido {
     private int pago;
     private int diasEntrega;
     private int diasRestantes;
+    private String destino;
+    private int bonificacionPorDia;
+    private int multaPorDia;
+    private String transporteAsignado;
 
     /**
      * Constructor de la clase Pedido
@@ -20,8 +24,9 @@ public class Pedido {
      * @param prioridad Nivel de prioridad
      * @param pago Monto ofrecido
      * @param diasEntrega Días necesarios para la entrega
+     * @param destino Ciudad de destino
      */
-    public Pedido(String id, String cliente, String carga, String prioridad, int pago, int diasEntrega) {
+    public Pedido(String id, String cliente, String carga, String prioridad, int pago, int diasEntrega, String destino) {
         this.id = id;
         this.cliente = cliente;
         this.carga = carga;
@@ -29,6 +34,10 @@ public class Pedido {
         this.pago = pago;
         this.diasEntrega = diasEntrega;
         this.diasRestantes = diasEntrega;
+        this.destino = destino;
+        this.bonificacionPorDia = (int)(pago * 0.1); // 10% del pago por día de adelanto
+        this.multaPorDia = (int)(pago * 0.15); // 15% del pago por día de retraso
+        this.transporteAsignado = "No asignado";
     }
 
     /**
@@ -86,5 +95,67 @@ public class Pedido {
         if (diasRestantes > 0) {
             diasRestantes--;
         }
+    }
+
+    /**
+     * Obtiene la ciudad de destino
+     * @return String con el destino
+     */
+    public String getDestino() {
+        return destino;
+    }
+
+    /**
+     * Obtiene la bonificación por día de adelanto
+     * @return int con la bonificación
+     */
+    public int getBonificacionPorDia() {
+        return bonificacionPorDia;
+    }
+
+    /**
+     * Obtiene la multa por día de retraso
+     * @return int con la multa
+     */
+    public int getMultaPorDia() {
+        return multaPorDia;
+    }
+
+    /**
+     * Obtiene el transporte asignado
+     * @return String con el transporte
+     */
+    public String getTransporteAsignado() {
+        return transporteAsignado;
+    }
+
+    /**
+     * Asigna un transporte al pedido
+     * @param transporte Nombre del transporte
+     */
+    public void setTransporteAsignado(String transporte) {
+        this.transporteAsignado = transporte;
+    }
+
+    /**
+     * Calcula el pago final considerando bonificaciones y multas
+     * @return int con el pago final
+     */
+    public int calcularPagoFinal() {
+        int diasAdelanto = diasEntrega - diasRestantes;
+        if (diasAdelanto > 0) {
+            return pago + (diasAdelanto * bonificacionPorDia);
+        } else if (diasAdelanto < 0) {
+            return pago - (Math.abs(diasAdelanto) * multaPorDia);
+        }
+        return pago;
+    }
+
+    /**
+     * Obtiene los días de entrega asignados
+     * @return int con los días de entrega
+     */
+    public int getDiasEntrega() {
+        return diasEntrega;
     }
 } 

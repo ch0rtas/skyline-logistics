@@ -17,22 +17,28 @@ public class JuegoLogistica {
     private Map<String, Pedido> pedidos;
     private List<Pedido> pedidosPendientes;
     private List<Pedido> pedidosEnCurso;
+    private List<Vehiculo> flota;
     private int diaActual;
-    private String region;
+    private String almacenPrincipal;
     private String dificultad;
     private int satisfaccionClientes;
     private int enviosExitosos;
     private int enviosTotales;
     private int beneficiosAcumulados;
     private static final double TASA_IMPUESTOS = 0.45;
+    private static final String[] PROVINCIAS = {
+        "Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza",
+        "Málaga", "Murcia", "Palma de Mallorca", "Las Palmas", "Bilbao",
+        "Alicante", "Córdoba", "Valladolid", "Vigo", "Gijón"
+    };
 
     /**
      * Constructor del juego
-     * @param region Región de operación
+     * @param almacenPrincipal Provincia seleccionada como almacén principal
      * @param dificultad Nivel de dificultad
      */
-    public JuegoLogistica(String region, String dificultad) {
-        this.region = region.toUpperCase();
+    public JuegoLogistica(String almacenPrincipal, String dificultad) {
+        this.almacenPrincipal = almacenPrincipal;
         this.dificultad = dificultad.toLowerCase();
         this.jugador = new Jugador("Jugador", calcularBalanceInicial());
         this.scanner = new Scanner(System.in);
@@ -119,18 +125,70 @@ public class JuegoLogistica {
      * Muestra la pantalla de bienvenida
      */
     private void mostrarBienvenida() {
-        System.out.println("\n✅ Sistema iniciado en región: " + region);
+        System.out.println("\n✅ Sistema iniciado en región: " + almacenPrincipal.toUpperCase());
         System.out.println("💰 Balance inicial: $" + jugador.getPresupuesto());
     }
 
     /**
-     * Inicializa la flota de vehículos
+     * Inicializa la flota de vehículos según la dificultad
      */
     private void inicializarFlota() {
-        System.out.println("\n🛠 Flota creada:");
-        System.out.println("   - 3 camiones (4x4)");
-        System.out.println("   - 1 avión de carga");
-        System.out.println("   - 2 almacenes (Lima, Cusco)");
+        flota = new ArrayList<>();
+        
+        switch (dificultad) {
+            case "easy":
+                // 2 furgonetas, 1 camión, 1 barco, 1 avión
+                flota.add(new Vehiculo("Furgoneta", "F1", 1000, 80, 2));
+                flota.add(new Vehiculo("Furgoneta", "F2", 1000, 80, 2));
+                flota.add(new Vehiculo("Camión", "C1", 5000, 60, 3));
+                flota.add(new Vehiculo("Barco", "B1", 20000, 30, 4));
+                flota.add(new Vehiculo("Avión", "A1", 10000, 500, 10));
+                break;
+            case "medium":
+                // 1 furgoneta, 1 camión, 1 barco
+                flota.add(new Vehiculo("Furgoneta", "F1", 1000, 80, 2));
+                flota.add(new Vehiculo("Camión", "C1", 5000, 60, 3));
+                flota.add(new Vehiculo("Barco", "B1", 20000, 30, 4));
+                break;
+            case "hard":
+                // 1 furgoneta, 1 barco
+                flota.add(new Vehiculo("Furgoneta", "F1", 1000, 80, 2));
+                flota.add(new Vehiculo("Barco", "B1", 20000, 30, 4));
+                break;
+        }
+
+        System.out.println("\n🛠 Empresa creada:");
+        System.out.println("   - Almacén: " + almacenPrincipal.toUpperCase());
+        System.out.print("   - Vehículos: ");
+        for (int i = 0; i < flota.size(); i++) {
+            Vehiculo v = flota.get(i);
+            System.out.print(v.getTipo() + " " + v.getId());
+            if (i < flota.size() - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println();
+    }
+
+    /**
+     * Muestra la flota de vehículos y sus pedidos asignados
+     */
+    private void mostrarFlota() {
+        System.out.println("\n🚗 FLOTA DE VEHÍCULOS:");
+        for (Vehiculo vehiculo : flota) {
+            System.out.println("\n   " + vehiculo.getTipo() + " " + vehiculo.getId());
+            System.out.println("   - Capacidad: " + vehiculo.getCapacidad() + " kg");
+            System.out.println("   - Velocidad: " + vehiculo.getVelocidad() + " km/h");
+            System.out.println("   - Coste/km: $" + vehiculo.getCostePorKm());
+            if (vehiculo.getPedidoAsignado() != null) {
+                Pedido pedido = vehiculo.getPedidoAsignado();
+                System.out.println("   - Pedido asignado: " + pedido.getId());
+                System.out.println("     Destino: " + pedido.getDestino());
+                System.out.println("     Días restantes: " + pedido.getDiasRestantes());
+            } else {
+                System.out.println("   - Estado: Disponible");
+            }
+        }
     }
 
     /**
@@ -138,14 +196,15 @@ public class JuegoLogistica {
      */
     private void mostrarMenuPrincipal() {
         System.out.println("\n==============================================");
-        System.out.println("📅 DÍA " + diaActual + " | ALMACÉN PRINCIPAL: LIMA");
+        System.out.println("📅 DÍA " + diaActual + " | ALMACÉN PRINCIPAL: " + almacenPrincipal.toUpperCase());
         System.out.println("==============================================");
         System.out.println("\n1. Ver pedidos pendientes");
         System.out.println("2. Ver pedidos en curso");
         System.out.println("3. Gestionar pedido");
-        System.out.println("4. Ver estadísticas");
-        System.out.println("5. Pasar al siguiente día");
-        System.out.println("6. Salir");
+        System.out.println("4. Ver flota");
+        System.out.println("5. Ver estadísticas");
+        System.out.println("6. Pasar al siguiente día");
+        System.out.println("7. Salir");
         System.out.print("\nSeleccione una opción: ");
     }
 
@@ -165,12 +224,15 @@ public class JuegoLogistica {
                 gestionarPedido();
                 break;
             case "4":
-                mostrarEstadisticas();
+                mostrarFlota();
                 break;
             case "5":
-                pasarDia();
+                mostrarEstadisticas();
                 break;
             case "6":
+                pasarDia();
+                break;
+            case "7":
                 System.exit(0);
                 break;
             default:
@@ -183,7 +245,7 @@ public class JuegoLogistica {
      * @return Pedido generado
      */
     private Pedido generarPedidoAleatorio() {
-        String[] clientes = {"Hospital Regional Cusco", "Farmacia Central", "Laboratorio Médico"};
+        String[] clientes = {"Hospital Regional", "Farmacia Central", "Laboratorio Médico"};
         String[] cargas = {"Vacunas", "Medicamentos", "Equipo médico"};
         String[] prioridades = {"URGENTE", "NORMAL", "BAJA"};
 
@@ -191,7 +253,13 @@ public class JuegoLogistica {
         String carga = cargas[random.nextInt(cargas.length)];
         String prioridad = prioridades[random.nextInt(prioridades.length)];
         int pago = 5000 + random.nextInt(5000);
-        String idPedido = "P" + (1000 + random.nextInt(9000));
+        String idPedido = "P" + (100 + random.nextInt(900)); // IDs de 3 dígitos
+
+        // Seleccionar un destino aleatorio que no sea el almacén principal
+        String destino;
+        do {
+            destino = PROVINCIAS[random.nextInt(PROVINCIAS.length)];
+        } while (destino.equalsIgnoreCase(almacenPrincipal));
 
         // Determinar si es un pedido de varios días según la dificultad
         int diasEntrega = 1;
@@ -200,7 +268,7 @@ public class JuegoLogistica {
             pago *= diasEntrega; // Aumentar el pago proporcionalmente
         }
 
-        return new Pedido(idPedido, cliente, carga, prioridad, pago, diasEntrega);
+        return new Pedido(idPedido, cliente, carga, prioridad, pago, diasEntrega, destino);
     }
 
     /**
@@ -278,18 +346,22 @@ public class JuegoLogistica {
      */
     private void mostrarPedidosEnCurso() {
         if (pedidosEnCurso.isEmpty()) {
-            System.out.println("\n📭 No hay pedidos en curso");
+            System.out.println("\n📦 No hay pedidos en curso");
             return;
         }
 
         System.out.println("\n📦 PEDIDOS EN CURSO:");
         for (Pedido pedido : pedidosEnCurso) {
-            System.out.println("\n   ID: #" + pedido.getId());
-            System.out.println("   Cliente: " + pedido.getCliente());
-            System.out.println("   Carga: " + pedido.getCarga());
-            System.out.println("   Prioridad: " + pedido.getPrioridad());
-            System.out.println("   Pago ofrecido: $" + pedido.getPago());
-            System.out.println("   Días restantes: " + pedido.getDiasRestantes());
+            System.out.println("\nID: " + pedido.getId());
+            System.out.println("Cliente: " + pedido.getCliente());
+            System.out.println("Carga: " + pedido.getCarga());
+            System.out.println("Destino: " + pedido.getDestino());
+            System.out.println("Transporte: " + pedido.getTransporteAsignado());
+            System.out.println("Días restantes: " + pedido.getDiasRestantes() + "/" + pedido.getDiasEntrega());
+            System.out.println("Pago base: $" + pedido.getPago());
+            System.out.println("Bonificación por día: $" + pedido.getBonificacionPorDia());
+            System.out.println("Multa por día: $" + pedido.getMultaPorDia());
+            System.out.println("Pago estimado: $" + pedido.calcularPagoFinal());
         }
     }
 

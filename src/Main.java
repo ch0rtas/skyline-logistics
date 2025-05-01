@@ -4,6 +4,12 @@ import java.util.Scanner;
  * Clase principal que inicia el juego de logística
  */
 public class Main {
+    private static final String[] PROVINCIAS = {
+        "Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza",
+        "Málaga", "Murcia", "Palma de Mallorca", "Las Palmas", "Bilbao",
+        "Alicante", "Córdoba", "Valladolid", "Vigo", "Gijón"
+    };
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         
@@ -12,43 +18,53 @@ public class Main {
         System.out.println("🚚 BIENVENIDO A SKYLINE LOGISTICS");
         System.out.println("==============================================");
         
-        // Seleccionar región
-        String region = seleccionarRegion(scanner);
+        // Seleccionar provincia
+        String provincia = seleccionarProvincia(scanner);
         
         // Seleccionar dificultad
         String dificultad = seleccionarDificultad(scanner);
         
         // Iniciar juego
-        game.JuegoLogistica juego = new game.JuegoLogistica(region, dificultad);
+        game.JuegoLogistica juego = new game.JuegoLogistica(provincia, dificultad);
         juego.iniciar();
         
         scanner.close();
     }
     
     /**
-     * Permite al usuario seleccionar la región
+     * Permite al usuario seleccionar la provincia
      * @param scanner Scanner para entrada de usuario
-     * @return String con la región seleccionada
+     * @return String con la provincia seleccionada
      */
-    private static String seleccionarRegion(Scanner scanner) {
-        System.out.println("\n🌍 SELECCIONA UNA REGIÓN:");
-        System.out.println("1. Sudamérica");
-        System.out.println("2. Europa");
-        System.out.println("3. Asia");
-        System.out.print("\nOpción: ");
+    private static String seleccionarProvincia(Scanner scanner) {
+        System.out.println("\n🌍 SELECCIONA UNA PROVINCIA:");
         
-        String opcion = scanner.nextLine();
-        switch (opcion) {
-            case "1":
-                return "sudamerica";
-            case "2":
-                return "europa";
-            case "3":
-                return "asia";
-            default:
-                System.out.println("❌ Opción no válida, seleccionando Sudamérica por defecto");
-                return "sudamerica";
+        // Mostrar provincias en 3 columnas
+        int columnas = 3;
+        int filas = (int) Math.ceil((double) PROVINCIAS.length / columnas);
+        
+        for (int i = 0; i < filas; i++) {
+            for (int j = 0; j < columnas; j++) {
+                int indice = i + j * filas;
+                if (indice < PROVINCIAS.length) {
+                    System.out.printf("%2d. %-20s", indice + 1, PROVINCIAS[indice]);
+                }
+            }
+            System.out.println();
         }
+        
+        System.out.print("\nOpción: ");
+        try {
+            int opcion = Integer.parseInt(scanner.nextLine());
+            if (opcion >= 1 && opcion <= PROVINCIAS.length) {
+                return PROVINCIAS[opcion - 1].toLowerCase().replace(" ", "_");
+            }
+        } catch (NumberFormatException e) {
+            // Si la entrada no es un número, continuamos con el valor por defecto
+        }
+        
+        System.out.println("❌ Opción no válida, seleccionando Madrid por defecto");
+        return "madrid";
     }
     
     /**
