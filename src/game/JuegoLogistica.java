@@ -77,21 +77,38 @@ public class JuegoLogistica {
     }
 
     /**
-     * Calcula la multa por rechazar un pedido según la dificultad
+     * Calcula la multa por rechazar un pedido
+     * @param pedido Pedido a rechazar
      * @return int con el monto de la multa
      */
-    private int calcularMultaRechazo() {
+    private int calcularMultaRechazo(Pedido pedido) {
         int base = 5000;
+        int multa = base;
+        
+        // Aumentar según la dificultad
         switch (dificultad) {
             case "easy":
-                return base;
+                multa *= 1;
+                break;
             case "medium":
-                return base * 2;
+                multa *= 1.5;
+                break;
             case "hard":
-                return base * 3;
-            default:
-                return base;
+                multa *= 2;
+                break;
         }
+        
+        // Aumentar según el día actual
+        multa *= (1 + (diaActual * 0.1)); // 10% más por cada día
+        
+        // Aumentar según la prioridad
+        if (pedido.getPrioridad().equals("URGENTE")) {
+            multa *= 2;
+        } else if (pedido.getPrioridad().equals("NORMAL")) {
+            multa *= 1.5;
+        }
+        
+        return (int) multa;
     }
 
     /**
@@ -260,6 +277,7 @@ public class JuegoLogistica {
         String prioridad = prioridades[random.nextInt(prioridades.length)];
         int pago = 5000 + random.nextInt(5000);
         String idPedido = "P" + (100 + random.nextInt(900)); // IDs de 3 dígitos
+        int peso = 100 + random.nextInt(900); // Peso entre 100 y 1000 kg
 
         // Seleccionar un destino aleatorio que no sea el almacén principal
         String destino;
@@ -286,7 +304,7 @@ public class JuegoLogistica {
             pago *= diasEntrega; // Aumentar el pago proporcionalmente
         }
 
-        return new Pedido(idPedido, cliente, carga, prioridad, pago, diasEntrega, destino, fechaEntrega);
+        return new Pedido(idPedido, cliente, carga, prioridad, pago, diasEntrega, destino, fechaEntrega, peso);
     }
 
     /**
@@ -354,6 +372,7 @@ public class JuegoLogistica {
             System.out.println("\n   ID: #" + pedido.getId());
             System.out.println("   Cliente: " + pedido.getCliente());
             System.out.println("   Carga: " + pedido.getCarga());
+            System.out.println("   Peso: " + pedido.getPeso() + " kg");
             System.out.println("   Prioridad: " + pedido.getPrioridad());
             System.out.println("   Destino: " + pedido.getDestino());
             System.out.println("   Fecha entrega máxima: " + pedido.getFechaEntrega());
@@ -375,6 +394,7 @@ public class JuegoLogistica {
             System.out.println("\nID: " + pedido.getId());
             System.out.println("Cliente: " + pedido.getCliente());
             System.out.println("Carga: " + pedido.getCarga());
+            System.out.println("Peso: " + pedido.getPeso() + " kg");
             System.out.println("Destino: " + pedido.getDestino());
             System.out.println("Transporte: " + pedido.getTransporteAsignado());
             System.out.println("Fecha entrega máxima: " + pedido.getFechaEntrega());
@@ -390,6 +410,33 @@ public class JuegoLogistica {
             
             System.out.println("Pago estimado: $" + pedido.calcularPagoFinal());
         }
+    }
+
+    /**
+     * Muestra los vehículos disponibles para un pedido
+     * @param pedido Pedido a transportar
+     * @return Lista de vehículos disponibles
+     */
+    private List<Vehiculo> mostrarVehiculosDisponibles(Pedido pedido) {
+        List<Vehiculo> disponibles = new ArrayList<>();
+        System.out.println("\n🚗 VEHÍCULOS DISPONIBLES:");
+        
+        for (Vehiculo vehiculo : flota) {
+            if (vehiculo.getPedidoAsignado() == null && vehiculo.getCapacidad() >= pedido.getPeso()) {
+                disponibles.add(vehiculo);
+                System.out.println("\n" + (disponibles.size()) + ". " + vehiculo.getTipo() + " " + vehiculo.getId());
+                System.out.println("   - Capacidad: " + vehiculo.getCapacidad() + " kg");
+                System.out.println("   - Velocidad: " + vehiculo.getVelocidad() + " km/h");
+                System.out.println("   - Coste/km: $" + vehiculo.getCostePorKm());
+            }
+        }
+        
+        if (disponibles.isEmpty()) {
+            System.out.println("❌ No hay vehículos disponibles para este pedido");
+            System.out.println("   - Peso del pedido: " + pedido.getPeso() + " kg");
+        }
+        
+        return disponibles;
     }
 
     /**
@@ -413,57 +460,46 @@ public class JuegoLogistica {
 
         System.out.println("\n¿Qué desea hacer con el pedido #" + idPedido + "?");
         System.out.println("1. Enviar");
-        System.out.println("2. Rechazar (Multa: $" + calcularMultaRechazo() + ")");
+        System.out.println("2. Rechazar (Multa: $" + calcularMultaRechazo(pedido) + ")");
         System.out.print("\nOpción: ");
         String opcion = scanner.nextLine();
 
         if (opcion.equals("2")) {
             System.out.println("\n⚠️ ¿Está seguro de rechazar el pedido #" + idPedido + "?");
-            System.out.println("   - Multa por rechazo: $" + calcularMultaRechazo());
+            System.out.println("   - Multa por rechazo: $" + calcularMultaRechazo(pedido));
             System.out.print("   - Confirmar (S/N): ");
             
             String confirmacion = scanner.nextLine().toUpperCase();
             if (confirmacion.equals("S")) {
-                jugador.recibirDanio(calcularMultaRechazo());
+                jugador.recibirDanio(calcularMultaRechazo(pedido));
                 pedidosPendientes.remove(pedido);
                 System.out.println("❌ Pedido #" + idPedido + " rechazado");
-                System.out.println("💰 Multa aplicada: $" + calcularMultaRechazo());
+                System.out.println("💰 Multa aplicada: $" + calcularMultaRechazo(pedido));
             }
             return;
         }
 
-        System.out.println("\n🔍 Analizando rutas disponibles...");
-        System.out.println("1) Terrestre (camión): 18 horas - Coste $1,200");
-        System.out.println("2) Aéreo (avión): 4 horas - Coste $4,500");
-        
-        if (random.nextBoolean()) {
-            System.out.println("❌ Bloqueo parcial en carretera (Evento aleatorio)");
-        }
-
-        System.out.print("\nSeleccione ruta (1-2): ");
-        String ruta = scanner.nextLine();
-
-        int costoRuta = 0;
-        if (ruta.equals("2")) {
-            costoRuta = 4500;
-            System.out.println("\n⏳ Aplicando patrón *Strategy*: Cambiando a estrategia rápida...");
-            System.out.println("✈ Envío #" + idPedido + " asignado a AVIÓN (Costo total: $" + costoRuta + ").");
-        } else {
-            costoRuta = 1200;
-            System.out.println("\n🚚 Envío #" + idPedido + " asignado a CAMIÓN (Costo total: $" + costoRuta + ").");
-        }
-
-        // Verificar si hay balance suficiente
-        if (jugador.getPresupuesto() < costoRuta) {
-            System.out.println("❌ Balance insuficiente para realizar el envío");
+        // Mostrar vehículos disponibles
+        List<Vehiculo> disponibles = mostrarVehiculosDisponibles(pedido);
+        if (disponibles.isEmpty()) {
             return;
         }
 
+        System.out.print("\nSeleccione vehículo (1-" + disponibles.size() + "): ");
+        int opcionVehiculo = Integer.parseInt(scanner.nextLine()) - 1;
+        
+        if (opcionVehiculo < 0 || opcionVehiculo >= disponibles.size()) {
+            System.out.println("❌ Opción no válida");
+            return;
+        }
+
+        Vehiculo vehiculoSeleccionado = disponibles.get(opcionVehiculo);
+        
         // Añadir servicios
         System.out.println("\n💡 Servicios disponibles:");
         System.out.println("1) Refrigeración (+$500)");
         System.out.println("2) Seguro (+$300)");
-        System.out.println("3) Prioridad urgente (+$1000)");
+        System.out.println("3) Prioridad urgente (+$1,000)");
         
         System.out.print("\nSeleccione servicios (separados por coma): ");
         String[] servicios = scanner.nextLine().split(",");
@@ -483,17 +519,19 @@ public class JuegoLogistica {
             }
         }
 
-        // Verificar balance total
-        int costoTotal = costoRuta + costoExtra;
+        // Calcular costo total
+        int costoTotal = vehiculoSeleccionado.getCostePorKm() * 100 + costoExtra; // Asumimos 100km de distancia promedio
+        
+        // Verificar balance
         if (jugador.getPresupuesto() < costoTotal) {
-            System.out.println("❌ Balance insuficiente para los servicios seleccionados");
+            System.out.println("❌ Balance insuficiente para realizar el envío");
             return;
         }
 
-        System.out.println("\n💡 Servicios añadidos:");
-        System.out.println("   - Costo adicional: $" + costoExtra);
-        System.out.println("   - Costo total: $" + costoTotal);
-
+        // Asignar vehículo al pedido
+        vehiculoSeleccionado.asignarPedido(pedido);
+        pedido.setTransporteAsignado(vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId());
+        
         // Descontar el costo del balance
         jugador.recibirDanio(costoTotal);
 
@@ -505,6 +543,8 @@ public class JuegoLogistica {
         pedidosPendientes.remove(pedido);
         pedidosEnCurso.add(pedido);
         System.out.println("\n✅ Pedido #" + idPedido + " gestionado exitosamente");
+        System.out.println("   - Vehículo asignado: " + vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId());
+        System.out.println("   - Costo total: $" + costoTotal);
     }
 
     /**

@@ -15,6 +15,7 @@ public class Pedido {
     private int diasEntrega;
     private int diasRestantes;
     private String destino;
+    private int peso; // en kg
     private int bonificacionPorDia;
     private int multaPorDia;
     private String transporteAsignado;
@@ -31,8 +32,9 @@ public class Pedido {
      * @param diasEntrega Días necesarios para la entrega
      * @param destino Ciudad de destino
      * @param fechaEntrega Fecha límite de entrega
+     * @param peso Peso del pedido en kg
      */
-    public Pedido(String id, String cliente, String carga, String prioridad, int pago, int diasEntrega, String destino, Calendar fechaEntrega) {
+    public Pedido(String id, String cliente, String carga, String prioridad, int pago, int diasEntrega, String destino, Calendar fechaEntrega, int peso) {
         this.id = id;
         this.cliente = cliente;
         this.carga = carga;
@@ -41,8 +43,9 @@ public class Pedido {
         this.diasEntrega = diasEntrega;
         this.diasRestantes = diasEntrega;
         this.destino = destino;
-        this.bonificacionPorDia = (int)(pago * 0.1); // 10% del pago por día de adelanto
-        this.multaPorDia = (int)(pago * 0.15); // 15% del pago por día de retraso
+        this.peso = peso;
+        this.bonificacionPorDia = pago / 10;
+        this.multaPorDia = pago / 5;
         this.transporteAsignado = "No asignado";
         this.fechaEntrega = fechaEntrega;
     }
@@ -194,5 +197,13 @@ public class Pedido {
         }
         long diff = fechaActual.getTimeInMillis() - fechaEntrega.getTimeInMillis();
         return (int) (diff / (1000 * 60 * 60 * 24));
+    }
+
+    /**
+     * Obtiene el peso del pedido
+     * @return int con el peso en kg
+     */
+    public int getPeso() {
+        return peso;
     }
 } 
