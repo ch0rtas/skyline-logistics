@@ -4,6 +4,8 @@ import java.util.Scanner;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Clase principal que gestiona el juego de logística
@@ -12,13 +14,15 @@ public class JuegoLogistica {
     private Jugador jugador;
     private Scanner scanner;
     private Random random;
-    private Map<String, Integer> pedidos;
+    private Map<String, Pedido> pedidos;
+    private List<Pedido> pedidosPendientes;
     private int diaActual;
     private String region;
     private String dificultad;
     private int satisfaccionClientes;
     private int enviosExitosos;
     private int enviosTotales;
+    private static final int MULTA_RECHAZO = 6514;
 
     /**
      * Constructor del juego
@@ -32,6 +36,7 @@ public class JuegoLogistica {
         this.scanner = new Scanner(System.in);
         this.random = new Random();
         this.pedidos = new HashMap<>();
+        this.pedidosPendientes = new ArrayList<>();
         this.diaActual = 1;
         this.satisfaccionClientes = 100;
         this.enviosExitosos = 0;
@@ -44,6 +49,7 @@ public class JuegoLogistica {
     public void iniciar() {
         mostrarBienvenida();
         inicializarFlota();
+        generarPedidosDia();
         
         while (!jugador.estaDerrotado()) {
             mostrarMenuPrincipal();
@@ -78,14 +84,11 @@ public class JuegoLogistica {
         System.out.println("\n==============================================");
         System.out.println("📅 DÍA " + diaActual + " | ALMACÉN PRINCIPAL: LIMA");
         System.out.println("==============================================");
-        System.out.println("\n1. Ver nuevo pedido");
-        System.out.println("2. Planificar envío");
-        System.out.println("3. Añadir servicios a envío");
-        System.out.println("4. Resolver incidente");
-        System.out.println("5. Rastrear envío");
-        System.out.println("6. Ver estadísticas");
-        System.out.println("7. Pasar al siguiente día");
-        System.out.println("8. Salir");
+        System.out.println("\n1. Ver pedidos pendientes");
+        System.out.println("2. Gestionar pedido");
+        System.out.println("3. Ver estadísticas");
+        System.out.println("4. Pasar al siguiente día");
+        System.out.println("5. Salir");
         System.out.print("\nSeleccione una opción: ");
     }
 
@@ -96,27 +99,18 @@ public class JuegoLogistica {
     private void procesarOpcion(String opcion) {
         switch (opcion) {
             case "1":
-                mostrarNuevoPedido();
+                mostrarPedidosPendientes();
                 break;
             case "2":
-                planificarEnvio();
+                gestionarPedido();
                 break;
             case "3":
-                anadirServicios();
-                break;
-            case "4":
-                resolverIncidente();
-                break;
-            case "5":
-                rastrearEnvio();
-                break;
-            case "6":
                 mostrarEstadisticas();
                 break;
-            case "7":
+            case "4":
                 pasarDia();
                 break;
-            case "8":
+            case "5":
                 System.exit(0);
                 break;
             default:
@@ -125,9 +119,44 @@ public class JuegoLogistica {
     }
 
     /**
-     * Muestra un nuevo pedido aleatorio
+     * Genera los pedidos del día según la dificultad
      */
-    private void mostrarNuevoPedido() {
+    private void generarPedidosDia() {
+        int cantidadPedidos = calcularCantidadPedidos();
+        pedidosPendientes.clear();
+        
+        for (int i = 0; i < cantidadPedidos; i++) {
+            Pedido pedido = generarPedidoAleatorio();
+            pedidosPendientes.add(pedido);
+            pedidos.put(pedido.getId(), pedido);
+        }
+        
+        System.out.println("\n📦 Se han generado " + cantidadPedidos + " nuevos pedidos para el día " + diaActual);
+    }
+
+    /**
+     * Calcula la cantidad de pedidos según la dificultad
+     * @return int con la cantidad de pedidos
+     */
+    private int calcularCantidadPedidos() {
+        int base = 2; // Pedidos base por día
+        switch (dificultad) {
+            case "easy":
+                return base + (diaActual / 3); // Aumenta 1 cada 3 días
+            case "medium":
+                return base + (diaActual / 2); // Aumenta 1 cada 2 días
+            case "hard":
+                return base + diaActual; // Aumenta 1 cada día
+            default:
+                return base;
+        }
+    }
+
+    /**
+     * Genera un pedido aleatorio
+     * @return Pedido generado
+     */
+    private Pedido generarPedidoAleatorio() {
         String[] clientes = {"Hospital Regional Cusco", "Farmacia Central", "Laboratorio Médico"};
         String[] cargas = {"Vacunas", "Medicamentos", "Equipo médico"};
         String[] prioridades = {"URGENTE", "NORMAL", "BAJA"};
@@ -136,27 +165,67 @@ public class JuegoLogistica {
         String carga = cargas[random.nextInt(cargas.length)];
         String prioridad = prioridades[random.nextInt(prioridades.length)];
         int pago = 5000 + random.nextInt(5000);
-        int idPedido = 1000 + random.nextInt(9000);
+        String idPedido = "P" + (1000 + random.nextInt(9000));
 
-        pedidos.put(String.valueOf(idPedido), pago);
-
-        System.out.println("\n❗ Nuevo pedido entrante:");
-        System.out.println("   - ID: #" + idPedido);
-        System.out.println("   - Cliente: " + cliente);
-        System.out.println("   - Carga: " + carga);
-        System.out.println("   - Prioridad: " + prioridad);
-        System.out.println("   - Pago ofrecido: $" + pago);
+        return new Pedido(idPedido, cliente, carga, prioridad, pago);
     }
 
     /**
-     * Permite planificar un envío
+     * Muestra los pedidos pendientes
      */
-    private void planificarEnvio() {
-        System.out.print("\nIngrese ID del pedido: ");
+    private void mostrarPedidosPendientes() {
+        if (pedidosPendientes.isEmpty()) {
+            System.out.println("\n📭 No hay pedidos pendientes");
+            return;
+        }
+
+        System.out.println("\n📦 PEDIDOS PENDIENTES:");
+        for (Pedido pedido : pedidosPendientes) {
+            System.out.println("\n   ID: #" + pedido.getId());
+            System.out.println("   Cliente: " + pedido.getCliente());
+            System.out.println("   Carga: " + pedido.getCarga());
+            System.out.println("   Prioridad: " + pedido.getPrioridad());
+            System.out.println("   Pago ofrecido: $" + pedido.getPago());
+        }
+    }
+
+    /**
+     * Permite gestionar un pedido
+     */
+    private void gestionarPedido() {
+        if (pedidosPendientes.isEmpty()) {
+            System.out.println("\n📭 No hay pedidos pendientes para gestionar");
+            return;
+        }
+
+        mostrarPedidosPendientes();
+        System.out.print("\nIngrese ID del pedido a gestionar: ");
         String idPedido = scanner.nextLine();
-        
-        if (!pedidos.containsKey(idPedido)) {
+
+        Pedido pedido = pedidos.get(idPedido);
+        if (pedido == null) {
             System.out.println("❌ Pedido no encontrado");
+            return;
+        }
+
+        System.out.println("\n¿Qué desea hacer con el pedido #" + idPedido + "?");
+        System.out.println("1. Enviar");
+        System.out.println("2. Rechazar (Multa: $" + MULTA_RECHAZO + ")");
+        System.out.print("\nOpción: ");
+        String opcion = scanner.nextLine();
+
+        if (opcion.equals("2")) {
+            System.out.println("\n⚠️ ¿Está seguro de rechazar el pedido #" + idPedido + "?");
+            System.out.println("   - Multa por rechazo: $" + MULTA_RECHAZO);
+            System.out.print("   - Confirmar (S/N): ");
+            
+            String confirmacion = scanner.nextLine().toUpperCase();
+            if (confirmacion.equals("S")) {
+                jugador.recibirDanio(MULTA_RECHAZO);
+                pedidosPendientes.remove(pedido);
+                System.out.println("❌ Pedido #" + idPedido + " rechazado");
+                System.out.println("💰 Multa aplicada: $" + MULTA_RECHAZO);
+            }
             return;
         }
 
@@ -177,20 +246,8 @@ public class JuegoLogistica {
         } else {
             System.out.println("\n🚚 Envío #" + idPedido + " asignado a CAMIÓN (Costo total: $1,200).");
         }
-    }
 
-    /**
-     * Permite añadir servicios a un envío
-     */
-    private void anadirServicios() {
-        System.out.print("\nIngrese ID del pedido: ");
-        String idPedido = scanner.nextLine();
-        
-        if (!pedidos.containsKey(idPedido)) {
-            System.out.println("❌ Pedido no encontrado");
-            return;
-        }
-
+        // Añadir servicios
         System.out.println("\n💡 Servicios disponibles:");
         System.out.println("1) Refrigeración (+$500)");
         System.out.println("2) Seguro (+$300)");
@@ -216,12 +273,21 @@ public class JuegoLogistica {
 
         System.out.println("\n💡 Servicios añadidos:");
         System.out.println("   - Costo adicional: $" + costoExtra);
+
+        // Resolver incidente si ocurre
+        if (random.nextBoolean()) {
+            resolverIncidente(pedido);
+        }
+
+        pedidosPendientes.remove(pedido);
+        System.out.println("\n✅ Pedido #" + idPedido + " gestionado exitosamente");
     }
 
     /**
-     * Permite resolver un incidente
+     * Resuelve un incidente para un pedido
+     * @param pedido Pedido afectado
      */
-    private void resolverIncidente() {
+    private void resolverIncidente(Pedido pedido) {
         String[] incidentes = {
             "Tormenta eléctrica",
             "Bloqueo de carretera",
@@ -255,24 +321,6 @@ public class JuegoLogistica {
     }
 
     /**
-     * Permite rastrear un envío
-     */
-    private void rastrearEnvio() {
-        System.out.print("\nIngrese ID del pedido: ");
-        String idPedido = scanner.nextLine();
-        
-        if (!pedidos.containsKey(idPedido)) {
-            System.out.println("❌ Pedido no encontrado");
-            return;
-        }
-
-        System.out.println("\n📌 Estado actual (patrón *State*):");
-        System.out.println("   - 📦 Pedido #" + idPedido + ": \"EN TRÁNSITO\"");
-        System.out.println("   - 📍 Ubicación: " + (random.nextBoolean() ? "Lima" : "Cusco"));
-        System.out.println("   - ⏳ Llegada estimada: Día " + (diaActual + 1));
-    }
-
-    /**
      * Muestra las estadísticas del juego
      */
     private void mostrarEstadisticas() {
@@ -280,23 +328,29 @@ public class JuegoLogistica {
         System.out.println("   - 💰 Presupuesto: $" + jugador.getPresupuesto());
         System.out.println("   - 😊 Satisfacción clientes: " + satisfaccionClientes + "%");
         System.out.println("   - 🚚 Envíos exitosos: " + enviosExitosos + "/" + enviosTotales);
+        System.out.println("   - 📦 Pedidos pendientes: " + pedidosPendientes.size());
     }
 
     /**
      * Avanza al siguiente día
      */
     private void pasarDia() {
+        if (!pedidosPendientes.isEmpty()) {
+            System.out.println("\n❌ No puedes pasar al siguiente día con pedidos pendientes");
+            return;
+        }
+
         diaActual++;
         System.out.println("\n==============================================");
         System.out.println("📅 DÍA " + diaActual + " | ENTREGA FINAL");
         System.out.println("==============================================");
         
         // Simular resultados de envíos
-        for (Map.Entry<String, Integer> pedido : pedidos.entrySet()) {
+        for (Map.Entry<String, Pedido> entry : pedidos.entrySet()) {
             boolean exito = random.nextBoolean();
             if (exito) {
                 enviosExitosos++;
-                jugador.recuperarPresupuesto(pedido.getValue());
+                jugador.recuperarPresupuesto(entry.getValue().getPago());
             } else {
                 satisfaccionClientes -= 5;
             }
@@ -304,6 +358,7 @@ public class JuegoLogistica {
         }
         
         pedidos.clear();
+        generarPedidosDia();
         mostrarEstadisticas();
     }
 
