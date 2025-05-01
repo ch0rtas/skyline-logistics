@@ -1,5 +1,8 @@
 package game;
 
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
+
 /**
  * Clase que representa un pedido en el juego
  */
@@ -15,6 +18,8 @@ public class Pedido {
     private int bonificacionPorDia;
     private int multaPorDia;
     private String transporteAsignado;
+    private Calendar fechaEntrega;
+    private static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
 
     /**
      * Constructor de la clase Pedido
@@ -25,8 +30,9 @@ public class Pedido {
      * @param pago Monto ofrecido
      * @param diasEntrega Días necesarios para la entrega
      * @param destino Ciudad de destino
+     * @param fechaEntrega Fecha límite de entrega
      */
-    public Pedido(String id, String cliente, String carga, String prioridad, int pago, int diasEntrega, String destino) {
+    public Pedido(String id, String cliente, String carga, String prioridad, int pago, int diasEntrega, String destino, Calendar fechaEntrega) {
         this.id = id;
         this.cliente = cliente;
         this.carga = carga;
@@ -38,6 +44,7 @@ public class Pedido {
         this.bonificacionPorDia = (int)(pago * 0.1); // 10% del pago por día de adelanto
         this.multaPorDia = (int)(pago * 0.15); // 15% del pago por día de retraso
         this.transporteAsignado = "No asignado";
+        this.fechaEntrega = fechaEntrega;
     }
 
     /**
@@ -157,5 +164,35 @@ public class Pedido {
      */
     public int getDiasEntrega() {
         return diasEntrega;
+    }
+
+    /**
+     * Obtiene la fecha de entrega
+     * @return String con la fecha formateada
+     */
+    public String getFechaEntrega() {
+        return formatoFecha.format(fechaEntrega.getTime());
+    }
+
+    /**
+     * Verifica si el pedido está retrasado respecto a la fecha actual
+     * @param fechaActual Fecha actual del juego
+     * @return true si está retrasado, false si no
+     */
+    public boolean estaRetrasado(Calendar fechaActual) {
+        return fechaActual.after(fechaEntrega);
+    }
+
+    /**
+     * Calcula los días de retraso
+     * @param fechaActual Fecha actual del juego
+     * @return int con los días de retraso (0 si no hay retraso)
+     */
+    public int calcularDiasRetraso(Calendar fechaActual) {
+        if (!estaRetrasado(fechaActual)) {
+            return 0;
+        }
+        long diff = fechaActual.getTimeInMillis() - fechaEntrega.getTimeInMillis();
+        return (int) (diff / (1000 * 60 * 60 * 24));
     }
 } 

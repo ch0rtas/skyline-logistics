@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
 
 /**
  * Clase principal que gestiona el juego de logística
@@ -19,6 +22,7 @@ public class JuegoLogistica {
     private List<Pedido> pedidosEnCurso;
     private List<Vehiculo> flota;
     private int diaActual;
+    private Calendar fechaActual;
     private String almacenPrincipal;
     private String dificultad;
     private int satisfaccionClientes;
@@ -26,6 +30,7 @@ public class JuegoLogistica {
     private int enviosTotales;
     private int beneficiosAcumulados;
     private static final double TASA_IMPUESTOS = 0.45;
+    private static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
     private static final String[] PROVINCIAS = {
         "Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza",
         "Málaga", "Murcia", "Palma de Mallorca", "Las Palmas", "Bilbao",
@@ -47,6 +52,7 @@ public class JuegoLogistica {
         this.pedidosPendientes = new ArrayList<>();
         this.pedidosEnCurso = new ArrayList<>();
         this.diaActual = 1;
+        this.fechaActual = Calendar.getInstance(); // Fecha actual del sistema
         this.satisfaccionClientes = 100;
         this.enviosExitosos = 0;
         this.enviosTotales = 0;
@@ -196,11 +202,11 @@ public class JuegoLogistica {
      */
     private void mostrarMenuPrincipal() {
         System.out.println("\n==============================================");
-        System.out.println("📅 DÍA " + diaActual + " | ALMACÉN PRINCIPAL: " + almacenPrincipal.toUpperCase());
+        System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ALMACÉN PRINCIPAL: " + almacenPrincipal.toUpperCase());
         System.out.println("==============================================");
         System.out.println("\n1. Ver pedidos pendientes");
         System.out.println("2. Ver pedidos en curso");
-        System.out.println("3. Gestionar pedido");
+        System.out.println("3. Gestionar pedidos");
         System.out.println("4. Ver flota");
         System.out.println("5. Ver estadísticas");
         System.out.println("6. Pasar al siguiente día");
@@ -261,6 +267,18 @@ public class JuegoLogistica {
             destino = PROVINCIAS[random.nextInt(PROVINCIAS.length)];
         } while (destino.equalsIgnoreCase(almacenPrincipal));
 
+        // Generar fecha de entrega según la prioridad
+        Calendar fechaEntrega = (Calendar) fechaActual.clone();
+        if (prioridad.equals("URGENTE")) {
+            // Pedidos urgentes deben entregarse al día siguiente
+            fechaEntrega.add(Calendar.DAY_OF_MONTH, 1);
+            pago *= 1.5; // Aumentar el pago en un 50% por urgencia
+        } else {
+            // Para pedidos normales y bajos, entre 2 y 5 días
+            int diasExtra = 2 + random.nextInt(4); // 2 a 5 días
+            fechaEntrega.add(Calendar.DAY_OF_MONTH, diasExtra);
+        }
+
         // Determinar si es un pedido de varios días según la dificultad
         int diasEntrega = 1;
         if (random.nextDouble() < calcularProbabilidadMultiDia()) {
@@ -268,7 +286,7 @@ public class JuegoLogistica {
             pago *= diasEntrega; // Aumentar el pago proporcionalmente
         }
 
-        return new Pedido(idPedido, cliente, carga, prioridad, pago, diasEntrega, destino);
+        return new Pedido(idPedido, cliente, carga, prioridad, pago, diasEntrega, destino, fechaEntrega);
     }
 
     /**
@@ -337,6 +355,8 @@ public class JuegoLogistica {
             System.out.println("   Cliente: " + pedido.getCliente());
             System.out.println("   Carga: " + pedido.getCarga());
             System.out.println("   Prioridad: " + pedido.getPrioridad());
+            System.out.println("   Destino: " + pedido.getDestino());
+            System.out.println("   Fecha entrega máxima: " + pedido.getFechaEntrega());
             System.out.println("   Pago ofrecido: $" + pedido.getPago());
         }
     }
@@ -357,10 +377,17 @@ public class JuegoLogistica {
             System.out.println("Carga: " + pedido.getCarga());
             System.out.println("Destino: " + pedido.getDestino());
             System.out.println("Transporte: " + pedido.getTransporteAsignado());
+            System.out.println("Fecha entrega máxima: " + pedido.getFechaEntrega());
             System.out.println("Días restantes: " + pedido.getDiasRestantes() + "/" + pedido.getDiasEntrega());
             System.out.println("Pago base: $" + pedido.getPago());
             System.out.println("Bonificación por día: $" + pedido.getBonificacionPorDia());
             System.out.println("Multa por día: $" + pedido.getMultaPorDia());
+            
+            int diasRetraso = pedido.calcularDiasRetraso(fechaActual);
+            if (diasRetraso > 0) {
+                System.out.println("⚠️ Retraso: " + diasRetraso + " días");
+            }
+            
             System.out.println("Pago estimado: $" + pedido.calcularPagoFinal());
         }
     }
@@ -572,8 +599,10 @@ public class JuegoLogistica {
         }
 
         diaActual++;
+        fechaActual.add(Calendar.DAY_OF_MONTH, 1); // Añadir un día a la fecha actual
+        
         System.out.println("\n==============================================");
-        System.out.println("📅 DÍA " + diaActual + " | ENTREGA FINAL");
+        System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ENTREGA FINAL");
         System.out.println("==============================================");
         
         // Procesar accidentes
