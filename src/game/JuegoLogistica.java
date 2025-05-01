@@ -221,8 +221,14 @@ public class JuegoLogistica {
         System.out.println("TIPO     | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | ESTADO");
         System.out.println("---------|---------|-----------|-----------|----------|--------");
         for (Vehiculo vehiculo : flota) {
-            String estado = vehiculo.getPedidoAsignado() != null ? 
-                "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ")" : "Disponible";
+            String estado;
+            if (vehiculo.getPedidoAsignado() != null) {
+                Calendar fechaEntrega = (Calendar) fechaActual.clone();
+                fechaEntrega.add(Calendar.DAY_OF_MONTH, vehiculo.getPedidoAsignado().getDiasRestantes());
+                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + formatoFecha.format(fechaEntrega.getTime());
+            } else {
+                estado = "Disponible";
+            }
             System.out.printf("%-9s| %-8s| %-10d| %-10d| $%-8d| %s%n",
                 vehiculo.getTipo(),
                 vehiculo.getId(),
@@ -582,6 +588,7 @@ public class JuegoLogistica {
                 pedidosPendientes.remove(pedido);
                 System.out.println("❌ Pedido #" + idPedido + " rechazado");
                 System.out.println("💰 Multa aplicada: $" + calcularMultaRechazo(pedido));
+                jugador.recibirDanio(calcularMultaRechazo(pedido));
             }
             return;
         }
@@ -642,15 +649,59 @@ public class JuegoLogistica {
      * @param pedido Pedido afectado
      */
     private void resolverIncidente(Pedido pedido) {
-        String[] incidentes = {
-            "Tormenta eléctrica",
-            "Bloqueo de carretera",
-            "Problema mecánico",
-            "Retraso en aduana"
+        String tipoTransporte = pedido.getTransporteAsignado().split(" ")[0];
+        String[] incidentesTerrestres = {
+            "Caída de árbol en la carretera",
+            "Accidente de tráfico",
+            "Obras en la vía",
+            "Protesta de agricultores",
+            "Control policial",
+            "Avería mecánica",
+            "Desprendimiento de rocas",
+            "Nieve en la carretera",
+            "Niebla densa"
         };
 
-        String incidente = incidentes[random.nextInt(incidentes.length)];
+        String[] incidentesAereos = {
+            "Turbulencias severas",
+            "Retraso en el despegue",
+            "Problemas técnicos en el avión",
+            "Mal tiempo en el aeropuerto",
+            "Huelga de controladores",
+            "Restricciones de espacio aéreo",
+            "Problemas de navegación",
+            "Viento fuerte en pista"
+        };
+
+        String[] incidentesMaritimos = {
+            "Tormenta en el mar",
+            "Niebla en la costa",
+            "Problemas en el puerto",
+            "Avería en el motor",
+            "Oleaje fuerte",
+            "Retraso en la descarga",
+            "Problemas de navegación",
+            "Control de aduanas"
+        };
+
+        String incidente;
         int idIncidente = 100 + random.nextInt(900);
+
+        // Seleccionar incidente según el tipo de transporte
+        switch (tipoTransporte) {
+            case "Furgoneta":
+            case "Camión":
+                incidente = incidentesTerrestres[random.nextInt(incidentesTerrestres.length)];
+                break;
+            case "Avión":
+                incidente = incidentesAereos[random.nextInt(incidentesAereos.length)];
+                break;
+            case "Barco":
+                incidente = incidentesMaritimos[random.nextInt(incidentesMaritimos.length)];
+                break;
+            default:
+                incidente = "Incidente desconocido";
+        }
 
         System.out.println("\n❗ ALERTA: Incidente #" + idIncidente + " - " + incidente);
         System.out.println("   - Riesgo: Retraso en entrega");
@@ -694,15 +745,38 @@ public class JuegoLogistica {
      */
     private void procesarAccidentes() {
         for (Pedido pedido : new ArrayList<>(pedidosEnCurso)) {
-            if (random.nextDouble() < 0.1) { // 10% de probabilidad de accidente
-                System.out.println("\n⚠️ ¡ACCIDENTE! El paquete #" + pedido.getId() + " se ha perdido");
+            if (random.nextDouble() < 0.15) { // 15% de probabilidad de accidente
+                String tipoTransporte = pedido.getTransporteAsignado().split(" ")[0];
+                String incidente;
+                int costeAdicional = 0;
+
+                switch (tipoTransporte) {
+                    case "Furgoneta":
+                    case "Camión":
+                        incidente = "Accidente en carretera";
+                        costeAdicional = 2000;
+                        break;
+                    case "Avión":
+                        incidente = "Turbulencias severas";
+                        costeAdicional = 5000;
+                        break;
+                    case "Barco":
+                        incidente = "Tormenta en el mar";
+                        costeAdicional = 3000;
+                        break;
+                    default:
+                        incidente = "Incidente desconocido";
+                        costeAdicional = 1000;
+                }
+
+                System.out.println("\n⚠️ ¡INCIDENTE! El paquete #" + pedido.getId() + " ha sufrido " + incidente);
                 System.out.println("   - Cliente: " + pedido.getCliente());
                 System.out.println("   - Carga: " + pedido.getCarga());
-                System.out.println("   - Debes pagar: $" + pedido.getPago());
+                System.out.println("   - Coste adicional: $" + costeAdicional);
                 
-                jugador.recibirDanio(pedido.getPago());
-                pedidosEnCurso.remove(pedido);
-                satisfaccionClientes -= 10;
+                jugador.recibirDanio(costeAdicional);
+                pedido.setDiasRestantes(pedido.getDiasRestantes() + 1);
+                satisfaccionClientes -= 5;
             }
         }
     }
