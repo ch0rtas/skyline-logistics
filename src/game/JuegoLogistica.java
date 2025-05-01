@@ -218,8 +218,8 @@ public class JuegoLogistica {
      */
     private void mostrarFlota() {
         System.out.println("\n🚗 FLOTA DE VEHÍCULOS:");
-        System.out.println("TIPO     | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | ESTADO");
-        System.out.println("---------|---------|-----------|-----------|----------|--------");
+        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | ESTADO                    | CARGAS PERMITIDAS");
+        System.out.println("----------|---------|-----------|-----------|----------|---------------------------|-----------------");
         for (Vehiculo vehiculo : flota) {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
@@ -229,13 +229,14 @@ public class JuegoLogistica {
             } else {
                 estado = "Disponible";
             }
-            System.out.printf("%-9s| %-8s| %-10d| %-10d| $%-8d| %s%n",
+            System.out.printf("%-9s| %-8s| %-10d| %-10d| $%-8d| %-26s| %s%n",
                 vehiculo.getTipo(),
                 vehiculo.getId(),
                 vehiculo.getCapacidad(),
                 vehiculo.getVelocidad(),
                 vehiculo.getCostePorKm(),
-                estado
+                estado,
+                String.join(", ", vehiculo.getTiposPaquetesPermitidos())
             );
         }
     }
@@ -244,9 +245,9 @@ public class JuegoLogistica {
      * Muestra el menú principal
      */
     private void mostrarMenuPrincipal() {
-        System.out.println("\n==============================================");
+        System.out.println("\n==================================================");
         System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ALMACÉN PRINCIPAL: " + almacenPrincipal.toUpperCase());
-        System.out.println("==============================================");
+        System.out.println("==================================================");
         System.out.println("\n1. Ver pedidos pendientes");
         System.out.println("2. Ver pedidos en curso");
         System.out.println("3. Gestionar pedidos");
@@ -486,8 +487,8 @@ public class JuegoLogistica {
         boolean rutaMaritima = origenEsIsla || destinoEsIsla;
         
         System.out.println("\n🚗 VEHÍCULOS DISPONIBLES:");
-        System.out.println("ID      | TIPO     | CAPACIDAD | VELOCIDAD | COSTE/KM | COSTE TOTAL | TIPOS PERMITIDOS");
-        System.out.println("--------|----------|-----------|-----------|----------|-------------|-----------------");
+        System.out.println("ID      | TIPO      | CAPACIDAD | VELOCIDAD | COSTE/KM | COSTE TOTAL | TIPOS PERMITIDOS");
+        System.out.println("--------|-----------|-----------|-----------|----------|-------------|-----------------");
         
         for (Vehiculo vehiculo : flota) {
             // Verificar restricciones de transporte
