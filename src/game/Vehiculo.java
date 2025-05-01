@@ -1,5 +1,8 @@
 package game;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Clase que representa un vehículo en la flota
  */
@@ -10,6 +13,7 @@ public class Vehiculo {
     private int capacidad;
     private int velocidad; // km/h
     private int costePorKm;
+    private Set<String> tiposPaquetesPermitidos;
 
     /**
      * Constructor de la clase Vehiculo
@@ -18,14 +22,24 @@ public class Vehiculo {
      * @param capacidad Capacidad de carga en kg
      * @param velocidad Velocidad en km/h
      * @param costePorKm Coste por kilómetro
+     * @param tiposPaquetes Tipos de paquetes que puede transportar el vehículo
      */
-    public Vehiculo(String tipo, String id, int capacidad, int velocidad, int costePorKm) {
+    public Vehiculo(String tipo, String id, int capacidad, int velocidad, int costePorKm, String... tiposPaquetes) {
         this.tipo = tipo;
         this.id = id;
         this.capacidad = capacidad;
         this.velocidad = velocidad;
         this.costePorKm = costePorKm;
         this.pedidoAsignado = null;
+        this.tiposPaquetesPermitidos = new HashSet<>();
+        
+        // Todos los vehículos pueden transportar paquetes normales
+        this.tiposPaquetesPermitidos.add("NORMAL");
+        
+        // Añadir los tipos de paquetes específicos
+        for (String tipoPaquete : tiposPaquetes) {
+            this.tiposPaquetesPermitidos.add(tipoPaquete);
+        }
     }
 
     /**
@@ -102,5 +116,22 @@ public class Vehiculo {
      */
     public int calcularTiempoEntrega(int distancia) {
         return (int) Math.ceil((double) distancia / velocidad);
+    }
+
+    /**
+     * Verifica si el vehículo puede transportar un tipo de paquete específico
+     * @param tipoPaquete Tipo de paquete a verificar
+     * @return true si puede transportarlo, false si no
+     */
+    public boolean puedeTransportarTipo(String tipoPaquete) {
+        return tiposPaquetesPermitidos.contains(tipoPaquete);
+    }
+
+    /**
+     * Obtiene los tipos de paquetes que puede transportar el vehículo
+     * @return Set con los tipos de paquetes permitidos
+     */
+    public Set<String> getTiposPaquetesPermitidos() {
+        return tiposPaquetesPermitidos;
     }
 } 
