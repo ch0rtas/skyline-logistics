@@ -483,6 +483,7 @@ public class JuegoLogistica {
         int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
         boolean origenEsIsla = esIsla(almacenPrincipal);
         boolean destinoEsIsla = esIsla(pedido.getDestino());
+        boolean rutaMaritima = origenEsIsla || destinoEsIsla;
         
         System.out.println("\n🚗 VEHÍCULOS DISPONIBLES:");
         System.out.println("ID      | TIPO     | CAPACIDAD | VELOCIDAD | COSTE/KM | COSTE TOTAL | TIPOS PERMITIDOS");
@@ -513,6 +514,11 @@ public class JuegoLogistica {
                         vehiculoPermitido = false;
                     }
                 }
+
+                // Restricción para barcos
+                if (vehiculo.getTipo().equals("Barco") && !rutaMaritima) {
+                    vehiculoPermitido = false;
+                }
                 
                 if (vehiculoPermitido) {
                     disponibles.add(vehiculo);
@@ -540,6 +546,9 @@ public class JuegoLogistica {
             if (destinoEsIsla) {
                 System.out.println("   - ⚠️ Solo se pueden utilizar barcos o aviones para envíos a " + pedido.getDestino());
             }
+            if (!rutaMaritima) {
+                System.out.println("   - ⚠️ Los barcos solo están disponibles para rutas marítimas");
+            }
         } else {
             System.out.println("\n   - Distancia a recorrer: " + distancia + " km");
             if (origenEsIsla) {
@@ -547,6 +556,9 @@ public class JuegoLogistica {
             }
             if (destinoEsIsla) {
                 System.out.println("   - ⚠️ Solo se permiten barcos o aviones para " + pedido.getDestino());
+            }
+            if (rutaMaritima) {
+                System.out.println("   - 🌊 Ruta marítima disponible");
             }
         }
         
