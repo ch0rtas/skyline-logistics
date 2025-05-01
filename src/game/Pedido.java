@@ -20,6 +20,7 @@ public class Pedido {
     private int multaPorDia;
     private String transporteAsignado;
     private Calendar fechaEntrega;
+    private String tipoPaquete; // NORMAL, REFRIGERADO, CONGELADO, ESCOLTADO, PELIGROSO, FRÁGIL
     private static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
 
     /**
@@ -33,8 +34,9 @@ public class Pedido {
      * @param destino Ciudad de destino
      * @param fechaEntrega Fecha límite de entrega
      * @param peso Peso del pedido en kg
+     * @param tipoPaquete Tipo de paquete
      */
-    public Pedido(String id, String cliente, String carga, String prioridad, int pago, int diasEntrega, String destino, Calendar fechaEntrega, int peso) {
+    public Pedido(String id, String cliente, String carga, String prioridad, int pago, int diasEntrega, String destino, Calendar fechaEntrega, int peso, String tipoPaquete) {
         this.id = id;
         this.cliente = cliente;
         this.carga = carga;
@@ -48,6 +50,7 @@ public class Pedido {
         this.multaPorDia = pago / 5;
         this.transporteAsignado = "No asignado";
         this.fechaEntrega = fechaEntrega;
+        this.tipoPaquete = tipoPaquete;
     }
 
     /**
@@ -205,5 +208,31 @@ public class Pedido {
      */
     public int getPeso() {
         return peso;
+    }
+
+    /**
+     * Obtiene el tipo de paquete
+     * @return String con el tipo de paquete
+     */
+    public String getTipoPaquete() {
+        return tipoPaquete;
+    }
+
+    /**
+     * Devuelve una representación formateada del pedido
+     * @return String con la representación formateada
+     */
+    public String toStringFormateado() {
+        return String.format("%-8s | %-20s | %-15s | %-10s | %-10s | %-15s | %-12s | %-10s | %-10s",
+            id,
+            cliente,
+            carga,
+            prioridad,
+            peso + " kg",
+            destino,
+            tipoPaquete,
+            "Pago: $" + pago,
+            "Entrega: " + getFechaEntrega()
+        );
     }
 } 
