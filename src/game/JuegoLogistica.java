@@ -23,6 +23,8 @@ public class JuegoLogistica {
     private int satisfaccionClientes;
     private int enviosExitosos;
     private int enviosTotales;
+    private int beneficiosAcumulados;
+    private static final double TASA_IMPUESTOS = 0.45;
 
     /**
      * Constructor del juego
@@ -42,6 +44,7 @@ public class JuegoLogistica {
         this.satisfaccionClientes = 100;
         this.enviosExitosos = 0;
         this.enviosTotales = 0;
+        this.beneficiosAcumulados = 0;
     }
 
     /**
@@ -76,6 +79,23 @@ public class JuegoLogistica {
                 return base * 3;
             default:
                 return base;
+        }
+    }
+
+    /**
+     * Calcula los días entre pagos de impuestos según la dificultad
+     * @return int con los días entre pagos
+     */
+    private int calcularDiasImpuestos() {
+        switch (dificultad) {
+            case "easy":
+                return 8;
+            case "medium":
+                return 5;
+            case "hard":
+                return 3;
+            default:
+                return 5;
         }
     }
 
@@ -159,6 +179,48 @@ public class JuegoLogistica {
     }
 
     /**
+     * Genera un pedido aleatorio
+     * @return Pedido generado
+     */
+    private Pedido generarPedidoAleatorio() {
+        String[] clientes = {"Hospital Regional Cusco", "Farmacia Central", "Laboratorio Médico"};
+        String[] cargas = {"Vacunas", "Medicamentos", "Equipo médico"};
+        String[] prioridades = {"URGENTE", "NORMAL", "BAJA"};
+
+        String cliente = clientes[random.nextInt(clientes.length)];
+        String carga = cargas[random.nextInt(cargas.length)];
+        String prioridad = prioridades[random.nextInt(prioridades.length)];
+        int pago = 5000 + random.nextInt(5000);
+        String idPedido = "P" + (1000 + random.nextInt(9000));
+
+        // Determinar si es un pedido de varios días según la dificultad
+        int diasEntrega = 1;
+        if (random.nextDouble() < calcularProbabilidadMultiDia()) {
+            diasEntrega = 2 + random.nextInt(3); // Entre 2 y 4 días
+            pago *= diasEntrega; // Aumentar el pago proporcionalmente
+        }
+
+        return new Pedido(idPedido, cliente, carga, prioridad, pago, diasEntrega);
+    }
+
+    /**
+     * Calcula la probabilidad de que un pedido sea de varios días según la dificultad
+     * @return double con la probabilidad
+     */
+    private double calcularProbabilidadMultiDia() {
+        switch (dificultad) {
+            case "easy":
+                return 0.2; // 20% de probabilidad
+            case "medium":
+                return 0.4; // 40% de probabilidad
+            case "hard":
+                return 0.6; // 60% de probabilidad
+            default:
+                return 0.3;
+        }
+    }
+
+    /**
      * Genera los pedidos del día según la dificultad
      */
     private void generarPedidosDia() {
@@ -171,7 +233,7 @@ public class JuegoLogistica {
             pedidos.put(pedido.getId(), pedido);
         }
         
-        System.out.println("\n📦 Se han generado " + cantidadPedidos + " nuevos pedidos para el día " + diaActual);
+        System.out.println("\n📦 Han entrado " + cantidadPedidos + " paquetes");
     }
 
     /**
@@ -190,24 +252,6 @@ public class JuegoLogistica {
             default:
                 return base;
         }
-    }
-
-    /**
-     * Genera un pedido aleatorio
-     * @return Pedido generado
-     */
-    private Pedido generarPedidoAleatorio() {
-        String[] clientes = {"Hospital Regional Cusco", "Farmacia Central", "Laboratorio Médico"};
-        String[] cargas = {"Vacunas", "Medicamentos", "Equipo médico"};
-        String[] prioridades = {"URGENTE", "NORMAL", "BAJA"};
-
-        String cliente = clientes[random.nextInt(clientes.length)];
-        String carga = cargas[random.nextInt(cargas.length)];
-        String prioridad = prioridades[random.nextInt(prioridades.length)];
-        int pago = 5000 + random.nextInt(5000);
-        String idPedido = "P" + (1000 + random.nextInt(9000));
-
-        return new Pedido(idPedido, cliente, carga, prioridad, pago);
     }
 
     /**
@@ -245,6 +289,7 @@ public class JuegoLogistica {
             System.out.println("   Carga: " + pedido.getCarga());
             System.out.println("   Prioridad: " + pedido.getPrioridad());
             System.out.println("   Pago ofrecido: $" + pedido.getPago());
+            System.out.println("   Días restantes: " + pedido.getDiasRestantes());
         }
     }
 
@@ -413,6 +458,39 @@ public class JuegoLogistica {
     }
 
     /**
+     * Procesa los accidentes aleatorios
+     */
+    private void procesarAccidentes() {
+        for (Pedido pedido : new ArrayList<>(pedidosEnCurso)) {
+            if (random.nextDouble() < 0.1) { // 10% de probabilidad de accidente
+                System.out.println("\n⚠️ ¡ACCIDENTE! El paquete #" + pedido.getId() + " se ha perdido");
+                System.out.println("   - Cliente: " + pedido.getCliente());
+                System.out.println("   - Carga: " + pedido.getCarga());
+                System.out.println("   - Debes pagar: $" + pedido.getPago());
+                
+                jugador.recibirDanio(pedido.getPago());
+                pedidosEnCurso.remove(pedido);
+                satisfaccionClientes -= 10;
+            }
+        }
+    }
+
+    /**
+     * Procesa el pago de impuestos
+     */
+    private void procesarImpuestos() {
+        if (diaActual % calcularDiasImpuestos() == 0) {
+            int impuestos = (int)(beneficiosAcumulados * TASA_IMPUESTOS);
+            System.out.println("\n💰 HACIENDA: Debes pagar el " + (TASA_IMPUESTOS * 100) + "% de tus beneficios");
+            System.out.println("   - Beneficios acumulados: $" + beneficiosAcumulados);
+            System.out.println("   - Impuestos a pagar: $" + impuestos);
+            
+            jugador.recibirDanio(impuestos);
+            beneficiosAcumulados = 0;
+        }
+    }
+
+    /**
      * Avanza al siguiente día
      */
     private void pasarDia() {
@@ -426,22 +504,34 @@ public class JuegoLogistica {
         System.out.println("📅 DÍA " + diaActual + " | ENTREGA FINAL");
         System.out.println("==============================================");
         
-        // Simular resultados de envíos
-        for (Pedido pedido : pedidosEnCurso) {
-            boolean exito = random.nextBoolean();
-            if (exito) {
-                enviosExitosos++;
-                jugador.recuperarPresupuesto(pedido.getPago());
-                System.out.println("✅ Envío #" + pedido.getId() + " completado exitosamente");
-                System.out.println("💰 Ganancia: $" + pedido.getPago());
-            } else {
-                satisfaccionClientes -= 5;
-                System.out.println("❌ Envío #" + pedido.getId() + " falló");
+        // Procesar accidentes
+        procesarAccidentes();
+        
+        // Procesar envíos
+        for (Pedido pedido : new ArrayList<>(pedidosEnCurso)) {
+            pedido.reducirDiasRestantes();
+            
+            if (pedido.getDiasRestantes() <= 0) {
+                boolean exito = random.nextBoolean();
+                if (exito) {
+                    enviosExitosos++;
+                    int ganancia = pedido.getPago();
+                    jugador.recuperarPresupuesto(ganancia);
+                    beneficiosAcumulados += ganancia;
+                    System.out.println("✅ Envío #" + pedido.getId() + " completado exitosamente");
+                    System.out.println("💰 Ganancia: $" + ganancia);
+                } else {
+                    satisfaccionClientes -= 5;
+                    System.out.println("❌ Envío #" + pedido.getId() + " falló");
+                }
+                enviosTotales++;
+                pedidosEnCurso.remove(pedido);
             }
-            enviosTotales++;
         }
         
-        pedidosEnCurso.clear();
+        // Procesar impuestos
+        procesarImpuestos();
+        
         pedidos.clear();
         generarPedidosDia();
         mostrarEstadisticas();
