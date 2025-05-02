@@ -529,6 +529,7 @@ public class JuegoLogistica {
         System.out.println("\n📦 PEDIDOS EN CURSO:");
         System.out.println("ID       | CLIENTE              | CARGA           | PRIORIDAD  | PESO      | DESTINO          | TIPO         | PAGO         | ENTREGA MÁXIMA | ENTREGA PREVISTA");
         System.out.println("---------|----------------------|-----------------|------------|-----------|------------------|--------------|--------------|----------------|-----------------");
+        
         for (Pedido pedido : pedidosEnCurso) {
             Calendar fechaPrevia = Calendar.getInstance();
             fechaPrevia.setTime(fechaActual.getTime());
@@ -543,7 +544,7 @@ public class JuegoLogistica {
                 pedido.getDestino(),
                 pedido.getTipoPaquete(),
                 pedido.getPago(),
-                formatoFecha.format(pedido.getFechaEntrega()),
+                pedido.getFechaEntrega(),
                 formatoFecha.format(fechaPrevia.getTime())
             );
         }
@@ -654,7 +655,6 @@ public class JuegoLogistica {
                 pedidosPendientes.remove(pedido);
                 System.out.println("❌ Pedido #" + idPedido + " rechazado");
                 System.out.println("💰 Multa aplicada: $" + calcularMultaRechazo(pedido));
-                jugador.recibirDanio(calcularMultaRechazo(pedido));
             }
             return;
         }
@@ -672,7 +672,7 @@ public class JuegoLogistica {
         for (Vehiculo v : flota) {
             if (v.getId().equals(idVehiculo)) {
                 vehiculoSeleccionado = v;
-                    break;
+                break;
             }
         }
 
@@ -695,9 +695,6 @@ public class JuegoLogistica {
         vehiculoSeleccionado.asignarPedido(pedido);
         pedido.setTransporteAsignado(vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId());
 
-        // Descontar el costo del balance
-        jugador.recibirDanio(costoTotal);
-
         // Resolver incidente si ocurre
         if (random.nextBoolean()) {
             resolverIncidente(pedido);
@@ -716,6 +713,7 @@ public class JuegoLogistica {
      */
     private void resolverIncidente(Pedido pedido) {
         String tipoTransporte = pedido.getTransporteAsignado().split(" ")[0];
+        String idVehiculo = pedido.getTransporteAsignado().split(" ")[1];
         String[] incidentesTerrestres = {
             "Caída de árbol en la carretera",
             "Accidente de tráfico",
@@ -772,7 +770,7 @@ public class JuegoLogistica {
         System.out.println("\n❗ ALERTA: Incidente #" + idIncidente + " - " + incidente);
         System.out.println("   - Riesgo: Retraso en entrega");
         System.out.println("   - Soluciones posibles:");
-        System.out.println("     1) Esperar (50% de retraso)");
+        System.out.println("     1) Esperar (Entrega: +3 días)");
         System.out.println("     2) Desviar ruta (Coste adicional: $1,000, Entrega: +1 día)");
         
         System.out.print("\nSeleccione solución (1-2): ");
@@ -785,12 +783,29 @@ public class JuegoLogistica {
         if (solucion.equals("2")) {
             System.out.println("   3. Desviando ruta...");
             System.out.println("✅ Resuelto: Envío llegará con 1 día de retraso.");
-            jugador.recibirDanio(1000);
             pedido.setDiasRestantes(pedido.getDiasRestantes() + 1);
+            
+            // Actualizar el coste total del envío
+            int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
+            int costeAdicional = 1000; // Coste por desviar ruta
+            
+            // Buscar el vehículo en la flota
+            Vehiculo vehiculo = null;
+            for (Vehiculo v : flota) {
+                if (v.getId().equals(idVehiculo)) {
+                    vehiculo = v;
+                    break;
+                }
+            }
+            
+            if (vehiculo != null) {
+                int costeTotal = distancia * vehiculo.getCostePorKm() + costeAdicional;
+                System.out.println("💰 Coste total actualizado: $" + costeTotal);
+            }
         } else {
             System.out.println("   3. Esperando condiciones...");
-            System.out.println("✅ Resuelto: Envío llegará con 2 días de retraso.");
-            pedido.setDiasRestantes(pedido.getDiasRestantes() + 2);
+            System.out.println("✅ Resuelto: Envío llegará con 3 días de retraso.");
+            pedido.setDiasRestantes(pedido.getDiasRestantes() + 3);
         }
     }
 
@@ -840,7 +855,6 @@ public class JuegoLogistica {
                 System.out.println("   - Carga: " + pedido.getCarga());
                 System.out.println("   - Coste adicional: $" + costeAdicional);
                 
-                jugador.recibirDanio(costeAdicional);
                 pedido.setDiasRestantes(pedido.getDiasRestantes() + 1);
                 satisfaccionClientes -= 5;
             }
@@ -857,7 +871,6 @@ public class JuegoLogistica {
             System.out.println("   - Beneficios acumulados: $" + beneficiosAcumulados);
             System.out.println("   - Impuestos a pagar: $" + impuestos);
             
-            jugador.recibirDanio(impuestos);
             beneficiosAcumulados = 0;
         }
     }
