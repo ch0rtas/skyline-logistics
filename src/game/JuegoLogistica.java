@@ -37,6 +37,17 @@ public class JuegoLogistica {
         "Alicante", "Córdoba", "Valladolid", "Vigo", "Gijón"
     };
 
+    // Provincias que son islas
+    private static final String[] ISLAS = {
+        "Palma de Mallorca", "Las Palmas"
+    };
+
+    // Provincias con acceso marítimo (puertos)
+    private static final String[] PROVINCIAS_MARITIMAS = {
+        "Barcelona", "Valencia", "Málaga", "Bilbao", "Alicante", "Vigo", "Gijón",
+        "Palma de Mallorca", "Las Palmas"
+    };
+
     // Matriz de distancias entre provincias (en km)
     private static final int[][] DISTANCIAS = {
         // Madrid, Barcelona, Valencia, Sevilla, Zaragoza, Málaga, Murcia, Palma, Las Palmas, Bilbao, Alicante, Córdoba, Valladolid, Vigo, Gijón
@@ -595,8 +606,52 @@ public class JuegoLogistica {
         System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | COSTE TOTAL | DÍA LLEGADA | CARGAS PERMITIDAS");
         System.out.println("----------|---------|-----------|-----------|----------|-------------|-------------|-----------------");
         
+        boolean esDestinoIsla = false;
+        boolean esDestinoMaritimo = false;
+        boolean esSedeIsla = false;
+        boolean esSedeMaritima = false;
+        
+        // Verificar si el destino es una isla
+        for (String isla : ISLAS) {
+            if (isla.equalsIgnoreCase(pedido.getDestino())) {
+                esDestinoIsla = true;
+                break;
+            }
+        }
+        
+        // Verificar si el destino tiene acceso marítimo
+        for (String puerto : PROVINCIAS_MARITIMAS) {
+            if (puerto.equalsIgnoreCase(pedido.getDestino())) {
+                esDestinoMaritimo = true;
+                break;
+            }
+        }
+        
+        // Verificar si la sede está en una isla
+        for (String isla : ISLAS) {
+            if (isla.equalsIgnoreCase(almacenPrincipal)) {
+                esSedeIsla = true;
+                break;
+            }
+        }
+        
+        // Verificar si la sede tiene acceso marítimo
+        for (String puerto : PROVINCIAS_MARITIMAS) {
+            if (puerto.equalsIgnoreCase(almacenPrincipal)) {
+                esSedeMaritima = true;
+                break;
+            }
+        }
+        
         for (Vehiculo vehiculo : flota) {
             if (vehiculo.estaDisponible() && vehiculo.puedeTransportarTipo(pedido.getTipoPaquete())) {
+                // Verificar restricciones para barcos
+                if (vehiculo.getTipo().equals("Barco")) {
+                    if (!esDestinoIsla && !esDestinoMaritimo && !esSedeIsla && !esSedeMaritima) {
+                        continue; // Saltar este vehículo si no es accesible por barco
+                    }
+                }
+                
                 int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
                 int costeTotal = vehiculo.getCostePorKm() * distancia;
                 int horasViaje = vehiculo.calcularTiempoEntrega(distancia);
