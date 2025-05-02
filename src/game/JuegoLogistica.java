@@ -222,8 +222,8 @@ public class JuegoLogistica {
      */
     private void mostrarFlota() {
         System.out.println("\n🚗 FLOTA DE VEHÍCULOS:");
-        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | ESTADO                         | CARGAS PERMITIDAS");
-        System.out.println("----------|---------|-----------|-----------|----------|--------------------------------|-----------------");
+        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | ESTADO                          | CARGAS PERMITIDAS");
+        System.out.println("----------|---------|-----------|-----------|----------|---------------------------------|-----------------");
         for (Vehiculo vehiculo : flota) {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
