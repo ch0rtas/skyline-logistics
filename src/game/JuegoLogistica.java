@@ -218,22 +218,23 @@ public class JuegoLogistica {
     }
 
     /**
-     * Muestra la flota de vehículos y el mercado
+     * Muestra la flota de vehículos
      */
     private void mostrarFlota() {
         System.out.println("\n🚗 FLOTA DE VEHÍCULOS:");
-        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | ESTADO                          | CARGAS PERMITIDAS");
-        System.out.println("----------|---------|-----------|-----------|----------|---------------------------------|-----------------");
+        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | ESTADO                         | CARGAS PERMITIDAS");
+        System.out.println("----------|---------|-----------|-----------|----------|--------------------------------|-----------------");
         for (Vehiculo vehiculo : flota) {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
-                Calendar fechaEntrega = (Calendar) fechaActual.clone();
+                Calendar fechaEntrega = Calendar.getInstance();
+                fechaEntrega.setTime(fechaActual.getTime());
                 fechaEntrega.add(Calendar.DAY_OF_MONTH, vehiculo.getPedidoAsignado().getDiasRestantes());
                 estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + formatoFecha.format(fechaEntrega.getTime());
             } else {
                 estado = "Disponible";
             }
-            System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| %-26s| %s%n",
+            System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| %-32s| %s%n",
                 vehiculo.getTipo(),
                 vehiculo.getId(),
                 vehiculo.getCapacidad(),
@@ -244,17 +245,32 @@ public class JuegoLogistica {
             );
         }
 
-        // Mostrar mercado de vehículos
-        System.out.println("\n🛒 MERCADO DE VEHÍCULOS (Disponibles mañana):");
-        System.out.println("ID      | TIPO      | CAPACIDAD | VELOCIDAD | COSTE/KM | PRECIO     | CARGAS PERMITIDAS");
-        System.out.println("--------|-----------|-----------|-----------|----------|------------|-----------------");
+        System.out.println("\n¿Desea ver el mercado de vehículos? (S/N)");
+        String opcion = scanner.nextLine().toUpperCase();
         
-        for (int i = 0; i < vehiculosMercado.size(); i++) {
-            Vehiculo vehiculo = vehiculosMercado.get(i);
+        if (opcion.equals("S")) {
+            mostrarMercadoVehiculos();
+        }
+    }
+
+    /**
+     * Muestra el mercado de vehículos
+     */
+    private void mostrarMercadoVehiculos() {
+        if (vehiculosMercado.isEmpty()) {
+            System.out.println("\n❌ No hay vehículos disponibles en el mercado hoy");
+            return;
+        }
+
+        System.out.println("\n🏪 MERCADO DE VEHÍCULOS:");
+        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | PRECIO     | CARGAS PERMITIDAS");
+        System.out.println("----------|---------|-----------|-----------|----------|------------|-----------------");
+        
+        for (Vehiculo vehiculo : vehiculosMercado) {
             int precio = calcularPrecioVehiculo(vehiculo);
-            System.out.printf("%-8s| %-10s| %-10d| %-10d| $%-8d| $%-10d| %s%n",
-                vehiculo.getId(),
+            System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| $%-10d| %s%n",
                 vehiculo.getTipo(),
+                vehiculo.getId(),
                 vehiculo.getCapacidad(),
                 vehiculo.getVelocidad(),
                 vehiculo.getCostePorKm(),
@@ -267,7 +283,7 @@ public class JuegoLogistica {
         String opcion = scanner.nextLine().toUpperCase();
         
         if (opcion.equals("S")) {
-            System.out.print("Ingrese el ID del vehículo a comprar: ");
+            System.out.println("\nIngrese el ID del vehículo que desea comprar:");
             String idVehiculo = scanner.nextLine().toUpperCase();
             
             Vehiculo vehiculoSeleccionado = null;
@@ -281,13 +297,17 @@ public class JuegoLogistica {
             if (vehiculoSeleccionado != null) {
                 int precio = calcularPrecioVehiculo(vehiculoSeleccionado);
                 if (jugador.getPresupuesto() >= precio) {
-                    System.out.println("\n✅ Vehículo comprado exitosamente");
-                    System.out.println("   - Costo: $" + precio);
-                    System.out.println("   - Disponible a partir de mañana");
+                    jugador.recibirDanio(precio);
                     flota.add(vehiculoSeleccionado);
                     vehiculosMercado.remove(vehiculoSeleccionado);
+                    System.out.println("\n✅ Vehículo comprado exitosamente");
+                    System.out.println("   - Precio pagado: $" + precio);
+                    System.out.println("   - Presupuesto restante: $" + jugador.getPresupuesto());
+                    System.out.println("   - El vehículo estará disponible a partir del próximo día");
                 } else {
-                    System.out.println("❌ Fondos insuficientes para comprar este vehículo");
+                    System.out.println("\n❌ No tienes suficiente dinero para comprar este vehículo");
+                    System.out.println("   - Precio del vehículo: $" + precio);
+                    System.out.println("   - Tu presupuesto: $" + jugador.getPresupuesto());
                 }
             } else {
                 System.out.println("❌ ID de vehículo no válido");
@@ -459,7 +479,7 @@ public class JuegoLogistica {
             pedidos.put(pedido.getId(), pedido);
         }
         
-        System.out.println("\n📦 Han entrado " + cantidadPedidos + " paquetes");
+        System.out.println("\n📦 Han entrado " + cantidadPedidos + " paquetes nuevos!");
     }
 
     /**
@@ -490,8 +510,8 @@ public class JuegoLogistica {
         }
 
         System.out.println("\n📦 PEDIDOS PENDIENTES:");
-        System.out.println("ID      | CLIENTE              | CARGA           | PRIORIDAD  | PESO      | DESTINO         | TIPO        | PAGO        | ENTREGA");
-        System.out.println("--------|----------------------|-----------------|------------|-----------|-----------------|-------------|-------------|----------");
+        System.out.println("ID       | CLIENTE              | CARGA           | PRIORIDAD  | PESO      | DESTINO          | TIPO         | PAGO         | ENTREGA");
+        System.out.println("---------|----------------------|-----------------|------------|-----------|------------------|--------------|--------------|------------------");
         for (Pedido pedido : pedidosPendientes) {
             System.out.println(pedido.toStringFormateado());
         }
@@ -507,10 +527,25 @@ public class JuegoLogistica {
         }
 
         System.out.println("\n📦 PEDIDOS EN CURSO:");
-        System.out.println("ID      | CLIENTE              | CARGA           | PRIORIDAD  | PESO      | DESTINO         | TIPO        | PAGO        | ENTREGA");
-        System.out.println("--------|----------------------|-----------------|------------|-----------|-----------------|-------------|-------------|----------");
+        System.out.println("ID       | CLIENTE              | CARGA           | PRIORIDAD  | PESO      | DESTINO          | TIPO         | PAGO         | ENTREGA MÁXIMA | ENTREGA PREVISTA");
+        System.out.println("---------|----------------------|-----------------|------------|-----------|------------------|--------------|--------------|----------------|-----------------");
         for (Pedido pedido : pedidosEnCurso) {
-            System.out.println(pedido.toStringFormateado());
+            Calendar fechaPrevia = Calendar.getInstance();
+            fechaPrevia.setTime(fechaActual.getTime());
+            fechaPrevia.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
+            
+            System.out.printf("%-9s| %-21s| %-16s| %-11s| %-10d| %-17s| %-13s| $%-12d| %-15s| %s%n",
+                pedido.getId(),
+                pedido.getCliente(),
+                pedido.getCarga(),
+                pedido.getPrioridad(),
+                pedido.getPeso(),
+                pedido.getDestino(),
+                pedido.getTipoPaquete(),
+                pedido.getPago(),
+                formatoFecha.format(pedido.getFechaEntrega()),
+                formatoFecha.format(fechaPrevia.getTime())
+            );
         }
     }
 
@@ -553,93 +588,33 @@ public class JuegoLogistica {
     /**
      * Muestra los vehículos disponibles para un pedido
      * @param pedido Pedido a transportar
-     * @return Lista de vehículos disponibles
      */
-    private List<Vehiculo> mostrarVehiculosDisponibles(Pedido pedido) {
-        List<Vehiculo> disponibles = new ArrayList<>();
-        int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
-        boolean origenEsIsla = esIsla(almacenPrincipal);
-        boolean destinoEsIsla = esIsla(pedido.getDestino());
-        boolean rutaMaritima = origenEsIsla || destinoEsIsla;
-        
+    private void mostrarVehiculosDisponibles(Pedido pedido) {
         System.out.println("\n🚗 VEHÍCULOS DISPONIBLES:");
-        System.out.println("ID      | TIPO      | CAPACIDAD | VELOCIDAD | COSTE/KM | COSTE TOTAL | TIPOS PERMITIDOS");
-        System.out.println("--------|-----------|-----------|-----------|----------|-------------|-----------------");
+        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | CARGAS PERMITIDAS | DÍA LLEGADA");
+        System.out.println("----------|---------|-----------|-----------|----------|------------------|------------");
         
         for (Vehiculo vehiculo : flota) {
-            // Verificar restricciones de transporte
-            boolean vehiculoPermitido = true;
-            
-            if (vehiculo.getPedidoAsignado() == null && 
-                vehiculo.getCapacidad() >= pedido.getPeso() && 
-                vehiculo.puedeTransportarTipo(pedido.getTipoPaquete())) {
+            if (vehiculo.estaDisponible() && vehiculo.puedeTransportarTipo(pedido.getTipoPaquete())) {
+                int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
+                int horasViaje = vehiculo.calcularTiempoEntrega(distancia);
+                int diasViaje = (int) Math.ceil(horasViaje / 8.0); // Asumiendo 8 horas de viaje por día
                 
-                // Si el origen es una isla
-                if (origenEsIsla) {
-                    // Solo permitir furgoneta y camión para envíos en la misma provincia
-                    if (!almacenPrincipal.equalsIgnoreCase(pedido.getDestino())) {
-                        vehiculoPermitido = false;
-                    } else if (!vehiculo.getTipo().equals("Furgoneta") && !vehiculo.getTipo().equals("Camión")) {
-                        vehiculoPermitido = false;
-                    }
-                }
+                Calendar fechaLlegada = Calendar.getInstance();
+                fechaLlegada.setTime(fechaActual.getTime());
+                fechaLlegada.add(Calendar.DAY_OF_MONTH, diasViaje);
                 
-                // Si el destino es una isla
-                if (destinoEsIsla) {
-                    // Solo permitir barco o avión
-                    if (!vehiculo.getTipo().equals("Barco") && !vehiculo.getTipo().equals("Avión")) {
-                        vehiculoPermitido = false;
-                    }
-                }
-
-                // Restricción para barcos
-                if (vehiculo.getTipo().equals("Barco") && !rutaMaritima) {
-                    vehiculoPermitido = false;
-                }
-                
-                if (vehiculoPermitido) {
-                    disponibles.add(vehiculo);
-                    int costeTotal = vehiculo.getCostePorKm() * distancia;
-                    System.out.printf("%-8s| %-9s| %-10d| %-10d| $%-8d| $%-11d| %s%n",
-                        vehiculo.getId(),
-                        vehiculo.getTipo(),
-                        vehiculo.getCapacidad(),
-                        vehiculo.getVelocidad(),
-                        vehiculo.getCostePorKm(),
-                        costeTotal,
-                        String.join(", ", vehiculo.getTiposPaquetesPermitidos())
-                    );
-                }
+                System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| %-17s| %s%n",
+                    vehiculo.getTipo(),
+                    vehiculo.getId(),
+                    vehiculo.getCapacidad(),
+                    vehiculo.getVelocidad(),
+                    vehiculo.getCostePorKm(),
+                    String.join(", ", vehiculo.getTiposPaquetesPermitidos()),
+                    formatoFecha.format(fechaLlegada.getTime())
+                );
             }
         }
-        
-        if (disponibles.isEmpty()) {
-            System.out.println("❌ No hay vehículos disponibles para este pedido");
-            System.out.println("   - Peso del pedido: " + pedido.getPeso() + " kg");
-            System.out.println("   - Tipo de paquete: " + pedido.getTipoPaquete());
-            if (origenEsIsla && !almacenPrincipal.equalsIgnoreCase(pedido.getDestino())) {
-                System.out.println("   - ⚠️ No se pueden realizar envíos fuera de la isla desde " + almacenPrincipal);
-            }
-            if (destinoEsIsla) {
-                System.out.println("   - ⚠️ Solo se pueden utilizar barcos o aviones para envíos a " + pedido.getDestino());
-            }
-            if (!rutaMaritima) {
-                System.out.println("   - ⚠️ Los barcos solo están disponibles para rutas marítimas");
-            }
-        } else {
-            System.out.println("\n   - Distancia a recorrer: " + distancia + " km");
-            if (origenEsIsla) {
-                System.out.println("   - ⚠️ Solo se permiten envíos dentro de " + almacenPrincipal);
-            }
-            if (destinoEsIsla) {
-                System.out.println("   - ⚠️ Solo se permiten barcos o aviones para " + pedido.getDestino());
-            }
-            if (rutaMaritima) {
-                System.out.println("   - 🌊 Ruta marítima disponible");
-            }
-        }
-        
-        return disponibles;
     }
 
     /**
@@ -683,8 +658,8 @@ public class JuegoLogistica {
         }
 
         // Mostrar vehículos disponibles
-        List<Vehiculo> disponibles = mostrarVehiculosDisponibles(pedido);
-        if (disponibles.isEmpty()) {
+        mostrarVehiculosDisponibles(pedido);
+        if (pedidosPendientes.isEmpty()) {
             return;
         }
 
@@ -692,13 +667,13 @@ public class JuegoLogistica {
         String idVehiculo = scanner.nextLine().toUpperCase();
         
         Vehiculo vehiculoSeleccionado = null;
-        for (Vehiculo v : disponibles) {
+        for (Vehiculo v : flota) {
             if (v.getId().equals(idVehiculo)) {
                 vehiculoSeleccionado = v;
-                break;
+                    break;
             }
         }
-        
+
         if (vehiculoSeleccionado == null) {
             System.out.println("❌ ID de vehículo no válido");
             return;
@@ -717,7 +692,7 @@ public class JuegoLogistica {
         // Asignar vehículo al pedido
         vehiculoSeleccionado.asignarPedido(pedido);
         pedido.setTransporteAsignado(vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId());
-        
+
         // Descontar el costo del balance
         jugador.recibirDanio(costoTotal);
 
@@ -821,7 +796,7 @@ public class JuegoLogistica {
      * Muestra las estadísticas del juego
      */
     private void mostrarEstadisticas() {
-        System.out.println("\n📊 Métricas actuales:");
+        System.out.println("\n📊 MÉTRICAS ACTUALES:");
         System.out.println("   - 💰 Balance: $" + jugador.getPresupuesto());
         System.out.println("   - 😊 Satisfacción clientes: " + satisfaccionClientes + "%");
         System.out.println("   - 🚚 Envíos exitosos: " + enviosExitosos + "/" + enviosTotales);
@@ -892,7 +867,7 @@ public class JuegoLogistica {
         vehiculosMercado = new ArrayList<>();
         Random random = new Random();
         
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) { // Cambiado de 5 a 3 vehículos por día
             String tipo = random.nextBoolean() ? "Furgoneta" : "Camión";
             // Generar ID con formato 1Letra2Numeros
             String id = tipo.charAt(0) + String.format("%02d", random.nextInt(100));
@@ -946,18 +921,45 @@ public class JuegoLogistica {
             pedido.reducirDiasRestantes();
             
             if (pedido.getDiasRestantes() <= 0) {
-                boolean exito = random.nextBoolean();
+                int diasRetraso = Math.abs(pedido.getDiasRestantes());
+                int pagoOriginal = pedido.getPago();
+                int multa = 0;
+                boolean exito = true;
+                String mensaje = "";
+
+                if (diasRetraso == 0) {
+                    // Entrega a tiempo
+                    mensaje = "✅ Envío #" + pedido.getId() + " completado exitosamente";
+                    multa = 0;
+                } else if (diasRetraso == 1) {
+                    // 1 día de retraso: 35% de multa
+                    multa = (int)(pagoOriginal * 0.35);
+                    mensaje = "⚠️ Envío #" + pedido.getId() + " completado con 1 día de retraso";
+                } else if (diasRetraso == 2) {
+                    // 2 días de retraso: 90% de multa
+                    multa = (int)(pagoOriginal * 0.90);
+                    mensaje = "⚠️ Envío #" + pedido.getId() + " completado con 2 días de retraso";
+                } else {
+                    // Más de 2 días: fallo y 150% de multa
+                    multa = (int)(pagoOriginal * 1.50);
+                    exito = false;
+                    mensaje = "❌ Envío #" + pedido.getId() + " falló por exceso de retraso";
+                }
+
+                int ganancia = pagoOriginal - multa;
                 if (exito) {
                     enviosExitosos++;
-                    int ganancia = pedido.getPago();
                     jugador.recuperarPresupuesto(ganancia);
                     beneficiosAcumulados += ganancia;
-                    System.out.println("✅ Envío #" + pedido.getId() + " completado exitosamente");
-                    System.out.println("💰 Ganancia: $" + ganancia);
                 } else {
-                    satisfaccionClientes -= 5;
-                    System.out.println("❌ Envío #" + pedido.getId() + " falló");
+                    satisfaccionClientes -= 10;
                 }
+
+                System.out.println(mensaje);
+                System.out.println("💰 Pago original: $" + pagoOriginal);
+                System.out.println("💰 Multa por retraso: $" + multa);
+                System.out.println("💰 Ganancia final: $" + ganancia);
+                
                 enviosTotales++;
                 pedidosEnCurso.remove(pedido);
             }
