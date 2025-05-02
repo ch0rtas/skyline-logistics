@@ -591,12 +591,13 @@ public class JuegoLogistica {
      */
     private void mostrarVehiculosDisponibles(Pedido pedido) {
         System.out.println("\n🚗 VEHÍCULOS DISPONIBLES:");
-        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | CARGAS PERMITIDAS | DÍA LLEGADA");
-        System.out.println("----------|---------|-----------|-----------|----------|------------------|------------");
+        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | COSTE TOTAL | DÍA LLEGADA | CARGAS PERMITIDAS");
+        System.out.println("----------|---------|-----------|-----------|----------|-------------|-------------|-----------------");
         
         for (Vehiculo vehiculo : flota) {
             if (vehiculo.estaDisponible() && vehiculo.puedeTransportarTipo(pedido.getTipoPaquete())) {
                 int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
+                int costeTotal = vehiculo.getCostePorKm() * distancia;
                 int horasViaje = vehiculo.calcularTiempoEntrega(distancia);
                 int diasViaje = (int) Math.ceil(horasViaje / 8.0); // Asumiendo 8 horas de viaje por día
                 
@@ -604,14 +605,15 @@ public class JuegoLogistica {
                 fechaLlegada.setTime(fechaActual.getTime());
                 fechaLlegada.add(Calendar.DAY_OF_MONTH, diasViaje);
                 
-                System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| %-17s| %s%n",
+                System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| $%-11d| %-12s| %s%n",
                     vehiculo.getTipo(),
                     vehiculo.getId(),
                     vehiculo.getCapacidad(),
                     vehiculo.getVelocidad(),
                     vehiculo.getCostePorKm(),
-                    String.join(", ", vehiculo.getTiposPaquetesPermitidos()),
-                    formatoFecha.format(fechaLlegada.getTime())
+                    costeTotal,
+                    formatoFecha.format(fechaLlegada.getTime()),
+                    String.join(", ", vehiculo.getTiposPaquetesPermitidos())
                 );
             }
         }
