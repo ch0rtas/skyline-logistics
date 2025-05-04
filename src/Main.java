@@ -125,7 +125,7 @@ public class Main {
             for (int j = 0; j < columnas; j++) {
                 int indice = i + j * filas;
                 if (indice < PROVINCIAS.length) {
-                    System.out.printf("%2d. %-20s", indice + 1, PROVINCIAS[indice]);
+                    System.out.printf("%02d. %-20s", indice + 1, PROVINCIAS[indice]);
                 }
             }
             System.out.println();
@@ -152,17 +152,20 @@ public class Main {
      */
     private static String seleccionarDificultad(Scanner scanner) {
         System.out.println("\n🎮 SELECCIONA LA DIFICULTAD:");
-        System.out.println("1. Fácil");
-        System.out.println("2. Medio");
-        System.out.println("3. Difícil");
+        System.out.println("01. Fácil");
+        System.out.println("02. Medio");
+        System.out.println("03. Difícil");
         System.out.print("\nOpción: ");
         
         String opcion = scanner.nextLine();
         switch (opcion) {
+            case "01":
             case "1":
                 return "easy";
+            case "02":
             case "2":
                 return "medium";
+            case "03":
             case "3":
                 return "hard";
             default:

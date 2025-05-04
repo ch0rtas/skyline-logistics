@@ -356,13 +356,13 @@ public class JuegoLogistica {
         System.out.println("\n==================================================");
         System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ALMACÉN PRINCIPAL: " + almacenPrincipal.toUpperCase());
         System.out.println("==================================================");
-        System.out.println("\n1. Ver pedidos pendientes");
-        System.out.println("2. Ver pedidos en curso");
-        System.out.println("3. Gestionar pedidos");
-        System.out.println("4. Ver flota");
-        System.out.println("5. Ver estadísticas");
-        System.out.println("6. Pasar al siguiente día");
-        System.out.println("7. Salir");
+        System.out.println("\n01. Ver pedidos pendientes");
+        System.out.println("02. Ver pedidos en curso");
+        System.out.println("03. Gestionar pedidos");
+        System.out.println("04. Ver flota");
+        System.out.println("05. Ver estadísticas");
+        System.out.println("06. Pasar al siguiente día");
+        System.out.println("99. Salir");
         System.out.print("\nSeleccione una opción: ");
     }
 
@@ -372,29 +372,37 @@ public class JuegoLogistica {
      */
     private void procesarOpcion(String opcion) {
         switch (opcion) {
+            case "01":
             case "1":
                 mostrarPedidosPendientes();
                 break;
+            case "02":
             case "2":
                 mostrarPedidosEnCurso();
                 break;
+            case "03":
             case "3":
                 gestionarPedido();
                 break;
+            case "04":
             case "4":
                 mostrarFlota();
                 break;
+            case "05":
             case "5":
                 mostrarEstadisticas();
                 break;
+            case "06":
             case "6":
                 pasarDia();
                 break;
-            case "7":
+            case "99":
                 System.exit(0);
                 break;
             default:
-                System.out.println("❌ Opción no válida");
+                System.out.println("\n❌ Opción no válida");
+                mostrarMenuPrincipal();
+                procesarOpcion(scanner.nextLine());
         }
     }
 
@@ -696,12 +704,12 @@ public class JuegoLogistica {
         }
 
         System.out.println("\n¿Qué desea hacer con el pedido #" + idPedido + "?");
-        System.out.println("1. Enviar");
-        System.out.println("2. Rechazar (Multa: $" + calcularMultaRechazo(pedido) + ")");
+        System.out.println("01. Enviar");
+        System.out.println("02. Rechazar (Multa: $" + calcularMultaRechazo(pedido) + ")");
         System.out.print("\nOpción: ");
         String opcion = scanner.nextLine();
 
-        if (opcion.equals("2")) {
+        if (opcion.equals("02") || opcion.equals("2")) {
             System.out.println("\n⚠️ ¿Está seguro de rechazar el pedido #" + idPedido + "?");
             System.out.println("   - Multa por rechazo: $" + calcularMultaRechazo(pedido));
             System.out.print("   - Confirmar (S/N): ");
@@ -712,6 +720,10 @@ public class JuegoLogistica {
                 System.out.println("❌ Pedido #" + idPedido + " rechazado");
                 System.out.println("💰 Multa aplicada: $" + calcularMultaRechazo(pedido));
             }
+            return;
+        } else if (!opcion.equals("01") && !opcion.equals("1")) {
+            System.out.println("\n❌ Opción no válida");
+            gestionarPedido();
             return;
         }
 
@@ -826,17 +838,17 @@ public class JuegoLogistica {
         System.out.println("\n❗ ALERTA: Incidente #" + idIncidente + " - " + incidente);
         System.out.println("   - Riesgo: Retraso en entrega");
         System.out.println("   - Soluciones posibles:");
-        System.out.println("     1) Esperar (Entrega: +3 días)");
-        System.out.println("     2) Desviar ruta (Coste adicional: $1,000, Entrega: +1 día)");
+        System.out.println("     01) Esperar (Entrega: +3 días)");
+        System.out.println("     02) Desviar ruta (Coste adicional: $1,000, Entrega: +1 día)");
         
-        System.out.print("\nSeleccione solución (1-2): ");
+        System.out.print("\nSeleccione solución (01-02): ");
         String solucion = scanner.nextLine();
 
         System.out.println("\n🛠 Aplicando patrón *Template Method*:");
         System.out.println("   1. Identificando causa: " + incidente);
         System.out.println("   2. Asignando recursos...");
         
-        if (solucion.equals("2")) {
+        if (solucion.equals("02") || solucion.equals("2")) {
             System.out.println("   3. Desviando ruta...");
             System.out.println("✅ Resuelto: Envío llegará con 1 día de retraso.");
             pedido.setDiasRestantes(pedido.getDiasRestantes() + 1);
@@ -858,7 +870,12 @@ public class JuegoLogistica {
                 int costeTotal = distancia * vehiculo.getCostePorKm() + costeAdicional;
                 System.out.println("💰 Coste total actualizado: $" + costeTotal);
             }
+        } else if (solucion.equals("01") || solucion.equals("1")) {
+            System.out.println("   3. Esperando condiciones...");
+            System.out.println("✅ Resuelto: Envío llegará con 3 días de retraso.");
+            pedido.setDiasRestantes(pedido.getDiasRestantes() + 3);
         } else {
+            System.out.println("\n❌ Opción no válida, seleccionando esperar por defecto");
             System.out.println("   3. Esperando condiciones...");
             System.out.println("✅ Resuelto: Envío llegará con 3 días de retraso.");
             pedido.setDiasRestantes(pedido.getDiasRestantes() + 3);
