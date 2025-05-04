@@ -887,7 +887,7 @@ public class JuegoLogistica {
      */
     private void mostrarEstadisticas() {
         System.out.println("\n📊 MÉTRICAS ACTUALES:");
-        System.out.println("   - 👤 Jugador: " + jugador.getNombre());
+        System.out.println("   - 👤 " + jugador.getNombre() + ", aquí están tus métricas:");
         System.out.println("   - 🎮 Dificultad: " + dificultad.toUpperCase());
         System.out.println("   - 💰 Balance: $" + jugador.getPresupuesto());
         System.out.println("   - 😊 Satisfacción clientes: " + satisfaccionClientes + "%");
@@ -896,12 +896,17 @@ public class JuegoLogistica {
         System.out.println("   - 📦 Pedidos en curso: " + pedidosEnCurso.size());
         System.out.println("   - 🚗 Flota de vehículos: " + flota.size());
         System.out.println("\n   🚗 VEHÍCULOS DISPONIBLES:");
+        
+        // Contar vehículos por tipo
+        Map<String, Integer> conteoVehiculos = new HashMap<>();
         for (Vehiculo v : flota) {
-            System.out.println("      • " + v.getTipo() + " " + v.getId() + 
-                             " | Capacidad: " + v.getCapacidad() + 
-                             " | Velocidad: " + v.getVelocidad() + 
-                             " | Coste/km: $" + v.getCostePorKm());
-            System.out.println("        Tipos de carga: " + String.join(", ", v.getTiposPaquetesPermitidos()));
+            conteoVehiculos.merge(v.getTipo(), 1, Integer::sum);
+        }
+        
+        // Mostrar total por tipo
+        for (Map.Entry<String, Integer> entry : conteoVehiculos.entrySet()) {
+            String unidad = entry.getValue() == 1 ? "unidad" : "unidades";
+            System.out.println("      • " + entry.getKey() + ": " + entry.getValue() + " " + unidad);
         }
     }
 
@@ -951,7 +956,8 @@ public class JuegoLogistica {
     private void procesarImpuestos() {
         if (diaActual % calcularDiasImpuestos() == 0) {
             int impuestos = (int)(beneficiosAcumulados * TASA_IMPUESTOS);
-            System.out.println("\n💰 HACIENDA: Debes pagar el " + (TASA_IMPUESTOS * 100) + "% de tus beneficios");
+            System.out.println("\n💰 " + jugador.getNombre() + ", es hora de pagar impuestos");
+            System.out.println("   - Debes pagar el " + (TASA_IMPUESTOS * 100) + "% de tus beneficios");
             System.out.println("   - Beneficios acumulados: $" + beneficiosAcumulados);
             System.out.println("   - Impuestos a pagar: $" + impuestos);
             
@@ -1001,7 +1007,7 @@ public class JuegoLogistica {
      */
     private void pasarDia() {
         if (!pedidosPendientes.isEmpty()) {
-            System.out.println("\n❌ No puedes pasar al siguiente día con pedidos pendientes");
+            System.out.println("\n❌ " + jugador.getNombre() + ", no puedes pasar al siguiente día con pedidos pendientes");
             return;
         }
 
@@ -1028,21 +1034,21 @@ public class JuegoLogistica {
 
                 if (diasRetraso == 0) {
                     // Entrega a tiempo
-                    mensaje = "✅ Envío #" + pedido.getId() + " completado exitosamente";
+                    mensaje = "✅ " + jugador.getNombre() + ", el envío #" + pedido.getId() + " se completó exitosamente";
                     multa = 0;
                 } else if (diasRetraso == 1) {
                     // 1 día de retraso: 35% de multa
                     multa = (int)(pagoOriginal * 0.35);
-                    mensaje = "⚠️ Envío #" + pedido.getId() + " completado con 1 día de retraso";
+                    mensaje = "⚠️ " + jugador.getNombre() + ", el envío #" + pedido.getId() + " se completó con 1 día de retraso";
                 } else if (diasRetraso == 2) {
                     // 2 días de retraso: 90% de multa
                     multa = (int)(pagoOriginal * 0.90);
-                    mensaje = "⚠️ Envío #" + pedido.getId() + " completado con 2 días de retraso";
+                    mensaje = "⚠️ " + jugador.getNombre() + ", el envío #" + pedido.getId() + " se completó con 2 días de retraso";
                 } else {
                     // Más de 2 días: fallo y 150% de multa
                     multa = (int)(pagoOriginal * 1.50);
                     exito = false;
-                    mensaje = "❌ Envío #" + pedido.getId() + " falló por exceso de retraso";
+                    mensaje = "❌ " + jugador.getNombre() + ", el envío #" + pedido.getId() + " falló por exceso de retraso";
                 }
 
                 int ganancia = pagoOriginal - multa;
