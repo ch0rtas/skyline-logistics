@@ -14,90 +14,99 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         
         // Mostrar menú principal
-        System.out.println("\n==============================================");
-        System.out.println("🎮 MENÚ PRINCIPAL");
-        System.out.println("==============================================");
-        System.out.println("1. Nueva partida");
-        System.out.println("2. Cargar partida");
-        System.out.println("3. Créditos");
-        System.out.print("\nOpción: ");
-        
-        String opcionMenu = scanner.nextLine();
-        
-        if (opcionMenu.equals("1")) {
-            mostrarInstrucciones();
-            
-            // Pedir nombre del jugador
-            System.out.print("\n👤 Por favor, introduce tu nombre: ");
-            String nombreJugador = scanner.nextLine();
-            
-            // Mostrar menú de bienvenida
+        boolean salir = false;
+        while (!salir) {
             System.out.println("\n==============================================");
-            System.out.println("🚚 BIENVENIDO A SKYLINE LOGISTICS, " + nombreJugador.toUpperCase());
+            System.out.println("🎮 MENÚ PRINCIPAL");
             System.out.println("==============================================");
+            System.out.println("01. Nueva partida");
+            System.out.println("02. Cargar partida");
+            System.out.println("03. Créditos");
+            System.out.println("99. Salir del juego");
+            System.out.print("\nSeleccione una opción: ");
             
-            // Seleccionar provincia
-            String provincia = seleccionarProvincia(scanner);
-            
-            // Seleccionar dificultad
-            String dificultad = seleccionarDificultad(scanner);
-            
-            // Iniciar juego
-            game.JuegoLogistica juego = new game.JuegoLogistica(provincia, dificultad, nombreJugador);
-            juego.iniciar();
-        } else if (opcionMenu.equals("2")) {
-            System.out.println("\n❌ Función de cargar partida no implementada aún");
-        } else if (opcionMenu.equals("3")) {
-            System.out.println("\n==============================================");
-            System.out.println("📝 CRÉDITOS");
-            System.out.println("==============================================");
-            System.out.println("Desarrollado por: Tu Nombre");
-            System.out.println("Versión: 1.0");
-            System.out.println("Año: 2024");
-        } else {
-            System.out.println("\n❌ Opción no válida");
+            String opcion = scanner.nextLine();
+            switch (opcion) {
+                case "01":
+                case "1":
+                    // Mostrar menú de bienvenida
+                    System.out.println("\n==============================================");
+                    System.out.println("🚚 BIENVENIDO A SKYLINE LOGISTICS");
+                    System.out.println("==============================================");
+                    
+                    // Mostrar instrucciones
+                    System.out.println("\n📖 INSTRUCCIONES DEL JUEGO:");
+                    System.out.println("🚚 Skyline Logistics es un juego de gestión de pedidos donde tu objetivo es");
+                    System.out.println("   administrar una empresa de logística en España. Cada día que pasa, el");
+                    System.out.println("   volumen de pedidos aumenta, poniendo a prueba tu capacidad de gestión.");
+                    System.out.println("\n🎯 CARACTERÍSTICAS PRINCIPALES:");
+                    System.out.println("• 🚗 Gestiona una flota de vehículos limitada");
+                    System.out.println("• 📦 Diferentes tipos de vehículos para diferentes tipos de carga");
+                    System.out.println("• 🌍 Pedidos a diferentes provincias de España");
+                    System.out.println("• 💰 Costes variables según la distancia");
+                    System.out.println("• 🛒 Sistema de compra de vehículos");
+                    System.out.println("• ⚠️ Gestión de incidentes y mantenimiento");
+                    System.out.println("• 📝 Sistema de impuestos y multas");
+                    System.out.println("\n❄️ TIPOS DE CARGA ESPECIAL:");
+                    System.out.println("• 🧊 REFRIGERADO: Requiere vehículos con refrigeración");
+                    System.out.println("• ❄️ CONGELADO: Necesita vehículos con congelación");
+                    System.out.println("• ⚠️ PELIGROSO: Requiere vehículos especiales");
+                    System.out.println("• 👮 ESCOLTADO: Necesita escolta de seguridad");
+                    System.out.println("• 🎯 FRÁGIL: Requiere manejo especial");
+                    System.out.println("\n🚗 TIPOS DE VEHÍCULOS:");
+                    System.out.println("• 🚐 Furgoneta: Ideal para envíos locales y pequeños");
+                    System.out.println("• 🚛 Camión: Para cargas medianas y largas distancias");
+                    System.out.println("• 🚢 Barco: Para envíos a islas y provincias costeras");
+                    System.out.println("• ✈️ Avión: Para envíos urgentes y largas distancias");
+                    System.out.println("\n🎮 OBJETIVO DEL JUEGO:");
+                    System.out.println("• 💰 Mantener un balance positivo");
+                    System.out.println("• 😊 Mantener alta satisfacción de clientes");
+                    System.out.println("• 📦 Gestionar eficientemente los pedidos");
+                    System.out.println("• 🚗 Expandir tu flota de vehículos");
+                    System.out.println("• 🌍 Conectar todas las provincias de España");
+                    
+                    // Solicitar nombre del jugador
+                    System.out.print("\n👤 Por favor, introduce tu nombre: ");
+                    String nombreJugador = scanner.nextLine();
+                    
+                    // Seleccionar provincia
+                    String provincia = seleccionarProvincia(scanner);
+                    
+                    // Seleccionar dificultad
+                    String dificultad = seleccionarDificultad(scanner);
+                    
+                    // Iniciar juego
+                    game.JuegoLogistica juego = new game.JuegoLogistica(provincia, dificultad, nombreJugador);
+                    juego.iniciar();
+                    break;
+                case "02":
+                case "2":
+                    System.out.println("\n⚠️ Función no implementada: Cargar partida");
+                    break;
+                case "03":
+                case "3":
+                    System.out.println("\n==============================================");
+                    System.out.println("📝 CRÉDITOS");
+                    System.out.println("==============================================");
+                    System.out.println("Juego desarrollado en JAVA para la asignatura de");
+                    System.out.println("Diseño de Software por alumnos de U-Tad");
+                    System.out.println("\nDesarrolladores:");
+                    System.out.println("• Manuel Martinez | GitHub: @ch0rtas");
+                    System.out.println("• Luis Marquina | GitHub: @Luiiss44");
+                    System.out.println("• Miguel Toran");
+                    System.out.println("\nRepositorio del proyecto:");
+                    System.out.println("https://github.com/Luiiss44/skyline-logistics");
+                    break;
+                case "99":
+                    salir = true;
+                    System.out.println("\n👋 ¡Hasta luego!");
+                    break;
+                default:
+                    System.out.println("\n❌ Opción no válida");
+            }
         }
         
         scanner.close();
-    }
-    
-    /**
-     * Muestra las instrucciones del juego
-     */
-    private static void mostrarInstrucciones() {
-        System.out.println("\n📖 INSTRUCCIONES DEL JUEGO:");
-        System.out.println("🚚 Skyline Logistics es un juego de gestión de pedidos donde tu objetivo es");
-        System.out.println("   administrar una empresa de logística en España. Cada día que pasa, el");
-        System.out.println("   volumen de pedidos aumenta, poniendo a prueba tu capacidad de gestión.");
-        
-        System.out.println("\n🎯 CARACTERÍSTICAS PRINCIPALES:");
-        System.out.println("• 🚗 Gestiona una flota de vehículos limitada");
-        System.out.println("• 📦 Diferentes tipos de vehículos para diferentes tipos de carga");
-        System.out.println("• 🌍 Pedidos a diferentes provincias de España");
-        System.out.println("• 💰 Costes variables según la distancia");
-        System.out.println("• 🛒 Sistema de compra de vehículos");
-        System.out.println("• ⚠️ Gestión de incidentes y mantenimiento");
-        System.out.println("• 📝 Sistema de impuestos y multas");
-        
-        System.out.println("\n❄️ TIPOS DE CARGA ESPECIAL:");
-        System.out.println("• 🧊 REFRIGERADO: Requiere vehículos con refrigeración");
-        System.out.println("• ❄️ CONGELADO: Necesita vehículos con congelación");
-        System.out.println("• ⚠️ PELIGROSO: Requiere vehículos especiales");
-        System.out.println("• 👮 ESCOLTADO: Necesita escolta de seguridad");
-        System.out.println("• 🎯 FRÁGIL: Requiere manejo especial");
-        
-        System.out.println("\n🚗 TIPOS DE VEHÍCULOS:");
-        System.out.println("• 🚐 Furgoneta: Ideal para envíos locales y pequeños");
-        System.out.println("• 🚛 Camión: Para cargas medianas y largas distancias");
-        System.out.println("• 🚢 Barco: Para envíos a islas y provincias costeras");
-        System.out.println("• ✈️ Avión: Para envíos urgentes y largas distancias");
-        
-        System.out.println("\n🎮 OBJETIVO DEL JUEGO:");
-        System.out.println("• 💰 Mantener un balance positivo");
-        System.out.println("• 😊 Mantener alta satisfacción de clientes");
-        System.out.println("• 📦 Gestionar eficientemente los pedidos");
-        System.out.println("• 🚗 Expandir tu flota de vehículos");
-        System.out.println("• 🌍 Conectar todas las provincias de España");
     }
     
     /**

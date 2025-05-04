@@ -87,7 +87,7 @@ public class JuegoLogistica {
         this.pedidosPendientes = new ArrayList<>();
         this.pedidosEnCurso = new ArrayList<>();
         this.diaActual = 1;
-        this.fechaActual = Calendar.getInstance(); // Fecha actual del sistema
+        this.fechaActual = Calendar.getInstance();
         this.satisfaccionClientes = 100;
         this.enviosExitosos = 0;
         this.enviosTotales = 0;
@@ -870,11 +870,22 @@ public class JuegoLogistica {
      */
     private void mostrarEstadisticas() {
         System.out.println("\n📊 MÉTRICAS ACTUALES:");
+        System.out.println("   - 👤 Jugador: " + jugador.getNombre());
+        System.out.println("   - 🎮 Dificultad: " + dificultad.toUpperCase());
         System.out.println("   - 💰 Balance: $" + jugador.getPresupuesto());
         System.out.println("   - 😊 Satisfacción clientes: " + satisfaccionClientes + "%");
         System.out.println("   - 🚚 Envíos exitosos: " + enviosExitosos + "/" + enviosTotales);
         System.out.println("   - 📦 Pedidos pendientes: " + pedidosPendientes.size());
         System.out.println("   - 📦 Pedidos en curso: " + pedidosEnCurso.size());
+        System.out.println("   - 🚗 Flota de vehículos: " + flota.size());
+        System.out.println("\n   🚗 VEHÍCULOS DISPONIBLES:");
+        for (Vehiculo v : flota) {
+            System.out.println("      • " + v.getTipo() + " " + v.getId() + 
+                             " | Capacidad: " + v.getCapacidad() + 
+                             " | Velocidad: " + v.getVelocidad() + 
+                             " | Coste/km: $" + v.getCostePorKm());
+            System.out.println("        Tipos de carga: " + String.join(", ", v.getTiposPaquetesPermitidos()));
+        }
     }
 
     /**
