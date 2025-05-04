@@ -184,12 +184,8 @@ public class JuegoLogistica {
      * Muestra la pantalla de bienvenida
      */
     private void mostrarBienvenida() {
-        System.out.println("\n✅ ¡Bienvenido " + jugador.getNombre() + "!");
-        System.out.println("✅ Sistema iniciado en región: " + almacenPrincipal.toUpperCase());
+        System.out.println("\n✅ Sistema iniciado en región: " + almacenPrincipal.toUpperCase());
         System.out.println("💰 Balance inicial: $" + jugador.getPresupuesto());
-        System.out.println("\n🎯 Tu objetivo es gestionar eficientemente tu empresa de logística,");
-        System.out.println("   manteniendo un balance positivo y una alta satisfacción de clientes.");
-        System.out.println("   ¡Buena suerte en tu aventura empresarial!");
     }
 
     /**
@@ -360,15 +356,14 @@ public class JuegoLogistica {
         System.out.println("\n==================================================");
         System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ALMACÉN PRINCIPAL: " + almacenPrincipal.toUpperCase());
         System.out.println("==================================================");
-        System.out.println("\n👤 " + jugador.getNombre() + ", ¿qué deseas hacer?");
-        System.out.println("\n1. Ver pedidos entrantes");
+        System.out.println("\n1. Ver pedidos pendientes");
         System.out.println("2. Ver pedidos en curso");
-        System.out.println("3. Ver flota de vehículos");
-        System.out.println("4. Ver mercado de vehículos");
+        System.out.println("3. Gestionar pedidos");
+        System.out.println("4. Ver flota");
         System.out.println("5. Ver estadísticas");
         System.out.println("6. Pasar al siguiente día");
-        System.out.println("7. Salir del juego");
-        System.out.print("\nOpción: ");
+        System.out.println("7. Salir");
+        System.out.print("\nSeleccione una opción: ");
     }
 
     /**
@@ -384,10 +379,10 @@ public class JuegoLogistica {
                 mostrarPedidosEnCurso();
                 break;
             case "3":
-                mostrarFlota();
+                gestionarPedido();
                 break;
             case "4":
-                mostrarMercadoVehiculos();
+                mostrarFlota();
                 break;
             case "5":
                 mostrarEstadisticas();
@@ -874,15 +869,12 @@ public class JuegoLogistica {
      * Muestra las estadísticas del juego
      */
     private void mostrarEstadisticas() {
-        System.out.println("\n📊 ESTADÍSTICAS DE " + jugador.getNombre());
-        System.out.println("==================================================");
-        System.out.println("💰 Presupuesto actual: $" + jugador.getPresupuesto());
-        System.out.println("📦 Pedidos completados: " + enviosExitosos + "/" + enviosTotales);
-        System.out.println("😊 Satisfacción clientes: " + satisfaccionClientes + "%");
-        System.out.println("📅 Días transcurridos: " + diaActual);
-        System.out.println("💼 Beneficios acumulados: $" + beneficiosAcumulados);
-        System.out.println("🚗 Tamaño de la flota: " + flota.size() + " vehículos");
-        System.out.println("🎮 Dificultad: " + dificultad.toUpperCase());
+        System.out.println("\n📊 MÉTRICAS ACTUALES:");
+        System.out.println("   - 💰 Balance: $" + jugador.getPresupuesto());
+        System.out.println("   - 😊 Satisfacción clientes: " + satisfaccionClientes + "%");
+        System.out.println("   - 🚚 Envíos exitosos: " + enviosExitosos + "/" + enviosTotales);
+        System.out.println("   - 📦 Pedidos pendientes: " + pedidosPendientes.size());
+        System.out.println("   - 📦 Pedidos en curso: " + pedidosEnCurso.size());
     }
 
     /**
@@ -1059,15 +1051,12 @@ public class JuegoLogistica {
      * Muestra la pantalla de fin de juego
      */
     private void mostrarGameOver() {
-        System.out.println("\n==================================================");
-        System.out.println("💀 GAME OVER - " + jugador.getNombre());
-        System.out.println("==================================================");
-        System.out.println("\n📊 ESTADÍSTICAS FINALES:");
-        System.out.println("📅 Días sobrevividos: " + diaActual);
-        System.out.println("📦 Pedidos completados: " + enviosExitosos + "/" + enviosTotales);
-        System.out.println("💰 Beneficios acumulados: $" + beneficiosAcumulados);
-        System.out.println("😊 Satisfacción final de clientes: " + satisfaccionClientes + "%");
-        System.out.println("\nGracias por jugar a Skyline Logistics, " + jugador.getNombre() + "!");
-        System.out.println("Esperamos verte de nuevo pronto.");
+        System.out.println("\n==============================================");
+        System.out.println("🎮 GAME OVER");
+        System.out.println("==============================================");
+        System.out.println("💰 Balance final: $" + jugador.getPresupuesto());
+        System.out.println("😊 Satisfacción final: " + satisfaccionClientes + "%");
+        System.out.println("🚚 Envíos totales: " + enviosTotales);
+        System.out.println("✅ Envíos exitosos: " + enviosExitosos);
     }
 } 
