@@ -18,6 +18,13 @@ public class Main {
         System.out.println("🚚 BIENVENIDO A SKYLINE LOGISTICS");
         System.out.println("==============================================");
         
+        // Mostrar instrucciones
+        mostrarInstrucciones();
+        
+        // Solicitar nombre del jugador
+        System.out.print("\n👤 Por favor, introduce tu nombre: ");
+        String nombreJugador = scanner.nextLine();
+        
         // Seleccionar provincia
         String provincia = seleccionarProvincia(scanner);
         
@@ -25,10 +32,39 @@ public class Main {
         String dificultad = seleccionarDificultad(scanner);
         
         // Iniciar juego
-        game.JuegoLogistica juego = new game.JuegoLogistica(provincia, dificultad);
+        game.JuegoLogistica juego = new game.JuegoLogistica(provincia, dificultad, nombreJugador);
         juego.iniciar();
         
         scanner.close();
+    }
+    
+    /**
+     * Muestra las instrucciones del juego
+     */
+    private static void mostrarInstrucciones() {
+        System.out.println("\n📖 INSTRUCCIONES DEL JUEGO:");
+        System.out.println("Skyline Logistics es un juego de gestión de pedidos donde tu objetivo es");
+        System.out.println("administrar una empresa de logística en España. Cada día que pasa, el");
+        System.out.println("volumen de pedidos aumenta, poniendo a prueba tu capacidad de gestión.");
+        System.out.println("\nCARACTERÍSTICAS PRINCIPALES:");
+        System.out.println("• Gestiona una flota de vehículos limitada");
+        System.out.println("• Diferentes tipos de vehículos para diferentes tipos de carga");
+        System.out.println("• Pedidos a diferentes provincias de España");
+        System.out.println("• Costes variables según la distancia");
+        System.out.println("• Sistema de compra de vehículos");
+        System.out.println("• Gestión de incidentes y mantenimiento");
+        System.out.println("• Sistema de impuestos y multas");
+        System.out.println("\nTIPOS DE CARGA ESPECIAL:");
+        System.out.println("• REFRIGERADO: Requiere vehículos con refrigeración");
+        System.out.println("• CONGELADO: Necesita vehículos con congelación");
+        System.out.println("• PELIGROSO: Requiere vehículos especiales");
+        System.out.println("• ESCOLTADO: Necesita escolta de seguridad");
+        System.out.println("• FRÁGIL: Requiere manejo especial");
+        System.out.println("\nTIPOS DE VEHÍCULOS:");
+        System.out.println("• Furgoneta: Ideal para envíos locales y pequeños");
+        System.out.println("• Camión: Para cargas medianas y largas distancias");
+        System.out.println("• Barco: Para envíos a islas y provincias costeras");
+        System.out.println("• Avión: Para envíos urgentes y largas distancias");
     }
     
     /**
