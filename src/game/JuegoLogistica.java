@@ -564,6 +564,47 @@ public class JuegoLogistica {
     }
 
     /**
+     * Calcula el ancho máximo necesario para una columna basado en su contenido
+     * @param contenido Array de strings con el contenido de la columna
+     * @param encabezado String con el encabezado de la columna
+     * @return int con el ancho máximo necesario
+     */
+    private int calcularAnchoColumna(String[] contenido, String encabezado) {
+        int anchoMaximo = encabezado.length();
+        for (String item : contenido) {
+            anchoMaximo = Math.max(anchoMaximo, item.length());
+        }
+        return anchoMaximo;
+    }
+
+    /**
+     * Genera una línea separadora para una tabla
+     * @param anchos Array con los anchos de cada columna
+     * @return String con la línea separadora
+     */
+    private String generarLineaSeparadora(int[] anchos) {
+        StringBuilder linea = new StringBuilder();
+        for (int ancho : anchos) {
+            linea.append("-".repeat(ancho + 2)).append("+");
+        }
+        return linea.toString();
+    }
+
+    /**
+     * Genera una fila de tabla con el formato correcto
+     * @param valores Array con los valores de cada columna
+     * @param anchos Array con los anchos de cada columna
+     * @return String con la fila formateada
+     */
+    private String generarFilaTabla(String[] valores, int[] anchos) {
+        StringBuilder fila = new StringBuilder();
+        for (int i = 0; i < valores.length; i++) {
+            fila.append(String.format(" %-" + anchos[i] + "s |", valores[i]));
+        }
+        return fila.toString();
+    }
+
+    /**
      * Muestra los pedidos pendientes
      */
     private void mostrarPedidosPendientes() {
@@ -572,11 +613,55 @@ public class JuegoLogistica {
             return;
         }
 
-        System.out.println("\n📦 PEDIDOS PENDIENTES:");
-        System.out.println("ID       | CLIENTE              | CARGA           | PRIORIDAD  | PESO      | DESTINO          | TIPO         | PAGO         | ENTREGA");
-        System.out.println("---------|----------------------|-----------------|------------|-----------|------------------|--------------|--------------|------------------");
+        // Calcular anchos máximos para cada columna
+        String[] encabezados = {"ID", "CLIENTE", "CARGA", "PRIORIDAD", "PESO", "DESTINO", "TIPO", "PAGO", "ENTREGA"};
+        int[] anchos = new int[encabezados.length];
+        
+        // Inicializar anchos con los encabezados
+        for (int i = 0; i < encabezados.length; i++) {
+            anchos[i] = encabezados[i].length();
+        }
+        
+        // Calcular anchos máximos basados en el contenido
         for (Pedido pedido : pedidosPendientes) {
-            System.out.println(pedido.toStringFormateado());
+            String[] valores = {
+                pedido.getId(),
+                pedido.getCliente(),
+                pedido.getCarga(),
+                pedido.getPrioridad(),
+                String.valueOf(pedido.getPeso()),
+                pedido.getDestino(),
+                pedido.getTipoPaquete(),
+                "Pago: $" + pedido.getPago(),
+                "Entrega: " + pedido.getFechaEntrega()
+            };
+            
+            for (int i = 0; i < valores.length; i++) {
+                anchos[i] = Math.max(anchos[i], valores[i].length());
+            }
+        }
+
+        // Mostrar tabla
+        System.out.println("\n📦 PEDIDOS PENDIENTES:");
+        
+        // Mostrar encabezados
+        System.out.println(generarFilaTabla(encabezados, anchos));
+        System.out.println(generarLineaSeparadora(anchos));
+        
+        // Mostrar datos
+        for (Pedido pedido : pedidosPendientes) {
+            String[] valores = {
+                pedido.getId(),
+                pedido.getCliente(),
+                pedido.getCarga(),
+                pedido.getPrioridad(),
+                String.valueOf(pedido.getPeso()),
+                pedido.getDestino(),
+                pedido.getTipoPaquete(),
+                "Pago: $" + pedido.getPago(),
+                "Entrega: " + pedido.getFechaEntrega()
+            };
+            System.out.println(generarFilaTabla(valores, anchos));
         }
     }
 
@@ -589,27 +674,65 @@ public class JuegoLogistica {
             return;
         }
 
-        System.out.println("\n📦 PEDIDOS EN CURSO:");
-        System.out.println("ID       | CLIENTE              | CARGA           | PRIORIDAD  | PESO      | DESTINO          | TIPO         | PAGO         | ENTREGA MÁXIMA | ENTREGA PREVISTA");
-        System.out.println("---------|----------------------|-----------------|------------|-----------|------------------|--------------|--------------|----------------|-----------------");
+        // Calcular anchos máximos para cada columna
+        String[] encabezados = {"ID", "CLIENTE", "CARGA", "PRIORIDAD", "PESO", "DESTINO", "TIPO", "PAGO", "ENTREGA MÁXIMA", "ENTREGA PREVISTA"};
+        int[] anchos = new int[encabezados.length];
         
+        // Inicializar anchos con los encabezados
+        for (int i = 0; i < encabezados.length; i++) {
+            anchos[i] = encabezados[i].length();
+        }
+        
+        // Calcular anchos máximos basados en el contenido
         for (Pedido pedido : pedidosEnCurso) {
             Calendar fechaPrevia = Calendar.getInstance();
             fechaPrevia.setTime(fechaActual.getTime());
             fechaPrevia.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
             
-            System.out.printf("%-9s| %-21s| %-16s| %-11s| %-10d| %-17s| %-13s| $%-12d| %-15s| %s%n",
+            String[] valores = {
                 pedido.getId(),
                 pedido.getCliente(),
                 pedido.getCarga(),
                 pedido.getPrioridad(),
-                pedido.getPeso(),
+                String.valueOf(pedido.getPeso()),
                 pedido.getDestino(),
                 pedido.getTipoPaquete(),
-                pedido.getPago(),
+                "$" + pedido.getPago(),
                 pedido.getFechaEntrega(),
                 formatoFecha.format(fechaPrevia.getTime())
-            );
+            };
+            
+            for (int i = 0; i < valores.length; i++) {
+                anchos[i] = Math.max(anchos[i], valores[i].length());
+            }
+        }
+
+        // Mostrar tabla
+        System.out.println("\n📦 PEDIDOS EN CURSO:");
+        
+        // Mostrar encabezados
+        System.out.println(generarFilaTabla(encabezados, anchos));
+        System.out.println(generarLineaSeparadora(anchos));
+        
+        // Mostrar datos
+        for (Pedido pedido : pedidosEnCurso) {
+            Calendar fechaPrevia = Calendar.getInstance();
+            fechaPrevia.setTime(fechaActual.getTime());
+            fechaPrevia.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
+            
+            String[] valores = {
+                pedido.getId(),
+                pedido.getCliente(),
+                pedido.getCarga(),
+                pedido.getPrioridad(),
+                String.valueOf(pedido.getPeso()),
+                pedido.getDestino(),
+                pedido.getTipoPaquete(),
+                "$" + pedido.getPago(),
+                pedido.getFechaEntrega(),
+                formatoFecha.format(fechaPrevia.getTime())
+            };
+            System.out.println(generarFilaTabla(valores, anchos));
         }
     }
 
@@ -929,6 +1052,11 @@ public class JuegoLogistica {
                 System.out.println("   - Ruta terrestre: Sí");
             }
             System.out.println("   - Ruta aérea: Siempre disponible");
+            
+            System.out.println("\n⚠️ IMPORTANTE:");
+            System.out.println("   - Debes cancelar este pedido para poder pasar al siguiente día");
+            System.out.println("   - Planifica mejor tus rutas y asegúrate de tener los vehículos necesarios");
+            System.out.println("   - 💡 TIP: Considera comprar un vehículo en el mercado (estará disponible al día siguiente)");
         }
     }
 
@@ -1104,8 +1232,8 @@ public class JuegoLogistica {
         System.out.println("\n❗ ALERTA: Incidente #" + idIncidente + " - " + incidente);
         System.out.println("   - Riesgo: Retraso en entrega");
         System.out.println("   - Soluciones posibles:");
-        System.out.println("     01) Esperar (Entrega: +3 días)");
-        System.out.println("     02) Desviar ruta (Coste adicional: $1,000, Entrega: +1 día)");
+        System.out.println("     01. Esperar (Entrega: +3 días)");
+        System.out.println("     02. Desviar ruta (Coste adicional: $1,000, Entrega: +1 día)");
         
         System.out.print("\nSeleccione solución (01-02): ");
         String solucion = scanner.nextLine();
