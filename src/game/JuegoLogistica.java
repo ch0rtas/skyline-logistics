@@ -53,21 +53,21 @@ public class JuegoLogistica {
     // Matriz de distancias entre provincias (en km)
     private static final int[][] DISTANCIAS = {
         // Madrid, Barcelona, Valencia, Sevilla, Zaragoza, Málaga, Murcia, Palma, Las Palmas, Bilbao, Alicante, Córdoba, Valladolid, Vigo, Gijón
-        {0, 621, 352, 538, 325, 530, 400, 0, 0, 395, 420, 400, 193, 599, 450}, // Madrid
-        {621, 0, 349, 1000, 296, 1000, 600, 0, 0, 610, 500, 900, 800, 1000, 800}, // Barcelona
-        {352, 349, 0, 650, 300, 600, 250, 0, 0, 600, 166, 500, 500, 800, 700}, // Valencia
-        {538, 1000, 650, 0, 800, 200, 400, 0, 0, 800, 500, 140, 600, 900, 800}, // Sevilla
-        {325, 296, 300, 800, 0, 700, 500, 0, 0, 300, 400, 600, 300, 700, 600}, // Zaragoza
-        {530, 1000, 600, 200, 700, 0, 300, 0, 0, 800, 400, 200, 700, 1000, 900}, // Málaga
-        {400, 600, 250, 400, 500, 300, 0, 0, 0, 700, 100, 300, 600, 900, 800}, // Murcia
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // Palma de Mallorca
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // Las Palmas
-        {395, 610, 600, 800, 300, 800, 700, 0, 0, 0, 600, 700, 280, 400, 300}, // Bilbao
-        {420, 500, 166, 500, 400, 400, 100, 0, 0, 600, 0, 400, 500, 800, 700}, // Alicante
-        {400, 900, 500, 140, 600, 200, 300, 0, 0, 700, 400, 0, 500, 800, 700}, // Córdoba
-        {193, 800, 500, 600, 300, 700, 600, 0, 0, 280, 500, 500, 0, 400, 300}, // Valladolid
-        {599, 1000, 800, 900, 700, 1000, 900, 0, 0, 400, 800, 800, 400, 0, 200}, // Vigo
-        {450, 800, 700, 800, 600, 900, 800, 0, 0, 300, 700, 700, 300, 200, 0}  // Gijón
+        {0, 621, 352, 538, 325, 530, 400, 800, 1800, 395, 420, 400, 193, 599, 450}, // Madrid
+        {621, 0, 349, 1000, 296, 1000, 600, 200, 1800, 610, 500, 900, 800, 1000, 800}, // Barcelona
+        {352, 349, 0, 650, 300, 600, 250, 300, 1800, 600, 166, 500, 500, 800, 700}, // Valencia
+        {538, 1000, 650, 0, 800, 200, 400, 600, 1800, 800, 500, 140, 600, 900, 800}, // Sevilla
+        {325, 296, 300, 800, 0, 700, 500, 500, 1800, 300, 400, 600, 300, 700, 600}, // Zaragoza
+        {530, 1000, 600, 200, 700, 0, 300, 400, 1800, 800, 400, 200, 700, 1000, 900}, // Málaga
+        {400, 600, 250, 400, 500, 300, 0, 300, 1800, 700, 100, 300, 600, 900, 800}, // Murcia
+        {800, 200, 300, 600, 500, 400, 300, 0, 1800, 800, 300, 600, 800, 1000, 900}, // Palma de Mallorca
+        {1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800, 0, 1800, 1800, 1800, 1800, 1800, 1800}, // Las Palmas
+        {395, 610, 600, 800, 300, 800, 700, 800, 1800, 0, 600, 700, 280, 400, 300}, // Bilbao
+        {420, 500, 166, 500, 400, 400, 100, 300, 1800, 600, 0, 400, 500, 800, 700}, // Alicante
+        {400, 900, 500, 140, 600, 200, 300, 600, 1800, 700, 400, 0, 500, 800, 700}, // Córdoba
+        {193, 800, 500, 600, 300, 700, 600, 800, 1800, 280, 500, 500, 0, 400, 300}, // Valladolid
+        {599, 1000, 800, 900, 700, 1000, 900, 1000, 1800, 400, 800, 800, 400, 0, 200}, // Vigo
+        {450, 800, 700, 800, 600, 900, 800, 900, 1800, 300, 700, 700, 300, 200, 0}  // Gijón
     };
 
     private List<Vehiculo> vehiculosMercado;
@@ -200,23 +200,32 @@ public class JuegoLogistica {
         
         switch (dificultad) {
             case "easy":
-                // 2 furgonetas, 1 camión, 1 barco, 1 avión
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO"));
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "FRÁGIL"));
+                // 3 furgonetas, 2 camiones, 2 barcos, 2 aviones
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "ESCOLTADO"));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "FRÁGIL", "ESCOLTADO"));
+                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "PELIGROSO", "ESCOLTADO"));
+                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "CONGELADO", "PELIGROSO"));
+                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                break;
+            case "medium":
+                // 2 furgonetas, 2 camiones, 1 barco, 1 avión
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "ESCOLTADO"));
+                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "PELIGROSO", "CONGELADO"));
                 flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "PELIGROSO", "ESCOLTADO"));
                 flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
                 flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
                 break;
-            case "medium":
-                // 1 furgoneta, 1 camión, 1 barco
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO"));
-                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "PELIGROSO"));
-                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
-                break;
             case "hard":
-                // 1 furgoneta, 1 barco
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100))));
+                // 1 furgoneta, 1 camión, 1 barco, 1 avión
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "PELIGROSO", "CONGELADO"));
                 flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
                 break;
         }
 
@@ -433,57 +442,57 @@ public class JuegoLogistica {
             "Universidad"
         };
         
-        String[] cargas = {
-            "Vacunas",
-            "Medicamentos",
-            "Equipos Médicos",
-            "Alimentos Frescos",
-            "Mariscos Frescos",
-            "Electrónicos",
-            "Flores Exóticas",
-            "Joyas Valiosas",
-            "Obras de Arte",
-            "Materiales Construcción",
-            "Piezas Industriales",
-            "Equipaje VIP",
-            "Contenedores Marítimos",
-            "Equipos Científicos",
-            "Material Educativo",
-            "Productos Químicos",
-            "Materias Primas",
-            "Textiles Finos",
-            "Instrumentos Musicales",
-            "Antigüedades"
-        };
+        // Cargas específicas por tipo de paquete
+        Map<String, String[]> cargasPorTipo = new HashMap<>();
+        cargasPorTipo.put("NORMAL", new String[]{"Materiales Construcción", "Piezas Industriales", "Equipaje VIP", "Material Educativo"});
+        cargasPorTipo.put("REFRIGERADO", new String[]{"Vacunas", "Medicamentos", "Alimentos Frescos", "Mariscos Frescos"});
+        cargasPorTipo.put("CONGELADO", new String[]{"Productos Congelados", "Muestras Biológicas", "Alimentos Ultra Congelados"});
+        cargasPorTipo.put("PELIGROSO", new String[]{"Productos Químicos", "Materiales Explosivos", "Residuos Tóxicos", "Combustibles"});
+        cargasPorTipo.put("ESCOLTADO", new String[]{"Joyas Valiosas", "Obras de Arte", "Dinero", "Documentos Secretos"});
+        cargasPorTipo.put("FRÁGIL", new String[]{"Equipos Médicos", "Electrónicos", "Flores Exóticas", "Instrumentos Musicales", "Antigüedades"});
         
         String[] prioridades = {"URGENTE", "NORMAL", "BAJA"};
         String[] tiposPaquetes = {"NORMAL", "REFRIGERADO", "CONGELADO", "ESCOLTADO", "PELIGROSO", "FRÁGIL"};
 
-        String cliente = clientes[random.nextInt(clientes.length)];
-        String carga = cargas[random.nextInt(cargas.length)];
-        String prioridad = prioridades[random.nextInt(prioridades.length)];
+        // Seleccionar tipo de paquete
         String tipoPaquete = tiposPaquetes[random.nextInt(tiposPaquetes.length)];
-        int pago = 5000 + random.nextInt(5000);
-        String idPedido = "P" + (100 + random.nextInt(900)); // IDs de 3 dígitos
-        int peso = 100 + random.nextInt(900); // Peso entre 100 y 1000 kg
-
-        // Ajustar pago según tipo de paquete
+        
+        // Seleccionar carga según el tipo
+        String[] cargasDisponibles = cargasPorTipo.get(tipoPaquete);
+        String carga = cargasDisponibles[random.nextInt(cargasDisponibles.length)];
+        
+        // Seleccionar cliente
+        String cliente = clientes[random.nextInt(clientes.length)];
+        
+        // Seleccionar prioridad
+        String prioridad = prioridades[random.nextInt(prioridades.length)];
+        
+        // Generar ID y peso según el tipo de paquete
+        String idPedido = "P" + (100 + random.nextInt(900));
+        int peso;
+        
+        // Ajustar peso según el tipo de paquete
         switch (tipoPaquete) {
+            case "NORMAL":
+                peso = 100 + random.nextInt(900); // 100-1000 kg
+                break;
             case "REFRIGERADO":
-                pago *= 1.2;
+                peso = 200 + random.nextInt(800); // 200-1000 kg
                 break;
             case "CONGELADO":
-                pago *= 1.3;
-                break;
-            case "ESCOLTADO":
-                pago *= 1.5;
+                peso = 500 + random.nextInt(1500); // 500-2000 kg
                 break;
             case "PELIGROSO":
-                pago *= 1.4;
+                peso = 1000 + random.nextInt(4000); // 1000-5000 kg
+                break;
+            case "ESCOLTADO":
+                peso = 50 + random.nextInt(450); // 50-500 kg
                 break;
             case "FRÁGIL":
-                pago *= 1.1;
+                peso = 10 + random.nextInt(490); // 10-500 kg
                 break;
+            default:
+                peso = 100 + random.nextInt(900);
         }
 
         // Seleccionar un destino aleatorio que no sea el almacén principal
@@ -492,24 +501,102 @@ public class JuegoLogistica {
             destino = PROVINCIAS[random.nextInt(PROVINCIAS.length)];
         } while (destino.equalsIgnoreCase(almacenPrincipal));
 
-        // Generar fecha de entrega según la prioridad
-        Calendar fechaEntrega = (Calendar) fechaActual.clone();
-        if (prioridad.equals("URGENTE")) {
-            fechaEntrega.add(Calendar.DAY_OF_MONTH, 1);
-            pago *= 1.5;
-        } else {
-            int diasExtra = 2 + random.nextInt(4);
-            fechaEntrega.add(Calendar.DAY_OF_MONTH, diasExtra);
+        // Calcular distancia base
+        int distancia = obtenerDistancia(almacenPrincipal, destino);
+        
+        // Calcular coste base del envío (usando el vehículo más económico)
+        int costeBaseEnvio = distancia * 2; // 2€/km como mínimo (furgoneta)
+        
+        // Si es ruta marítima, usar barco como base
+        if (esRutaMaritima(almacenPrincipal, destino)) {
+            costeBaseEnvio = (int)(distancia * 3 * 1.5); // 3€/km * 1.5 por ser marítimo
         }
+        
+        // Si es ruta aérea, usar avión como base
+        if (esIsla(almacenPrincipal) || esIsla(destino)) {
+            costeBaseEnvio = (int)(distancia * 10 * 2.0); // 10€/km * 2.0 por ser aéreo
+        }
+
+        // Calcular pago base según peso, tipo y distancia
+        int pagoBase = peso * 2; // 2€ por kg base (reducido de 10€ a 2€)
+        
+        // Ajustar pago según tipo de paquete
+        switch (tipoPaquete) {
+            case "REFRIGERADO":
+                pagoBase *= 1.3; // Reducido de 1.5 a 1.3
+                break;
+            case "CONGELADO":
+                pagoBase *= 1.5; // Reducido de 2.0 a 1.5
+                break;
+            case "ESCOLTADO":
+                pagoBase *= 1.8; // Reducido de 2.5 a 1.8
+                break;
+            case "PELIGROSO":
+                pagoBase *= 1.6; // Reducido de 2.0 a 1.6
+                break;
+            case "FRÁGIL":
+                pagoBase *= 1.4; // Reducido de 1.8 a 1.4
+                break;
+        }
+        
+        // Ajustar pago según distancia (reducido el incremento)
+        pagoBase = (int)(pagoBase * (1 + (distancia / 2000.0))); // Aumenta 1% por cada 20km (antes era 10km)
+        
+        // Ajustar pago según prioridad
+        if (prioridad.equals("URGENTE")) {
+            pagoBase *= 1.5; // Reducido de 2.0 a 1.5
+        } else if (prioridad.equals("BAJA")) {
+            pagoBase *= 0.8; // Aumentado de 0.7 a 0.8
+        }
+        
+        // Asegurar que el pago sea al menos 1.2 veces el coste base del envío (reducido de 1.5 a 1.2)
+        pagoBase = Math.max(pagoBase, (int)(costeBaseEnvio * 1.2));
+
+        // Calcular fecha de entrega según la prioridad y el tipo de paquete
+        Calendar fechaEntrega = (Calendar) fechaActual.clone();
+        int diasBase;
+        
+        // Días base según tipo de paquete
+        switch (tipoPaquete) {
+            case "NORMAL":
+                diasBase = 3;
+                break;
+            case "REFRIGERADO":
+                diasBase = 2;
+                break;
+            case "CONGELADO":
+                diasBase = 4;
+                break;
+            case "PELIGROSO":
+                diasBase = 5;
+                break;
+            case "ESCOLTADO":
+                diasBase = 2;
+                break;
+            case "FRÁGIL":
+                diasBase = 2;
+                break;
+            default:
+                diasBase = 3;
+        }
+        
+        // Ajustar días según prioridad
+        if (prioridad.equals("URGENTE")) {
+            diasBase = Math.max(1, diasBase - 2);
+        } else if (prioridad.equals("BAJA")) {
+            diasBase += 2;
+        }
+        
+        fechaEntrega.add(Calendar.DAY_OF_MONTH, diasBase);
 
         // Determinar si es un pedido de varios días según la dificultad
         int diasEntrega = 1;
         if (random.nextDouble() < calcularProbabilidadMultiDia()) {
             diasEntrega = 2 + random.nextInt(3);
-            pago *= diasEntrega;
+            pagoBase *= diasEntrega;
         }
 
-        return new Pedido(idPedido, cliente, carga, prioridad, pago, diasEntrega, destino, fechaEntrega, peso, tipoPaquete);
+        return new Pedido(idPedido, cliente, carga, prioridad, pagoBase, diasEntrega, destino, fechaEntrega, peso, tipoPaquete);
     }
 
     /**
@@ -759,11 +846,6 @@ public class JuegoLogistica {
             return 0;
         }
         
-        // Si es una ruta marítima (entre islas o provincias costeras)
-        if (esRutaMaritima(origen, destino)) {
-            return calcularDistanciaMaritima(origen, destino);
-        }
-        
         return DISTANCIAS[indiceOrigen][indiceDestino];
     }
 
@@ -849,52 +931,6 @@ public class JuegoLogistica {
     }
 
     /**
-     * Calcula la distancia marítima entre dos puntos
-     * @param origen Provincia de origen
-     * @param destino Provincia de destino
-     * @return int con la distancia en km
-     */
-    private int calcularDistanciaMaritima(String origen, String destino) {
-        // Obtener las coordenadas base de las provincias
-        int indiceOrigen = -1;
-        int indiceDestino = -1;
-        
-        for (int i = 0; i < PROVINCIAS.length; i++) {
-            if (PROVINCIAS[i].equalsIgnoreCase(origen)) {
-                indiceOrigen = i;
-            }
-            if (PROVINCIAS[i].equalsIgnoreCase(destino)) {
-                indiceDestino = i;
-            }
-        }
-        
-        if (indiceOrigen == -1 || indiceDestino == -1) {
-            return 0;
-        }
-        
-        // Obtener la distancia base
-        int distanciaBase = DISTANCIAS[indiceOrigen][indiceDestino];
-        
-        // Si la distancia base es 0 (no hay ruta terrestre), calcular una distancia marítima
-        if (distanciaBase == 0) {
-            // Distancias aproximadas para rutas marítimas
-            if (esIsla(origen) && esIsla(destino)) {
-                // Entre islas
-                return 500; // 500 km base entre islas
-            } else if (esIsla(origen) || esIsla(destino)) {
-                // Entre isla y costa
-                return 300; // 300 km base entre isla y costa
-            } else {
-                // Entre costas
-                return 200; // 200 km base entre costas
-            }
-        }
-        
-        // Si hay una ruta terrestre, usar esa distancia como base
-        return distanciaBase;
-    }
-
-    /**
      * Calcula el coste de envío para un vehículo
      * @param vehiculo Vehículo que realizará el envío
      * @param origen Provincia de origen
@@ -915,6 +951,19 @@ public class JuegoLogistica {
                 costeBase *= 1.3; // 30% más caro entre islas
             } else if (esIsla(origen) || esIsla(destino)) {
                 costeBase *= 1.2; // 20% más caro entre isla y costa
+            }
+        }
+        
+        // Ajustes específicos para aviones
+        if (vehiculo.getTipo().equals("Avión")) {
+            // Coste adicional por ser ruta aérea
+            costeBase *= 2.0; // 100% más caro que la ruta terrestre equivalente
+            
+            // Coste adicional por tipo de ruta aérea
+            if (esIsla(origen) && esIsla(destino)) {
+                costeBase *= 1.5; // 50% más caro entre islas
+            } else if (esIsla(origen) || esIsla(destino)) {
+                costeBase *= 1.3; // 30% más caro entre isla y costa
             }
         }
         

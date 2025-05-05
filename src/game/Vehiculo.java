@@ -1,8 +1,12 @@
 package game;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Arrays;
 
 /**
  * Clase que representa un vehículo en la flota
@@ -16,57 +20,69 @@ public class Vehiculo {
     private int costePorKm;
     private Set<String> tiposPaquetesPermitidos;
     
-    // Rangos preestablecidos para cada tipo de vehículo
-    private static final int[][] RANGOS_FURGONETA = {
-        {800, 1500},    // Capacidad
-        {70, 100},      // Velocidad
-        {1, 3}          // Coste por km
-    };
+    private static final Map<String, Map<String, int[]>> RANGOS_VEHICULOS = new HashMap<>();
     
-    private static final int[][] RANGOS_CAMION = {
-        {4000, 7000},   // Capacidad
-        {50, 80},       // Velocidad
-        {3, 6}          // Coste por km
-    };
-    
-    private static final int[][] RANGOS_BARCO = {
-        {15000, 25000}, // Capacidad
-        {20, 40},       // Velocidad
-        {3, 5}          // Coste por km
-    };
-    
-    private static final int[][] RANGOS_AVION = {
-        {8000, 12000},  // Capacidad
-        {400, 600},     // Velocidad
-        {8, 12}         // Coste por km
-    };
+    static {
+        // Furgoneta: Ligera y rápida, pero poca capacidad
+        Map<String, int[]> rangosFurgoneta = new HashMap<>();
+        rangosFurgoneta.put("capacidad", new int[]{500, 1000});  // 500-1000 kg
+        rangosFurgoneta.put("velocidad", new int[]{90, 120});    // 90-120 km/h
+        rangosFurgoneta.put("costeKm", new int[]{2, 4});         // 2-4€/km
+        RANGOS_VEHICULOS.put("Furgoneta", rangosFurgoneta);
+        
+        // Camión: Gran capacidad, velocidad media
+        Map<String, int[]> rangosCamion = new HashMap<>();
+        rangosCamion.put("capacidad", new int[]{3000, 5000});    // 3000-5000 kg
+        rangosCamion.put("velocidad", new int[]{60, 80});        // 60-80 km/h
+        rangosCamion.put("costeKm", new int[]{4, 6});            // 4-6€/km
+        RANGOS_VEHICULOS.put("Camión", rangosCamion);
+        
+        // Barco: Mayor capacidad, muy lento
+        Map<String, int[]> rangosBarco = new HashMap<>();
+        rangosBarco.put("capacidad", new int[]{20000, 30000});   // 20000-30000 kg
+        rangosBarco.put("velocidad", new int[]{15, 25});         // 15-25 km/h
+        rangosBarco.put("costeKm", new int[]{3, 5});             // 3-5€/km
+        RANGOS_VEHICULOS.put("Barco", rangosBarco);
+        
+        // Avión: Capacidad media, muy rápido
+        Map<String, int[]> rangosAvion = new HashMap<>();
+        rangosAvion.put("capacidad", new int[]{8000, 12000});    // 8000-12000 kg
+        rangosAvion.put("velocidad", new int[]{500, 700});       // 500-700 km/h
+        rangosAvion.put("costeKm", new int[]{10, 15});           // 10-15€/km
+        RANGOS_VEHICULOS.put("Avión", rangosAvion);
+    }
 
     /**
-     * Constructor de la clase Vehiculo con valores aleatorios
+     * Constructor que genera valores aleatorios dentro de rangos predefinidos
      * @param tipo Tipo de vehículo
      * @param id Identificador único
-     * @param tiposPaquetes Tipos de paquetes que puede transportar el vehículo
+     * @param tiposPaquetes Tipos de paquetes que puede transportar
      */
     public Vehiculo(String tipo, String id, String... tiposPaquetes) {
         this.tipo = tipo;
         this.id = id;
-        this.pedidoAsignado = null;
         this.tiposPaquetesPermitidos = new HashSet<>();
+        this.tiposPaquetesPermitidos.add("NORMAL"); // Todos los vehículos pueden transportar carga normal
         
-        // Generar características aleatorias según el tipo
-        int[][] rangos = obtenerRangosPorTipo(tipo);
-        Random random = new Random();
-        
-        this.capacidad = rangos[0][0] + random.nextInt(rangos[0][1] - rangos[0][0]);
-        this.velocidad = rangos[1][0] + random.nextInt(rangos[1][1] - rangos[1][0]);
-        this.costePorKm = rangos[2][0] + random.nextInt(rangos[2][1] - rangos[2][0]);
-        
-        // Todos los vehículos pueden transportar paquetes normales
-        this.tiposPaquetesPermitidos.add("NORMAL");
-        
-        // Añadir los tipos de paquetes específicos
+        // Añadir tipos específicos si se proporcionan
         for (String tipoPaquete : tiposPaquetes) {
-            this.tiposPaquetesPermitidos.add(tipoPaquete);
+            if (!tipoPaquete.equals("NORMAL")) {
+                this.tiposPaquetesPermitidos.add(tipoPaquete);
+            }
+        }
+
+        // Obtener rangos según el tipo de vehículo
+        Map<String, int[]> rangos = RANGOS_VEHICULOS.get(tipo);
+        if (rangos != null) {
+            Random random = new Random();
+            this.capacidad = rangos.get("capacidad")[0] + random.nextInt(rangos.get("capacidad")[1] - rangos.get("capacidad")[0]);
+            this.velocidad = rangos.get("velocidad")[0] + random.nextInt(rangos.get("velocidad")[1] - rangos.get("velocidad")[0]);
+            this.costePorKm = rangos.get("costeKm")[0] + random.nextInt(rangos.get("costeKm")[1] - rangos.get("costeKm")[0]);
+        } else {
+            // Valores por defecto si no se encuentra el tipo
+            this.capacidad = 1000;
+            this.velocidad = 60;
+            this.costePorKm = 5;
         }
     }
 
@@ -94,23 +110,6 @@ public class Vehiculo {
         // Añadir los tipos de paquetes específicos
         for (String tipoPaquete : tiposPaquetes) {
             this.tiposPaquetesPermitidos.add(tipoPaquete);
-        }
-    }
-
-    private int[][] obtenerRangosPorTipo(String tipo) {
-        switch (tipo.toLowerCase()) {
-            case "furgoneta":
-                return RANGOS_FURGONETA;
-            case "camión":
-            case "camion":
-                return RANGOS_CAMION;
-            case "barco":
-                return RANGOS_BARCO;
-            case "avión":
-            case "avion":
-                return RANGOS_AVION;
-            default:
-                return RANGOS_FURGONETA; // Por defecto retorna rangos de furgoneta
         }
     }
 
