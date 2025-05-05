@@ -928,8 +928,12 @@ public class JuegoLogistica {
      * @return true si existe una ruta terrestre válida, false si no
      */
     private boolean existeRutaTerrestre(String origen, String destino) {
+        // Normalizar nombres de provincias
+        String origenNormalizado = normalizarNombreProvincia(origen);
+        String destinoNormalizado = normalizarNombreProvincia(destino);
+        
         // Si alguna de las provincias es una isla, no hay ruta terrestre
-        if (esIsla(origen) || esIsla(destino)) {
+        if (esIsla(origenNormalizado) || esIsla(destinoNormalizado)) {
             return false;
         }
         
@@ -938,10 +942,10 @@ public class JuegoLogistica {
         int indiceDestino = -1;
         
         for (int i = 0; i < PROVINCIAS.length; i++) {
-            if (PROVINCIAS[i].equalsIgnoreCase(origen)) {
+            if (PROVINCIAS[i].equalsIgnoreCase(origenNormalizado)) {
                 indiceOrigen = i;
             }
-            if (PROVINCIAS[i].equalsIgnoreCase(destino)) {
+            if (PROVINCIAS[i].equalsIgnoreCase(destinoNormalizado)) {
                 indiceDestino = i;
             }
         }
