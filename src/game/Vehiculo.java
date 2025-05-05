@@ -1,6 +1,7 @@
 package game;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -14,9 +15,63 @@ public class Vehiculo {
     private int velocidad; // km/h
     private int costePorKm;
     private Set<String> tiposPaquetesPermitidos;
+    
+    // Rangos preestablecidos para cada tipo de vehículo
+    private static final int[][] RANGOS_FURGONETA = {
+        {800, 1500},    // Capacidad
+        {70, 100},      // Velocidad
+        {1, 3}          // Coste por km
+    };
+    
+    private static final int[][] RANGOS_CAMION = {
+        {4000, 7000},   // Capacidad
+        {50, 80},       // Velocidad
+        {3, 6}          // Coste por km
+    };
+    
+    private static final int[][] RANGOS_BARCO = {
+        {15000, 25000}, // Capacidad
+        {20, 40},       // Velocidad
+        {3, 5}          // Coste por km
+    };
+    
+    private static final int[][] RANGOS_AVION = {
+        {8000, 12000},  // Capacidad
+        {400, 600},     // Velocidad
+        {8, 12}         // Coste por km
+    };
 
     /**
-     * Constructor de la clase Vehiculo
+     * Constructor de la clase Vehiculo con valores aleatorios
+     * @param tipo Tipo de vehículo
+     * @param id Identificador único
+     * @param tiposPaquetes Tipos de paquetes que puede transportar el vehículo
+     */
+    public Vehiculo(String tipo, String id, String... tiposPaquetes) {
+        this.tipo = tipo;
+        this.id = id;
+        this.pedidoAsignado = null;
+        this.tiposPaquetesPermitidos = new HashSet<>();
+        
+        // Generar características aleatorias según el tipo
+        int[][] rangos = obtenerRangosPorTipo(tipo);
+        Random random = new Random();
+        
+        this.capacidad = rangos[0][0] + random.nextInt(rangos[0][1] - rangos[0][0]);
+        this.velocidad = rangos[1][0] + random.nextInt(rangos[1][1] - rangos[1][0]);
+        this.costePorKm = rangos[2][0] + random.nextInt(rangos[2][1] - rangos[2][0]);
+        
+        // Todos los vehículos pueden transportar paquetes normales
+        this.tiposPaquetesPermitidos.add("NORMAL");
+        
+        // Añadir los tipos de paquetes específicos
+        for (String tipoPaquete : tiposPaquetes) {
+            this.tiposPaquetesPermitidos.add(tipoPaquete);
+        }
+    }
+
+    /**
+     * Constructor de la clase Vehiculo con valores específicos
      * @param tipo Tipo de vehículo
      * @param id Identificador único
      * @param capacidad Capacidad de carga en kg
@@ -39,6 +94,23 @@ public class Vehiculo {
         // Añadir los tipos de paquetes específicos
         for (String tipoPaquete : tiposPaquetes) {
             this.tiposPaquetesPermitidos.add(tipoPaquete);
+        }
+    }
+
+    private int[][] obtenerRangosPorTipo(String tipo) {
+        switch (tipo.toLowerCase()) {
+            case "furgoneta":
+                return RANGOS_FURGONETA;
+            case "camión":
+            case "camion":
+                return RANGOS_CAMION;
+            case "barco":
+                return RANGOS_BARCO;
+            case "avión":
+            case "avion":
+                return RANGOS_AVION;
+            default:
+                return RANGOS_FURGONETA; // Por defecto retorna rangos de furgoneta
         }
     }
 

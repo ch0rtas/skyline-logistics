@@ -195,26 +195,27 @@ public class JuegoLogistica {
      */
     private void inicializarFlota() {
         flota = new ArrayList<>();
+        Random random = new Random();
         
         switch (dificultad) {
             case "easy":
                 // 2 furgonetas, 1 camión, 1 barco, 1 avión
-                flota.add(new Vehiculo("Furgoneta", "F01", 1000, 80, 2, "REFRIGERADO"));
-                flota.add(new Vehiculo("Furgoneta", "F02", 1000, 80, 2, "FRÁGIL"));
-                flota.add(new Vehiculo("Camión", "C01", 5000, 60, 3, "PELIGROSO", "ESCOLTADO"));
-                flota.add(new Vehiculo("Barco", "B01", 20000, 30, 4, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
-                flota.add(new Vehiculo("Avión", "A01", 10000, 500, 10, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO"));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "FRÁGIL"));
+                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "PELIGROSO", "ESCOLTADO"));
+                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
                 break;
             case "medium":
                 // 1 furgoneta, 1 camión, 1 barco
-                flota.add(new Vehiculo("Furgoneta", "F01", 1000, 80, 2, "REFRIGERADO"));
-                flota.add(new Vehiculo("Camión", "C01", 5000, 60, 3, "PELIGROSO"));
-                flota.add(new Vehiculo("Barco", "B01", 20000, 30, 4, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO"));
+                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "PELIGROSO"));
+                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
                 break;
             case "hard":
                 // 1 furgoneta, 1 barco
-                flota.add(new Vehiculo("Furgoneta", "F01", 1000, 80, 2));
-                flota.add(new Vehiculo("Barco", "B01", 20000, 30, 4, "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100))));
+                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
                 break;
         }
 
@@ -1026,25 +1027,19 @@ public class JuegoLogistica {
             }
             idsUsados.add(id);
             
-            int capacidad = tipo.equals("Furgoneta") ? 1000 + random.nextInt(1000) : 5000 + random.nextInt(5000);
-            int velocidad = tipo.equals("Furgoneta") ? 80 + random.nextInt(20) : 60 + random.nextInt(20);
-            int costePorKm = tipo.equals("Furgoneta") ? 2 + random.nextInt(3) : 5 + random.nextInt(5);
-            
             // Generar tipos de carga permitidos aleatorios (mínimo 1, máximo 3)
             int numTipos = 1 + random.nextInt(3);
             List<String> tiposPermitidos = new ArrayList<>();
-            tiposPermitidos.add("NORMAL"); // Siempre permitido
             
-            for (int j = 1; j < numTipos; j++) {
+            for (int j = 0; j < numTipos; j++) {
                 String tipoCarga;
                 do {
-                    tipoCarga = TIPOS_CARGA[1 + random.nextInt(TIPOS_CARGA.length - 1)];
+                    tipoCarga = TIPOS_CARGA[random.nextInt(TIPOS_CARGA.length)];
                 } while (tiposPermitidos.contains(tipoCarga));
                 tiposPermitidos.add(tipoCarga);
             }
             
-            vehiculosMercado.add(new Vehiculo(tipo, id, capacidad, velocidad, costePorKm, 
-                tiposPermitidos.toArray(new String[0])));
+            vehiculosMercado.add(new Vehiculo(tipo, id, tiposPermitidos.toArray(new String[0])));
         }
     }
 
