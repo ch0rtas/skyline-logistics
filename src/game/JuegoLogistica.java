@@ -411,8 +411,47 @@ public class JuegoLogistica {
      * @return Pedido generado
      */
     private Pedido generarPedidoAleatorio() {
-        String[] clientes = {"Hospital Regional", "Farmacia Central", "Laboratorio Médico"};
-        String[] cargas = {"Vacunas", "Medicamentos", "Equipo médico"};
+        String[] clientes = {
+            "Hospital Regional", 
+            "Farmacia Central", 
+            "Laboratorio Médico",
+            "Supermercado Local",
+            "Restaurante VIP",
+            "Tienda Electrónica",
+            "Floristería Central",
+            "Joyería Premium",
+            "Galería de Arte",
+            "Constructora",
+            "Fábrica Industrial",
+            "Aeropuerto Local",
+            "Puerto Marítimo",
+            "Centro Científico",
+            "Universidad"
+        };
+        
+        String[] cargas = {
+            "Vacunas",
+            "Medicamentos",
+            "Equipos Médicos",
+            "Alimentos Frescos",
+            "Mariscos Frescos",
+            "Electrónicos",
+            "Flores Exóticas",
+            "Joyas Valiosas",
+            "Obras de Arte",
+            "Materiales Construcción",
+            "Piezas Industriales",
+            "Equipaje VIP",
+            "Contenedores Marítimos",
+            "Equipos Científicos",
+            "Material Educativo",
+            "Productos Químicos",
+            "Materias Primas",
+            "Textiles Finos",
+            "Instrumentos Musicales",
+            "Antigüedades"
+        };
+        
         String[] prioridades = {"URGENTE", "NORMAL", "BAJA"};
         String[] tiposPaquetes = {"NORMAL", "REFRIGERADO", "CONGELADO", "ESCOLTADO", "PELIGROSO", "FRÁGIL"};
 
