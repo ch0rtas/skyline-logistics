@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Clase principal que gestiona el juego de logística
@@ -1010,11 +1012,20 @@ public class JuegoLogistica {
     private void generarVehiculosMercado() {
         vehiculosMercado = new ArrayList<>();
         Random random = new Random();
+        Set<String> idsUsados = new HashSet<>();
         
-        for (int i = 0; i < 3; i++) { // Cambiado de 5 a 3 vehículos por día
+        // Generar 3 vehículos diferentes
+        while (vehiculosMercado.size() < 3) {
             String tipo = random.nextBoolean() ? "Furgoneta" : "Camión";
             // Generar ID con formato 1Letra2Numeros
             String id = tipo.charAt(0) + String.format("%02d", random.nextInt(100));
+            
+            // Verificar que el ID no esté repetido
+            if (idsUsados.contains(id)) {
+                continue;
+            }
+            idsUsados.add(id);
+            
             int capacidad = tipo.equals("Furgoneta") ? 1000 + random.nextInt(1000) : 5000 + random.nextInt(5000);
             int velocidad = tipo.equals("Furgoneta") ? 80 + random.nextInt(20) : 60 + random.nextInt(20);
             int costePorKm = tipo.equals("Furgoneta") ? 2 + random.nextInt(3) : 5 + random.nextInt(5);
@@ -1031,10 +1042,6 @@ public class JuegoLogistica {
                 } while (tiposPermitidos.contains(tipoCarga));
                 tiposPermitidos.add(tipoCarga);
             }
-            
-            // Calcular precio base según características
-            int precioBase = capacidad * 2 + velocidad * 10 + costePorKm * 100;
-            precioBase += tiposPermitidos.size() * 1000; // Cada tipo adicional suma 1000
             
             vehiculosMercado.add(new Vehiculo(tipo, id, capacidad, velocidad, costePorKm, 
                 tiposPermitidos.toArray(new String[0])));
