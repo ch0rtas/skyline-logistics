@@ -80,7 +80,8 @@ public class JuegoLogistica {
      * @param nombreJugador Nombre del jugador
      */
     public JuegoLogistica(String almacenPrincipal, String dificultad, String nombreJugador) {
-        this.almacenPrincipal = almacenPrincipal;
+        // Normalizar el nombre del almacén principal
+        this.almacenPrincipal = normalizarNombreProvincia(almacenPrincipal);
         this.dificultad = dificultad.toLowerCase();
         this.jugador = new Jugador(nombreJugador, calcularBalanceInicial());
         this.scanner = new Scanner(System.in);
@@ -186,7 +187,7 @@ public class JuegoLogistica {
      * Muestra la pantalla de bienvenida
      */
     private void mostrarBienvenida() {
-        System.out.println("\n✅ Sistema iniciado en región: " + almacenPrincipal.toUpperCase());
+        System.out.println("\n✅ Sistema iniciado en región: " + almacenPrincipal);
         System.out.println("💰 Balance inicial: $" + jugador.getPresupuesto());
     }
 
@@ -220,7 +221,7 @@ public class JuegoLogistica {
         }
 
         System.out.println("\n🛠 Empresa creada:");
-        System.out.println("   - Almacén: " + almacenPrincipal.toUpperCase());
+        System.out.println("   - Almacén: " + almacenPrincipal);
         System.out.print("   - Vehículos: ");
         for (int i = 0; i < flota.size(); i++) {
             Vehiculo v = flota.get(i);
@@ -357,7 +358,7 @@ public class JuegoLogistica {
      */
     private void mostrarMenuPrincipal() {
         System.out.println("\n==================================================");
-        System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ALMACÉN PRINCIPAL: " + almacenPrincipal.toUpperCase());
+        System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ALMACÉN PRINCIPAL: " + almacenPrincipal);
         System.out.println("==================================================");
         System.out.println("\n01. Ver pedidos pendientes");
         System.out.println("02. Ver pedidos en curso");
@@ -635,7 +636,54 @@ public class JuegoLogistica {
             return 0;
         }
         
+        // Si es una ruta marítima (entre islas o provincias costeras)
+        if (esRutaMaritima(origen, destino)) {
+            return calcularDistanciaMaritima(origen, destino);
+        }
+        
         return DISTANCIAS[indiceOrigen][indiceDestino];
+    }
+
+    /**
+     * Verifica si una ruta es marítima
+     * @param origen Provincia de origen
+     * @param destino Provincia de destino
+     * @return true si es una ruta marítima, false si no
+     */
+    private boolean esRutaMaritima(String origen, String destino) {
+        // Normalizar nombres de provincias
+        String origenNormalizado = normalizarNombreProvincia(origen);
+        String destinoNormalizado = normalizarNombreProvincia(destino);
+        
+        boolean origenEsIsla = esIsla(origenNormalizado);
+        boolean destinoEsIsla = esIsla(destinoNormalizado);
+        boolean origenEsCostero = esProvinciaCostera(origenNormalizado);
+        boolean destinoEsCostero = esProvinciaCostera(destinoNormalizado);
+        
+        // Es ruta marítima si:
+        // 1. El origen es una isla y el destino es costero o isla
+        // 2. El origen es costero y el destino es una isla
+        // 3. Ambos son costeros
+        return (origenEsIsla && (destinoEsCostero || destinoEsIsla)) ||
+               (origenEsCostero && destinoEsIsla) ||
+               (origenEsCostero && destinoEsCostero);
+    }
+
+    /**
+     * Verifica si una provincia es costera
+     * @param provincia Nombre de la provincia
+     * @return true si es costera, false si no
+     */
+    private boolean esProvinciaCostera(String provincia) {
+        // Normalizar el nombre de la provincia
+        String provinciaNormalizada = normalizarNombreProvincia(provincia);
+        
+        for (String puerto : PROVINCIAS_MARITIMAS) {
+            if (puerto.equalsIgnoreCase(provinciaNormalizada)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -644,8 +692,166 @@ public class JuegoLogistica {
      * @return true si es una isla, false si no
      */
     private boolean esIsla(String provincia) {
-        return provincia.equalsIgnoreCase("Palma de Mallorca") || 
-               provincia.equalsIgnoreCase("Las Palmas");
+        // Normalizar el nombre de la provincia
+        String provinciaNormalizada = normalizarNombreProvincia(provincia);
+        
+        return provinciaNormalizada.equalsIgnoreCase("Palma de Mallorca") || 
+               provinciaNormalizada.equalsIgnoreCase("Las Palmas");
+    }
+
+    /**
+     * Normaliza el nombre de una provincia
+     * @param provincia Nombre de la provincia a normalizar
+     * @return String con el nombre normalizado
+     */
+    private String normalizarNombreProvincia(String provincia) {
+        // Reemplazar guiones bajos por espacios
+        String nombre = provincia.replace("_", " ");
+        
+        // Capitalizar cada palabra
+        String[] palabras = nombre.split(" ");
+        StringBuilder resultado = new StringBuilder();
+        
+        for (int i = 0; i < palabras.length; i++) {
+            if (palabras[i].length() > 0) {
+                resultado.append(Character.toUpperCase(palabras[i].charAt(0)));
+                resultado.append(palabras[i].substring(1).toLowerCase());
+                if (i < palabras.length - 1) {
+                    resultado.append(" ");
+                }
+            }
+        }
+        
+        return resultado.toString();
+    }
+
+    /**
+     * Calcula la distancia marítima entre dos puntos
+     * @param origen Provincia de origen
+     * @param destino Provincia de destino
+     * @return int con la distancia en km
+     */
+    private int calcularDistanciaMaritima(String origen, String destino) {
+        // Obtener las coordenadas base de las provincias
+        int indiceOrigen = -1;
+        int indiceDestino = -1;
+        
+        for (int i = 0; i < PROVINCIAS.length; i++) {
+            if (PROVINCIAS[i].equalsIgnoreCase(origen)) {
+                indiceOrigen = i;
+            }
+            if (PROVINCIAS[i].equalsIgnoreCase(destino)) {
+                indiceDestino = i;
+            }
+        }
+        
+        if (indiceOrigen == -1 || indiceDestino == -1) {
+            return 0;
+        }
+        
+        // Obtener la distancia base
+        int distanciaBase = DISTANCIAS[indiceOrigen][indiceDestino];
+        
+        // Si la distancia base es 0 (no hay ruta terrestre), calcular una distancia marítima
+        if (distanciaBase == 0) {
+            // Distancias aproximadas para rutas marítimas
+            if (esIsla(origen) && esIsla(destino)) {
+                // Entre islas
+                return 500; // 500 km base entre islas
+            } else if (esIsla(origen) || esIsla(destino)) {
+                // Entre isla y costa
+                return 300; // 300 km base entre isla y costa
+            } else {
+                // Entre costas
+                return 200; // 200 km base entre costas
+            }
+        }
+        
+        // Si hay una ruta terrestre, usar esa distancia como base
+        return distanciaBase;
+    }
+
+    /**
+     * Calcula el coste de envío para un vehículo
+     * @param vehiculo Vehículo que realizará el envío
+     * @param origen Provincia de origen
+     * @param destino Provincia de destino
+     * @return int con el coste total
+     */
+    private int calcularCosteEnvio(Vehiculo vehiculo, String origen, String destino) {
+        int distancia = obtenerDistancia(origen, destino);
+        int costeBase = vehiculo.getCostePorKm() * distancia;
+        
+        // Ajustes específicos para barcos
+        if (vehiculo.getTipo().equals("Barco")) {
+            // Coste adicional por ser ruta marítima
+            costeBase *= 1.5; // 50% más caro que la ruta terrestre equivalente
+            
+            // Coste adicional por tipo de ruta marítima
+            if (esIsla(origen) && esIsla(destino)) {
+                costeBase *= 1.3; // 30% más caro entre islas
+            } else if (esIsla(origen) || esIsla(destino)) {
+                costeBase *= 1.2; // 20% más caro entre isla y costa
+            }
+        }
+        
+        return costeBase;
+    }
+
+    /**
+     * Verifica si existe una ruta terrestre válida entre dos provincias
+     * @param origen Provincia de origen
+     * @param destino Provincia de destino
+     * @return true si existe una ruta terrestre válida, false si no
+     */
+    private boolean existeRutaTerrestre(String origen, String destino) {
+        // Si alguna de las provincias es una isla, no hay ruta terrestre
+        if (esIsla(origen) || esIsla(destino)) {
+            return false;
+        }
+        
+        // Obtener índices de las provincias
+        int indiceOrigen = -1;
+        int indiceDestino = -1;
+        
+        for (int i = 0; i < PROVINCIAS.length; i++) {
+            if (PROVINCIAS[i].equalsIgnoreCase(origen)) {
+                indiceOrigen = i;
+            }
+            if (PROVINCIAS[i].equalsIgnoreCase(destino)) {
+                indiceDestino = i;
+            }
+        }
+        
+        if (indiceOrigen == -1 || indiceDestino == -1) {
+            return false;
+        }
+        
+        // Verificar si hay una distancia terrestre válida
+        int distancia = DISTANCIAS[indiceOrigen][indiceDestino];
+        return distancia > 0;
+    }
+
+    /**
+     * Verifica si un vehículo puede realizar una ruta específica
+     * @param vehiculo Vehículo a verificar
+     * @param origen Provincia de origen
+     * @param destino Provincia de destino
+     * @return true si el vehículo puede realizar la ruta, false si no
+     */
+    private boolean vehiculoPuedeRealizarRuta(Vehiculo vehiculo, String origen, String destino) {
+        switch (vehiculo.getTipo()) {
+            case "Furgoneta":
+            case "Camión":
+            case "Camion":
+                return existeRutaTerrestre(origen, destino);
+            case "Barco":
+                return esRutaMaritima(origen, destino);
+            case "Avión":
+                return true; // Los aviones pueden ir a cualquier parte
+            default:
+                return false;
+        }
     }
 
     /**
@@ -657,72 +863,72 @@ public class JuegoLogistica {
         System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | COSTE TOTAL | DÍA LLEGADA | CARGAS PERMITIDAS");
         System.out.println("----------|---------|-----------|-----------|----------|-------------|-------------|-----------------");
         
-        boolean esDestinoIsla = false;
-        boolean esDestinoMaritimo = false;
-        boolean esSedeIsla = false;
-        boolean esSedeMaritima = false;
+        boolean hayVehiculosDisponibles = false;
         
-        // Verificar si el destino es una isla
-        for (String isla : ISLAS) {
-            if (isla.equalsIgnoreCase(pedido.getDestino())) {
-                esDestinoIsla = true;
-                break;
-            }
-        }
-        
-        // Verificar si el destino tiene acceso marítimo
-        for (String puerto : PROVINCIAS_MARITIMAS) {
-            if (puerto.equalsIgnoreCase(pedido.getDestino())) {
-                esDestinoMaritimo = true;
-                break;
-            }
-        }
-        
-        // Verificar si la sede está en una isla
-        for (String isla : ISLAS) {
-            if (isla.equalsIgnoreCase(almacenPrincipal)) {
-                esSedeIsla = true;
-                break;
-            }
-        }
-        
-        // Verificar si la sede tiene acceso marítimo
-        for (String puerto : PROVINCIAS_MARITIMAS) {
-            if (puerto.equalsIgnoreCase(almacenPrincipal)) {
-                esSedeMaritima = true;
-                break;
-            }
-        }
+        // Normalizar nombres de provincias
+        String origenNormalizado = normalizarNombreProvincia(almacenPrincipal);
+        String destinoNormalizado = normalizarNombreProvincia(pedido.getDestino());
         
         for (Vehiculo vehiculo : flota) {
-            if (vehiculo.estaDisponible() && vehiculo.puedeTransportarTipo(pedido.getTipoPaquete())) {
-                // Verificar restricciones para barcos
-                if (vehiculo.getTipo().equals("Barco")) {
-                    if (!esDestinoIsla && !esDestinoMaritimo && !esSedeIsla && !esSedeMaritima) {
-                        continue; // Saltar este vehículo si no es accesible por barco
-                    }
-                }
-                
-                int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
-                int costeTotal = vehiculo.getCostePorKm() * distancia;
-                int horasViaje = vehiculo.calcularTiempoEntrega(distancia);
-                int diasViaje = (int) Math.ceil(horasViaje / 8.0); // Asumiendo 8 horas de viaje por día
-                
-                Calendar fechaLlegada = Calendar.getInstance();
-                fechaLlegada.setTime(fechaActual.getTime());
-                fechaLlegada.add(Calendar.DAY_OF_MONTH, diasViaje);
-                
-                System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| $%-11d| %-12s| %s%n",
-                    vehiculo.getTipo(),
-                    vehiculo.getId(),
-                    vehiculo.getCapacidad(),
-                    vehiculo.getVelocidad(),
-                    vehiculo.getCostePorKm(),
-                    costeTotal,
-                    formatoFecha.format(fechaLlegada.getTime()),
-                    String.join(", ", vehiculo.getTiposPaquetesPermitidos())
-                );
+            // Verificar si el vehículo está disponible y puede transportar el tipo de carga
+            if (!vehiculo.estaDisponible() || !vehiculo.puedeTransportarTipo(pedido.getTipoPaquete())) {
+                continue;
             }
+            
+            // Verificar si el vehículo puede realizar la ruta
+            boolean puedeRealizarRuta = false;
+            switch (vehiculo.getTipo()) {
+                case "Furgoneta":
+                case "Camión":
+                case "Camion":
+                    puedeRealizarRuta = existeRutaTerrestre(origenNormalizado, destinoNormalizado);
+                    break;
+                case "Barco":
+                    puedeRealizarRuta = esRutaMaritima(origenNormalizado, destinoNormalizado);
+                    break;
+                case "Avión":
+                    puedeRealizarRuta = true;
+                    break;
+            }
+            
+            if (!puedeRealizarRuta) {
+                continue;
+            }
+            
+            hayVehiculosDisponibles = true;
+            int costeTotal = calcularCosteEnvio(vehiculo, origenNormalizado, destinoNormalizado);
+            int horasViaje = vehiculo.calcularTiempoEntrega(obtenerDistancia(origenNormalizado, destinoNormalizado));
+            int diasViaje = (int) Math.ceil(horasViaje / 8.0); // Asumiendo 8 horas de viaje por día
+            
+            Calendar fechaLlegada = Calendar.getInstance();
+            fechaLlegada.setTime(fechaActual.getTime());
+            fechaLlegada.add(Calendar.DAY_OF_MONTH, diasViaje);
+            
+            System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| $%-11d| %-12s| %s%n",
+                vehiculo.getTipo(),
+                vehiculo.getId(),
+                vehiculo.getCapacidad(),
+                vehiculo.getVelocidad(),
+                vehiculo.getCostePorKm(),
+                costeTotal,
+                formatoFecha.format(fechaLlegada.getTime()),
+                String.join(", ", vehiculo.getTiposPaquetesPermitidos())
+            );
+        }
+        
+        if (!hayVehiculosDisponibles) {
+            System.out.println("\n❌ No hay vehículos disponibles para realizar esta ruta");
+            System.out.println("   - Origen: " + origenNormalizado);
+            System.out.println("   - Destino: " + destinoNormalizado);
+            System.out.println("   - Tipo de carga: " + pedido.getTipoPaquete());
+            System.out.println("\nRutas disponibles:");
+            if (esRutaMaritima(origenNormalizado, destinoNormalizado)) {
+                System.out.println("   - Ruta marítima: Sí");
+            }
+            if (existeRutaTerrestre(origenNormalizado, destinoNormalizado)) {
+                System.out.println("   - Ruta terrestre: Sí");
+            }
+            System.out.println("   - Ruta aérea: Siempre disponible");
         }
     }
 
@@ -742,6 +948,25 @@ public class JuegoLogistica {
         Pedido pedido = pedidos.get(idPedido);
         if (pedido == null) {
             System.out.println("❌ Pedido no encontrado");
+            return;
+        }
+
+        // Verificar si hay vehículos disponibles para esta ruta
+        boolean hayVehiculosDisponibles = false;
+        for (Vehiculo v : flota) {
+            if (v.estaDisponible() && 
+                v.puedeTransportarTipo(pedido.getTipoPaquete()) &&
+                vehiculoPuedeRealizarRuta(v, almacenPrincipal, pedido.getDestino())) {
+                hayVehiculosDisponibles = true;
+                break;
+            }
+        }
+
+        if (!hayVehiculosDisponibles) {
+            System.out.println("\n❌ No hay vehículos disponibles para realizar esta ruta");
+            System.out.println("   - Origen: " + almacenPrincipal);
+            System.out.println("   - Destino: " + pedido.getDestino());
+            System.out.println("   - Tipo de carga: " + pedido.getTipoPaquete());
             return;
         }
 
@@ -792,8 +1017,7 @@ public class JuegoLogistica {
         }
 
         // Calcular costo total
-        int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
-        int costoTotal = vehiculoSeleccionado.getCostePorKm() * distancia;
+        int costoTotal = calcularCosteEnvio(vehiculoSeleccionado, almacenPrincipal, pedido.getDestino());
         
         // Verificar balance
         if (jugador.getPresupuesto() < costoTotal) {

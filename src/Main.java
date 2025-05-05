@@ -135,14 +135,14 @@ public class Main {
         try {
             int opcion = Integer.parseInt(scanner.nextLine());
             if (opcion >= 1 && opcion <= PROVINCIAS.length) {
-                return PROVINCIAS[opcion - 1].toLowerCase().replace(" ", "_");
+                return PROVINCIAS[opcion - 1];
             }
         } catch (NumberFormatException e) {
             // Si la entrada no es un número, continuamos con el valor por defecto
         }
         
         System.out.println("❌ Opción no válida, seleccionando Madrid por defecto");
-        return "madrid";
+        return "Madrid";
     }
     
     /**
