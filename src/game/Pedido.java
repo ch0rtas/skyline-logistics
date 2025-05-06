@@ -94,6 +94,14 @@ public class Pedido {
     }
 
     /**
+     * Establece el monto del pago
+     * @param pago Nuevo monto del pago
+     */
+    public void setPago(int pago) {
+        this.pago = pago;
+    }
+
+    /**
      * Obtiene los días restantes para la entrega
      * @return int con los días restantes
      */

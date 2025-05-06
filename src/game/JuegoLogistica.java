@@ -11,6 +11,8 @@ import java.util.Calendar;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.function.Function;
 
 /**
  * Clase principal que gestiona el juego de logística
@@ -198,34 +200,49 @@ public class JuegoLogistica {
         flota = new ArrayList<>();
         Random random = new Random();
         
+        // Función auxiliar para generar tipos de carga aleatorios
+        Function<Integer, String[]> generarTiposCarga = (numTipos) -> {
+            List<String> tiposDisponibles = new ArrayList<>(Arrays.asList(TIPOS_CARGA));
+            List<String> tiposSeleccionados = new ArrayList<>();
+            tiposSeleccionados.add("NORMAL"); // Todos los vehículos pueden transportar carga normal
+            
+            for (int i = 1; i < numTipos; i++) {
+                if (tiposDisponibles.isEmpty()) break;
+                int index = random.nextInt(tiposDisponibles.size());
+                tiposSeleccionados.add(tiposDisponibles.remove(index));
+            }
+            
+            return tiposSeleccionados.toArray(new String[0]);
+        };
+        
         switch (dificultad) {
             case "easy":
                 // 3 furgonetas, 2 camiones, 2 barcos, 2 aviones
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "FRÁGIL"));
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "ESCOLTADO"));
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "FRÁGIL", "ESCOLTADO"));
-                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "PELIGROSO", "ESCOLTADO"));
-                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "CONGELADO", "PELIGROSO"));
-                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
-                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
-                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
-                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
                 break;
             case "medium":
                 // 2 furgonetas, 2 camiones, 1 barco, 1 avión
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "FRÁGIL"));
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "ESCOLTADO"));
-                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "PELIGROSO", "CONGELADO"));
-                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "PELIGROSO", "ESCOLTADO"));
-                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
-                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
                 break;
             case "hard":
                 // 1 furgoneta, 1 camión, 1 barco, 1 avión
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "FRÁGIL"));
-                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), "PELIGROSO", "CONGELADO"));
-                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
-                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"));
+                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
                 break;
         }
 
@@ -247,8 +264,17 @@ public class JuegoLogistica {
      */
     private void mostrarFlota() {
         System.out.println("\n🚗 FLOTA DE VEHÍCULOS:");
-        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | ESTADO                          | CARGAS PERMITIDAS");
-        System.out.println("----------|---------|-----------|-----------|----------|---------------------------------|-----------------");
+        
+        // Calcular anchos máximos para cada columna
+        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "ESTADO", "CARGAS PERMITIDAS"};
+        int[] anchos = new int[encabezados.length];
+        
+        // Inicializar anchos con los encabezados
+        for (int i = 0; i < encabezados.length; i++) {
+            anchos[i] = encabezados[i].length();
+        }
+        
+        // Calcular anchos máximos basados en el contenido
         for (Vehiculo vehiculo : flota) {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
@@ -259,15 +285,48 @@ public class JuegoLogistica {
             } else {
                 estado = "Disponible";
             }
-            System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| %-32s| %s%n",
+            
+            String[] valores = {
                 vehiculo.getTipo(),
                 vehiculo.getId(),
-                vehiculo.getCapacidad(),
-                vehiculo.getVelocidad(),
-                vehiculo.getCostePorKm(),
+                String.valueOf(vehiculo.getCapacidad()),
+                String.valueOf(vehiculo.getVelocidad()),
+                "$" + vehiculo.getCostePorKm(),
                 estado,
                 String.join(", ", vehiculo.getTiposPaquetesPermitidos())
-            );
+            };
+            
+            for (int i = 0; i < valores.length; i++) {
+                anchos[i] = Math.max(anchos[i], valores[i].length());
+            }
+        }
+
+        // Mostrar tabla
+        System.out.println(generarFilaTabla(encabezados, anchos));
+        System.out.println(generarLineaSeparadora(anchos));
+        
+        // Mostrar datos
+        for (Vehiculo vehiculo : flota) {
+            String estado;
+            if (vehiculo.getPedidoAsignado() != null) {
+                Calendar fechaEntrega = Calendar.getInstance();
+                fechaEntrega.setTime(fechaActual.getTime());
+                fechaEntrega.add(Calendar.DAY_OF_MONTH, vehiculo.getPedidoAsignado().getDiasRestantes());
+                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + formatoFecha.format(fechaEntrega.getTime());
+            } else {
+                estado = "Disponible";
+            }
+            
+            String[] valores = {
+                vehiculo.getTipo(),
+                vehiculo.getId(),
+                String.valueOf(vehiculo.getCapacidad()),
+                String.valueOf(vehiculo.getVelocidad()),
+                "$" + vehiculo.getCostePorKm(),
+                estado,
+                String.join(", ", vehiculo.getTiposPaquetesPermitidos())
+            };
+            System.out.println(generarFilaTabla(valores, anchos));
         }
 
         System.out.println("\n¿Desea ver el mercado de vehículos? (S/N)");
@@ -288,20 +347,53 @@ public class JuegoLogistica {
         }
 
         System.out.println("\n🏪 MERCADO DE VEHÍCULOS:");
-        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | PRECIO     | CARGAS PERMITIDAS");
-        System.out.println("----------|---------|-----------|-----------|----------|------------|-----------------");
         
+        // Calcular anchos máximos para cada columna
+        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "PRECIO", "CARGAS PERMITIDAS"};
+        int[] anchos = new int[encabezados.length];
+        
+        // Inicializar anchos con los encabezados
+        for (int i = 0; i < encabezados.length; i++) {
+            anchos[i] = encabezados[i].length();
+        }
+        
+        // Calcular anchos máximos basados en el contenido
         for (Vehiculo vehiculo : vehiculosMercado) {
             int precio = calcularPrecioVehiculo(vehiculo);
-            System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| $%-10d| %s%n",
+            
+            String[] valores = {
                 vehiculo.getTipo(),
                 vehiculo.getId(),
-                vehiculo.getCapacidad(),
-                vehiculo.getVelocidad(),
-                vehiculo.getCostePorKm(),
-                precio,
+                String.valueOf(vehiculo.getCapacidad()),
+                String.valueOf(vehiculo.getVelocidad()),
+                "$" + vehiculo.getCostePorKm(),
+                "$" + precio,
                 String.join(", ", vehiculo.getTiposPaquetesPermitidos())
-            );
+            };
+            
+            for (int i = 0; i < valores.length; i++) {
+                anchos[i] = Math.max(anchos[i], valores[i].length());
+            }
+        }
+
+        // Mostrar tabla
+        System.out.println(generarFilaTabla(encabezados, anchos));
+        System.out.println(generarLineaSeparadora(anchos));
+        
+        // Mostrar datos
+        for (Vehiculo vehiculo : vehiculosMercado) {
+            int precio = calcularPrecioVehiculo(vehiculo);
+            
+            String[] valores = {
+                vehiculo.getTipo(),
+                vehiculo.getId(),
+                String.valueOf(vehiculo.getCapacidad()),
+                String.valueOf(vehiculo.getVelocidad()),
+                "$" + vehiculo.getCostePorKm(),
+                "$" + precio,
+                String.join(", ", vehiculo.getTiposPaquetesPermitidos())
+            };
+            System.out.println(generarFilaTabla(valores, anchos));
         }
 
         System.out.println("\n¿Desea comprar algún vehículo? (S/N)");
@@ -410,7 +502,7 @@ public class JuegoLogistica {
                 pasarDia();
                 break;
             case "99":
-                System.exit(0);
+                SalirJuego.ejecutar();
                 break;
             default:
                 System.out.println("\n❌ Opción no válida");
@@ -518,39 +610,42 @@ public class JuegoLogistica {
         }
 
         // Calcular pago base según peso, tipo y distancia
-        int pagoBase = peso * 2; // 2€ por kg base (reducido de 10€ a 2€)
+        int pagoBase = peso * 2; // 2€ por kg base
         
         // Ajustar pago según tipo de paquete
         switch (tipoPaquete) {
             case "REFRIGERADO":
-                pagoBase *= 1.3; // Reducido de 1.5 a 1.3
+                pagoBase *= 1.3; // 30% más
                 break;
             case "CONGELADO":
-                pagoBase *= 1.5; // Reducido de 2.0 a 1.5
+                pagoBase *= 1.5; // 50% más
                 break;
             case "ESCOLTADO":
-                pagoBase *= 1.8; // Reducido de 2.5 a 1.8
+                pagoBase *= 1.8; // 80% más
                 break;
             case "PELIGROSO":
-                pagoBase *= 1.6; // Reducido de 2.0 a 1.6
+                pagoBase *= 1.6; // 60% más
                 break;
             case "FRÁGIL":
-                pagoBase *= 1.4; // Reducido de 1.8 a 1.4
+                pagoBase *= 1.4; // 40% más
                 break;
         }
         
-        // Ajustar pago según distancia (reducido el incremento)
-        pagoBase = (int)(pagoBase * (1 + (distancia / 2000.0))); // Aumenta 1% por cada 20km (antes era 10km)
+        // Ajustar pago según distancia
+        pagoBase = (int)(pagoBase * (1 + (distancia / 2000.0))); // Aumenta 1% por cada 20km
         
         // Ajustar pago según prioridad
         if (prioridad.equals("URGENTE")) {
-            pagoBase *= 1.5; // Reducido de 2.0 a 1.5
+            pagoBase *= 1.5; // 50% más
         } else if (prioridad.equals("BAJA")) {
-            pagoBase *= 0.8; // Aumentado de 0.7 a 0.8
+            pagoBase *= 0.8; // 20% menos
         }
         
-        // Asegurar que el pago sea al menos 1.2 veces el coste base del envío (reducido de 1.5 a 1.2)
-        pagoBase = Math.max(pagoBase, (int)(costeBaseEnvio * 1.2));
+        // Asegurar que el pago sea al menos 1.5 veces el coste base del envío
+        pagoBase = Math.max(pagoBase, (int)(costeBaseEnvio * 1.5));
+        
+        // Asegurar un pago mínimo para pedidos pequeños
+        pagoBase = Math.max(pagoBase, 2000); // Mínimo 2000€ para cualquier pedido
 
         // Calcular fecha de entrega según la prioridad y el tipo de paquete
         Calendar fechaEntrega = (Calendar) fechaActual.clone();
@@ -719,8 +814,8 @@ public class JuegoLogistica {
                 String.valueOf(pedido.getPeso()),
                 pedido.getDestino(),
                 pedido.getTipoPaquete(),
-                "Pago: $" + pedido.getPago(),
-                "Entrega: " + pedido.getFechaEntrega()
+                "$" + pedido.getPago(),
+                pedido.getFechaEntrega()
             };
             
             for (int i = 0; i < valores.length; i++) {
@@ -745,8 +840,8 @@ public class JuegoLogistica {
                 String.valueOf(pedido.getPeso()),
                 pedido.getDestino(),
                 pedido.getTipoPaquete(),
-                "Pago: $" + pedido.getPago(),
-                "Entrega: " + pedido.getFechaEntrega()
+                "$" + pedido.getPago(),
+                pedido.getFechaEntrega()
             };
             System.out.println(generarFilaTabla(valores, anchos));
         }
@@ -1036,80 +1131,120 @@ public class JuegoLogistica {
      */
     private void mostrarVehiculosDisponibles(Pedido pedido) {
         System.out.println("\n🚗 VEHÍCULOS DISPONIBLES:");
-        System.out.println("TIPO      | ID      | CAPACIDAD | VELOCIDAD | COSTE/KM | COSTE TOTAL | DÍA LLEGADA | CARGAS PERMITIDAS");
-        System.out.println("----------|---------|-----------|-----------|----------|-------------|-------------|-----------------");
         
-        boolean hayVehiculosDisponibles = false;
+        // Calcular anchos máximos para cada columna
+        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "COSTE TOTAL", "DÍA LLEGADA", "PENALIZACIÓN", "CARGAS PERMITIDAS"};
+        int[] anchos = new int[encabezados.length];
         
-        // Normalizar nombres de provincias
-        String origenNormalizado = normalizarNombreProvincia(almacenPrincipal);
-        String destinoNormalizado = normalizarNombreProvincia(pedido.getDestino());
+        // Inicializar anchos con los encabezados
+        for (int i = 0; i < encabezados.length; i++) {
+            anchos[i] = encabezados[i].length();
+        }
         
+        // Calcular anchos máximos basados en el contenido
         for (Vehiculo vehiculo : flota) {
-            // Verificar si el vehículo está disponible y puede transportar el tipo de carga
             if (!vehiculo.estaDisponible() || !vehiculo.puedeTransportarTipo(pedido.getTipoPaquete())) {
                 continue;
             }
             
             // Verificar si el vehículo puede realizar la ruta
-            boolean puedeRealizarRuta = false;
-            switch (vehiculo.getTipo()) {
-                case "Furgoneta":
-                case "Camión":
-                case "Camion":
-                    puedeRealizarRuta = existeRutaTerrestre(origenNormalizado, destinoNormalizado);
-                    break;
-                case "Barco":
-                    puedeRealizarRuta = esRutaMaritima(origenNormalizado, destinoNormalizado);
-                    break;
-                case "Avión":
-                    puedeRealizarRuta = true;
-                    break;
-            }
-            
-            if (!puedeRealizarRuta) {
+            if (!vehiculoPuedeRealizarRuta(vehiculo, almacenPrincipal, pedido.getDestino())) {
                 continue;
             }
             
-            hayVehiculosDisponibles = true;
-            int costeTotal = calcularCosteEnvio(vehiculo, origenNormalizado, destinoNormalizado);
-            int horasViaje = vehiculo.calcularTiempoEntrega(obtenerDistancia(origenNormalizado, destinoNormalizado));
-            int diasViaje = (int) Math.ceil(horasViaje / 8.0); // Asumiendo 8 horas de viaje por día
+            int costeTotal = calcularCosteEnvio(vehiculo, almacenPrincipal, pedido.getDestino());
+            int horasViaje = vehiculo.calcularTiempoEntrega(obtenerDistancia(almacenPrincipal, pedido.getDestino()));
+            int diasViaje = (int) Math.ceil(horasViaje / 8.0);
             
             Calendar fechaLlegada = Calendar.getInstance();
             fechaLlegada.setTime(fechaActual.getTime());
             fechaLlegada.add(Calendar.DAY_OF_MONTH, diasViaje);
             
-            System.out.printf("%-10s| %-8s| %-10d| %-10d| $%-8d| $%-11d| %-12s| %s%n",
+            Calendar fechaEntrega = Calendar.getInstance();
+            fechaEntrega.setTime(fechaActual.getTime());
+            fechaEntrega.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
+            
+            int diasRetraso = (int) ((fechaLlegada.getTimeInMillis() - fechaEntrega.getTimeInMillis()) / (1000 * 60 * 60 * 24));
+            
+            String penalizacion;
+            if (diasRetraso <= 0) {
+                penalizacion = "Sin penalización";
+            } else if (diasRetraso == 1) {
+                penalizacion = "50% del pago";
+            } else if (diasRetraso == 2) {
+                penalizacion = "10% del pago";
+            } else {
+                penalizacion = "Multa 65%";
+            }
+            
+            String[] valores = {
                 vehiculo.getTipo(),
                 vehiculo.getId(),
-                vehiculo.getCapacidad(),
-                vehiculo.getVelocidad(),
-                vehiculo.getCostePorKm(),
-                costeTotal,
+                String.valueOf(vehiculo.getCapacidad()),
+                String.valueOf(vehiculo.getVelocidad()),
+                "$" + vehiculo.getCostePorKm(),
+                "$" + costeTotal,
                 formatoFecha.format(fechaLlegada.getTime()),
+                penalizacion,
                 String.join(", ", vehiculo.getTiposPaquetesPermitidos())
-            );
-        }
-        
-        if (!hayVehiculosDisponibles) {
-            System.out.println("\n❌ No hay vehículos disponibles para realizar esta ruta");
-            System.out.println("   - Origen: " + origenNormalizado);
-            System.out.println("   - Destino: " + destinoNormalizado);
-            System.out.println("   - Tipo de carga: " + pedido.getTipoPaquete());
-            System.out.println("\nRutas disponibles:");
-            if (esRutaMaritima(origenNormalizado, destinoNormalizado)) {
-                System.out.println("   - Ruta marítima: Sí");
-            }
-            if (existeRutaTerrestre(origenNormalizado, destinoNormalizado)) {
-                System.out.println("   - Ruta terrestre: Sí");
-            }
-            System.out.println("   - Ruta aérea: Siempre disponible");
+            };
             
-            System.out.println("\n⚠️ IMPORTANTE:");
-            System.out.println("   - Debes cancelar este pedido para poder pasar al siguiente día");
-            System.out.println("   - Planifica mejor tus rutas y asegúrate de tener los vehículos necesarios");
-            System.out.println("   - 💡 TIP: Considera comprar un vehículo en el mercado (estará disponible al día siguiente)");
+            for (int i = 0; i < valores.length; i++) {
+                anchos[i] = Math.max(anchos[i], valores[i].length());
+            }
+        }
+
+        // Mostrar tabla
+        System.out.println(generarFilaTabla(encabezados, anchos));
+        System.out.println(generarLineaSeparadora(anchos));
+        
+        // Mostrar datos
+        for (Vehiculo vehiculo : flota) {
+            if (!vehiculo.estaDisponible() || !vehiculo.puedeTransportarTipo(pedido.getTipoPaquete())) {
+                continue;
+            }
+            
+            if (!vehiculoPuedeRealizarRuta(vehiculo, almacenPrincipal, pedido.getDestino())) {
+                continue;
+            }
+            
+            int costeTotal = calcularCosteEnvio(vehiculo, almacenPrincipal, pedido.getDestino());
+            int horasViaje = vehiculo.calcularTiempoEntrega(obtenerDistancia(almacenPrincipal, pedido.getDestino()));
+            int diasViaje = (int) Math.ceil(horasViaje / 8.0);
+            
+            Calendar fechaLlegada = Calendar.getInstance();
+            fechaLlegada.setTime(fechaActual.getTime());
+            fechaLlegada.add(Calendar.DAY_OF_MONTH, diasViaje);
+            
+            Calendar fechaEntrega = Calendar.getInstance();
+            fechaEntrega.setTime(fechaActual.getTime());
+            fechaEntrega.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
+            
+            int diasRetraso = (int) ((fechaLlegada.getTimeInMillis() - fechaEntrega.getTimeInMillis()) / (1000 * 60 * 60 * 24));
+            
+            String penalizacion;
+            if (diasRetraso <= 0) {
+                penalizacion = "Sin penalización";
+            } else if (diasRetraso == 1) {
+                penalizacion = "50% del pago";
+            } else if (diasRetraso == 2) {
+                penalizacion = "10% del pago";
+            } else {
+                penalizacion = "Multa 65%";
+            }
+            
+            String[] valores = {
+                vehiculo.getTipo(),
+                vehiculo.getId(),
+                String.valueOf(vehiculo.getCapacidad()),
+                String.valueOf(vehiculo.getVelocidad()),
+                "$" + vehiculo.getCostePorKm(),
+                "$" + costeTotal,
+                formatoFecha.format(fechaLlegada.getTime()),
+                penalizacion,
+                String.join(", ", vehiculo.getTiposPaquetesPermitidos())
+            };
+            System.out.println(generarFilaTabla(valores, anchos));
         }
     }
 
@@ -1282,11 +1417,53 @@ public class JuegoLogistica {
                 incidente = "Incidente desconocido";
         }
 
+        // Obtener la fecha límite de entrega del pedido
+        Calendar fechaLimite = Calendar.getInstance();
+        fechaLimite.setTime(fechaActual.getTime());
+        fechaLimite.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
+        
+        // Calcular fechas de llegada para cada opción
+        Calendar fechaEspera = (Calendar) fechaActual.clone();
+        fechaEspera.add(Calendar.DAY_OF_MONTH, 3); // 3 días de retraso por esperar
+        
+        Calendar fechaDesvio = (Calendar) fechaActual.clone();
+        fechaDesvio.add(Calendar.DAY_OF_MONTH, 1); // 1 día de retraso por desviar
+
+        // Calcular los días de retraso para cada opción
+        int diasRetrasoEspera = calcularDiasRetraso(fechaEspera, fechaLimite);
+        int diasRetrasoDesvio = calcularDiasRetraso(fechaDesvio, fechaLimite);
+
         System.out.println("\n❗ ALERTA: Incidente #" + idIncidente + " - " + incidente);
         System.out.println("   - Riesgo: Retraso en entrega");
+        System.out.println("   - Fecha límite de entrega: " + formatoFecha.format(fechaLimite.getTime()));
         System.out.println("   - Soluciones posibles:");
-        System.out.println("     01. Esperar (Entrega: +3 días)");
-        System.out.println("     02. Desviar ruta (Coste adicional: $1,000, Entrega: +1 día)");
+        System.out.println("     01. Esperar");
+        System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaEspera.getTime()));
+        if (diasRetrasoEspera > 0) {
+            if (diasRetrasoEspera == 1) {
+                System.out.println("         • Penalización: 50% del pago");
+            } else if (diasRetrasoEspera == 2) {
+                System.out.println("         • Penalización: 10% del pago");
+            } else {
+                System.out.println("         • Penalización: 65% de multa");
+            }
+        } else {
+            System.out.println("         • Sin penalización");
+        }
+        
+        System.out.println("     02. Desviar ruta (Coste adicional: $1,000)");
+        System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaDesvio.getTime()));
+        if (diasRetrasoDesvio > 0) {
+            if (diasRetrasoDesvio == 1) {
+                System.out.println("         • Penalización: 50% del pago");
+            } else if (diasRetrasoDesvio == 2) {
+                System.out.println("         • Penalización: 10% del pago");
+            } else {
+                System.out.println("         • Penalización: 65% de multa");
+            }
+        } else {
+            System.out.println("         • Sin penalización");
+        }
         
         System.out.print("\nSeleccione solución (01-02): ");
         String solucion = scanner.nextLine();
@@ -1297,7 +1474,17 @@ public class JuegoLogistica {
         
         if (solucion.equals("02") || solucion.equals("2")) {
             System.out.println("   3. Desviando ruta...");
-            System.out.println("✅ Resuelto: Envío llegará con 1 día de retraso.");
+            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaDesvio.getTime()));
+            if (diasRetrasoDesvio > 0) {
+                if (diasRetrasoDesvio == 1) {
+                    System.out.println("   - Penalización: 50% del pago");
+                } else if (diasRetrasoDesvio == 2) {
+                    System.out.println("   - Penalización: 10% del pago");
+                } else {
+                    System.out.println("   - Penalización: 65% de multa");
+                }
+                aplicarPenalizacion(pedido, diasRetrasoDesvio);
+            }
             pedido.setDiasRestantes(pedido.getDiasRestantes() + 1);
             
             // Actualizar el coste total del envío
@@ -1315,18 +1502,59 @@ public class JuegoLogistica {
             
             if (vehiculo != null) {
                 int costeTotal = distancia * vehiculo.getCostePorKm() + costeAdicional;
+                pedido.setPago(costeTotal);
                 System.out.println("💰 Coste total actualizado: $" + costeTotal);
             }
         } else if (solucion.equals("01") || solucion.equals("1")) {
             System.out.println("   3. Esperando condiciones...");
-            System.out.println("✅ Resuelto: Envío llegará con 3 días de retraso.");
+            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
+            if (diasRetrasoEspera > 0) {
+                if (diasRetrasoEspera == 1) {
+                    System.out.println("   - Penalización: 50% del pago");
+                } else if (diasRetrasoEspera == 2) {
+                    System.out.println("   - Penalización: 10% del pago");
+                } else {
+                    System.out.println("   - Penalización: 65% de multa");
+                }
+                aplicarPenalizacion(pedido, diasRetrasoEspera);
+            }
             pedido.setDiasRestantes(pedido.getDiasRestantes() + 3);
         } else {
             System.out.println("\n❌ Opción no válida, seleccionando esperar por defecto");
             System.out.println("   3. Esperando condiciones...");
-            System.out.println("✅ Resuelto: Envío llegará con 3 días de retraso.");
+            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
+            if (diasRetrasoEspera > 0) {
+                if (diasRetrasoEspera == 1) {
+                    System.out.println("   - Penalización: 50% del pago");
+                } else if (diasRetrasoEspera == 2) {
+                    System.out.println("   - Penalización: 10% del pago");
+                } else {
+                    System.out.println("   - Penalización: 65% de multa");
+                }
+                aplicarPenalizacion(pedido, diasRetrasoEspera);
+            }
             pedido.setDiasRestantes(pedido.getDiasRestantes() + 3);
         }
+    }
+    
+    private int calcularDiasRetraso(Calendar fechaLlegada, Calendar fechaLimite) {
+        long diffMillis = fechaLlegada.getTimeInMillis() - fechaLimite.getTimeInMillis();
+        int dias = (int) (diffMillis / (1000 * 60 * 60 * 24));
+        return Math.max(0, dias); // Retornar 0 si la fecha es anterior o igual
+    }
+    
+    private void aplicarPenalizacion(Pedido pedido, int diasRetraso) {
+        double porcentajePenalizacion;
+        if (diasRetraso == 1) {
+            porcentajePenalizacion = 0.50; // 50% de penalización
+        } else if (diasRetraso == 2) {
+            porcentajePenalizacion = 0.10; // 10% de penalización
+        } else {
+            porcentajePenalizacion = 0.65; // 65% de penalización
+        }
+        
+        double penalizacion = pedido.getPago() * porcentajePenalizacion;
+        pedido.setPago((int)(pedido.getPago() - penalizacion));
     }
 
     /**

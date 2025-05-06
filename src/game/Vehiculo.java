@@ -19,36 +19,37 @@ public class Vehiculo {
     private int velocidad; // km/h
     private int costePorKm;
     private Set<String> tiposPaquetesPermitidos;
+    private static final Random random = new Random();
     
     private static final Map<String, Map<String, int[]>> RANGOS_VEHICULOS = new HashMap<>();
     
     static {
-        // Furgoneta: Ligera y rápida, pero poca capacidad
+        // Furgoneta: Ligera y rápida
         Map<String, int[]> rangosFurgoneta = new HashMap<>();
-        rangosFurgoneta.put("capacidad", new int[]{500, 1000});  // 500-1000 kg
-        rangosFurgoneta.put("velocidad", new int[]{90, 120});    // 90-120 km/h
-        rangosFurgoneta.put("costeKm", new int[]{2, 4});         // 2-4€/km
+        rangosFurgoneta.put("capacidad", new int[]{500, 1000}); // 500-1000 kg
+        rangosFurgoneta.put("velocidad", new int[]{120, 150}); // 120-150 km/h
+        rangosFurgoneta.put("costePorKm", new int[]{3, 3}); // 3€/km fijo
         RANGOS_VEHICULOS.put("Furgoneta", rangosFurgoneta);
         
-        // Camión: Gran capacidad, velocidad media
+        // Camión: Alta capacidad, más lento
         Map<String, int[]> rangosCamion = new HashMap<>();
-        rangosCamion.put("capacidad", new int[]{3000, 5000});    // 3000-5000 kg
-        rangosCamion.put("velocidad", new int[]{60, 80});        // 60-80 km/h
-        rangosCamion.put("costeKm", new int[]{4, 6});            // 4-6€/km
+        rangosCamion.put("capacidad", new int[]{3000, 5000}); // 3000-5000 kg
+        rangosCamion.put("velocidad", new int[]{40, 60}); // 40-60 km/h
+        rangosCamion.put("costePorKm", new int[]{4, 6}); // 4-6€/km
         RANGOS_VEHICULOS.put("Camión", rangosCamion);
         
-        // Barco: Mayor capacidad, muy lento
+        // Barco: Muy alta capacidad, muy lento
         Map<String, int[]> rangosBarco = new HashMap<>();
-        rangosBarco.put("capacidad", new int[]{20000, 30000});   // 20000-30000 kg
-        rangosBarco.put("velocidad", new int[]{15, 25});         // 15-25 km/h
-        rangosBarco.put("costeKm", new int[]{3, 5});             // 3-5€/km
+        rangosBarco.put("capacidad", new int[]{10000, 15000}); // 10000-15000 kg
+        rangosBarco.put("velocidad", new int[]{30, 40}); // 30-40 km/h
+        rangosBarco.put("costePorKm", new int[]{8, 11}); // 8-11€/km
         RANGOS_VEHICULOS.put("Barco", rangosBarco);
         
         // Avión: Capacidad media, muy rápido
         Map<String, int[]> rangosAvion = new HashMap<>();
-        rangosAvion.put("capacidad", new int[]{8000, 12000});    // 8000-12000 kg
-        rangosAvion.put("velocidad", new int[]{500, 700});       // 500-700 km/h
-        rangosAvion.put("costeKm", new int[]{10, 15});           // 10-15€/km
+        rangosAvion.put("capacidad", new int[]{8000, 10000}); // 8000-10000 kg
+        rangosAvion.put("velocidad", new int[]{500, 700}); // 500-700 km/h
+        rangosAvion.put("costePorKm", new int[]{10, 15}); // 10-15€/km
         RANGOS_VEHICULOS.put("Avión", rangosAvion);
     }
 
@@ -74,10 +75,19 @@ public class Vehiculo {
         // Obtener rangos según el tipo de vehículo
         Map<String, int[]> rangos = RANGOS_VEHICULOS.get(tipo);
         if (rangos != null) {
-            Random random = new Random();
-            this.capacidad = rangos.get("capacidad")[0] + random.nextInt(rangos.get("capacidad")[1] - rangos.get("capacidad")[0]);
-            this.velocidad = rangos.get("velocidad")[0] + random.nextInt(rangos.get("velocidad")[1] - rangos.get("velocidad")[0]);
-            this.costePorKm = rangos.get("costeKm")[0] + random.nextInt(rangos.get("costeKm")[1] - rangos.get("costeKm")[0]);
+            int[] rangoCapacidad = rangos.get("capacidad");
+            int[] rangoVelocidad = rangos.get("velocidad");
+            int[] rangoCoste = rangos.get("costePorKm");
+            
+            // Asegurar que el rango sea válido
+            this.capacidad = rangoCapacidad[0] + (rangoCapacidad[1] > rangoCapacidad[0] ? 
+                random.nextInt(rangoCapacidad[1] - rangoCapacidad[0]) : 0);
+            
+            this.velocidad = rangoVelocidad[0] + (rangoVelocidad[1] > rangoVelocidad[0] ? 
+                random.nextInt(rangoVelocidad[1] - rangoVelocidad[0]) : 0);
+            
+            this.costePorKm = rangoCoste[0] + (rangoCoste[1] > rangoCoste[0] ? 
+                random.nextInt(rangoCoste[1] - rangoCoste[0]) : 0);
         } else {
             // Valores por defecto si no se encuentra el tipo
             this.capacidad = 1000;

@@ -98,8 +98,7 @@ public class Main {
                     System.out.println("https://github.com/Luiiss44/skyline-logistics");
                     break;
                 case "99":
-                    salir = true;
-                    System.out.println("\n👋 ¡Hasta luego!");
+                    game.SalirJuego.ejecutar();
                     break;
                 default:
                     System.out.println("\n❌ Opción no válida");
