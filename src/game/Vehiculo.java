@@ -1,7 +1,12 @@
 package game;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Arrays;
 
 /**
  * Clase que representa un vehículo en la flota
@@ -14,9 +19,85 @@ public class Vehiculo {
     private int velocidad; // km/h
     private int costePorKm;
     private Set<String> tiposPaquetesPermitidos;
+    private static final Random random = new Random();
+    
+    private static final Map<String, Map<String, int[]>> RANGOS_VEHICULOS = new HashMap<>();
+    
+    static {
+        // Furgoneta: Ligera y rápida
+        Map<String, int[]> rangosFurgoneta = new HashMap<>();
+        rangosFurgoneta.put("capacidad", new int[]{500, 1000}); // 500-1000 kg
+        rangosFurgoneta.put("velocidad", new int[]{120, 150}); // 120-150 km/h
+        rangosFurgoneta.put("costePorKm", new int[]{3, 3}); // 3€/km fijo
+        RANGOS_VEHICULOS.put("Furgoneta", rangosFurgoneta);
+        
+        // Camión: Alta capacidad, más lento
+        Map<String, int[]> rangosCamion = new HashMap<>();
+        rangosCamion.put("capacidad", new int[]{3000, 5000}); // 3000-5000 kg
+        rangosCamion.put("velocidad", new int[]{40, 60}); // 40-60 km/h
+        rangosCamion.put("costePorKm", new int[]{4, 6}); // 4-6€/km
+        RANGOS_VEHICULOS.put("Camión", rangosCamion);
+        
+        // Barco: Muy alta capacidad, muy lento
+        Map<String, int[]> rangosBarco = new HashMap<>();
+        rangosBarco.put("capacidad", new int[]{10000, 15000}); // 10000-15000 kg
+        rangosBarco.put("velocidad", new int[]{30, 40}); // 30-40 km/h
+        rangosBarco.put("costePorKm", new int[]{8, 11}); // 8-11€/km
+        RANGOS_VEHICULOS.put("Barco", rangosBarco);
+        
+        // Avión: Capacidad media, muy rápido
+        Map<String, int[]> rangosAvion = new HashMap<>();
+        rangosAvion.put("capacidad", new int[]{8000, 10000}); // 8000-10000 kg
+        rangosAvion.put("velocidad", new int[]{500, 700}); // 500-700 km/h
+        rangosAvion.put("costePorKm", new int[]{10, 15}); // 10-15€/km
+        RANGOS_VEHICULOS.put("Avión", rangosAvion);
+    }
 
     /**
-     * Constructor de la clase Vehiculo
+     * Constructor que genera valores aleatorios dentro de rangos predefinidos
+     * @param tipo Tipo de vehículo
+     * @param id Identificador único
+     * @param tiposPaquetes Tipos de paquetes que puede transportar
+     */
+    public Vehiculo(String tipo, String id, String... tiposPaquetes) {
+        this.tipo = tipo;
+        this.id = id;
+        this.tiposPaquetesPermitidos = new HashSet<>();
+        this.tiposPaquetesPermitidos.add("NORMAL"); // Todos los vehículos pueden transportar carga normal
+        
+        // Añadir tipos específicos si se proporcionan
+        for (String tipoPaquete : tiposPaquetes) {
+            if (!tipoPaquete.equals("NORMAL")) {
+                this.tiposPaquetesPermitidos.add(tipoPaquete);
+            }
+        }
+
+        // Obtener rangos según el tipo de vehículo
+        Map<String, int[]> rangos = RANGOS_VEHICULOS.get(tipo);
+        if (rangos != null) {
+            int[] rangoCapacidad = rangos.get("capacidad");
+            int[] rangoVelocidad = rangos.get("velocidad");
+            int[] rangoCoste = rangos.get("costePorKm");
+            
+            // Asegurar que el rango sea válido
+            this.capacidad = rangoCapacidad[0] + (rangoCapacidad[1] > rangoCapacidad[0] ? 
+                random.nextInt(rangoCapacidad[1] - rangoCapacidad[0]) : 0);
+            
+            this.velocidad = rangoVelocidad[0] + (rangoVelocidad[1] > rangoVelocidad[0] ? 
+                random.nextInt(rangoVelocidad[1] - rangoVelocidad[0]) : 0);
+            
+            this.costePorKm = rangoCoste[0] + (rangoCoste[1] > rangoCoste[0] ? 
+                random.nextInt(rangoCoste[1] - rangoCoste[0]) : 0);
+        } else {
+            // Valores por defecto si no se encuentra el tipo
+            this.capacidad = 1000;
+            this.velocidad = 60;
+            this.costePorKm = 5;
+        }
+    }
+
+    /**
+     * Constructor de la clase Vehiculo con valores específicos
      * @param tipo Tipo de vehículo
      * @param id Identificador único
      * @param capacidad Capacidad de carga en kg
