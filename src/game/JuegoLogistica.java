@@ -332,20 +332,28 @@ public class JuegoLogistica {
             System.out.println(generarFilaTabla(valores, anchos));
         }
 
-        System.out.println("\n01. Reparar vehículo");
-        System.out.println("02. Ver mercado de vehículos");
+        System.out.println("\n01. Volver al menú principal");
+        System.out.println("02. Reparar vehículo");
+        System.out.println("03. Ver mercado de vehículos");
         System.out.print("\nSeleccione una opción: ");
         String opcion = scanner.nextLine();
-        
+
         switch (opcion) {
             case "01":
             case "1":
-                repararVehiculo();
+                mostrarMenuPrincipal();
                 break;
             case "02":
             case "2":
+                repararVehiculo();
+                break;
+            case "03":
+            case "3":
                 mostrarMercadoVehiculos();
                 break;
+            default:
+                System.out.println("\n❌ Opción no válida");
+                mostrarFlota();
         }
     }
 
@@ -1435,7 +1443,13 @@ public class JuegoLogistica {
                 "Avería mecánica",
                 "Desprendimiento de rocas",
                 "Nieve en la carretera",
-                "Niebla densa"
+                "Niebla densa",
+                "Pinchazo de neumático",
+                "Fallo en el sistema de frenos",
+                "Problemas con el motor",
+                "Batería descargada",
+                "Problemas con el sistema de refrigeración",
+                "Fallo en el sistema eléctrico"
             };
 
             String[] incidentesAereos = {
@@ -1446,7 +1460,14 @@ public class JuegoLogistica {
                 "Huelga de controladores",
                 "Restricciones de espacio aéreo",
                 "Problemas de navegación",
-                "Viento fuerte en pista"
+                "Viento fuerte en pista",
+                "Fallo en el sistema de presurización",
+                "Problemas con el tren de aterrizaje",
+                "Avería en el sistema de combustible",
+                "Problemas con el sistema de comunicación",
+                "Fallo en el sistema de oxígeno",
+                "Problemas con el sistema de navegación",
+                "Avería en el sistema de climatización"
             };
 
             String[] incidentesMaritimos = {
@@ -1457,26 +1478,71 @@ public class JuegoLogistica {
                 "Oleaje fuerte",
                 "Retraso en la descarga",
                 "Problemas de navegación",
-                "Control de aduanas"
+                "Control de aduanas",
+                "Fallo en el sistema de propulsión",
+                "Problemas con el sistema de carga",
+                "Avería en el sistema de refrigeración",
+                "Problemas con el sistema de navegación",
+                "Fallo en el sistema de comunicación",
+                "Problemas con el sistema de estabilización",
+                "Avería en el sistema de lastre"
             };
 
             String incidente;
             int idIncidente = 100 + random.nextInt(900);
+            int costeReparacion = 0;
+            int diasRetraso = 0;
 
             // Seleccionar incidente según el tipo de transporte
             switch (tipoTransporte) {
                 case "Furgoneta":
                 case "Camión":
                     incidente = incidentesTerrestres[random.nextInt(incidentesTerrestres.length)];
+                    // Asignar costes y retrasos según el tipo de incidente
+                    if (incidente.contains("Pinchazo")) {
+                        costeReparacion = 500;
+                        diasRetraso = 1;
+                    } else if (incidente.contains("Avería") || incidente.contains("Fallo")) {
+                        costeReparacion = 2000;
+                        diasRetraso = 2;
+                    } else if (incidente.contains("Accidente")) {
+                        costeReparacion = 5000;
+                        diasRetraso = 3;
+                    } else {
+                        costeReparacion = 1000;
+                        diasRetraso = 1;
+                    }
                     break;
                 case "Avión":
                     incidente = incidentesAereos[random.nextInt(incidentesAereos.length)];
+                    if (incidente.contains("Fallo") || incidente.contains("Avería")) {
+                        costeReparacion = 10000;
+                        diasRetraso = 2;
+                    } else if (incidente.contains("Turbulencias")) {
+                        costeReparacion = 0;
+                        diasRetraso = 1;
+                    } else {
+                        costeReparacion = 5000;
+                        diasRetraso = 1;
+                    }
                     break;
                 case "Barco":
                     incidente = incidentesMaritimos[random.nextInt(incidentesMaritimos.length)];
+                    if (incidente.contains("Fallo") || incidente.contains("Avería")) {
+                        costeReparacion = 8000;
+                        diasRetraso = 2;
+                    } else if (incidente.contains("Tormenta")) {
+                        costeReparacion = 0;
+                        diasRetraso = 2;
+                    } else {
+                        costeReparacion = 3000;
+                        diasRetraso = 1;
+                    }
                     break;
                 default:
                     incidente = "Incidente desconocido";
+                    costeReparacion = 1000;
+                    diasRetraso = 1;
             }
 
             // Obtener la fecha límite de entrega del pedido
@@ -1486,19 +1552,25 @@ public class JuegoLogistica {
             
             // Calcular fechas de llegada para cada opción
             Calendar fechaEspera = (Calendar) fechaActual.clone();
-            fechaEspera.add(Calendar.DAY_OF_MONTH, 3); // 3 días de retraso por esperar
+            fechaEspera.add(Calendar.DAY_OF_MONTH, diasRetraso + 2); // Días de retraso + 2 días de espera
             
             Calendar fechaDesvio = (Calendar) fechaActual.clone();
-            fechaDesvio.add(Calendar.DAY_OF_MONTH, 1); // 1 día de retraso por desviar
+            fechaDesvio.add(Calendar.DAY_OF_MONTH, diasRetraso + 1); // Días de retraso + 1 día por desviar
+            
+            Calendar fechaReparacion = (Calendar) fechaActual.clone();
+            fechaReparacion.add(Calendar.DAY_OF_MONTH, diasRetraso); // Solo los días de retraso por reparación
 
             // Calcular los días de retraso para cada opción
             int diasRetrasoEspera = calcularDiasRetraso(fechaEspera, fechaLimite);
             int diasRetrasoDesvio = calcularDiasRetraso(fechaDesvio, fechaLimite);
+            int diasRetrasoReparacion = calcularDiasRetraso(fechaReparacion, fechaLimite);
 
             System.out.println("\n❗ ALERTA: Incidente #" + idIncidente + " - " + incidente);
             System.out.println("   - Riesgo: Retraso en entrega");
             System.out.println("   - Fecha límite de entrega: " + formatoFecha.format(fechaLimite.getTime()));
             System.out.println("   - Soluciones posibles:");
+            
+            // Opción 1: Esperar
             System.out.println("     01. Esperar");
             System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaEspera.getTime()));
             if (diasRetrasoEspera > 0) {
@@ -1513,6 +1585,7 @@ public class JuegoLogistica {
                 System.out.println("         • Sin penalización");
             }
             
+            // Opción 2: Desviar ruta
             System.out.println("     02. Desviar ruta (Coste adicional: $1,000)");
             System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaDesvio.getTime()));
             if (diasRetrasoDesvio > 0) {
@@ -1527,43 +1600,113 @@ public class JuegoLogistica {
                 System.out.println("         • Sin penalización");
             }
             
-            System.out.print("\nSeleccione solución (01-02): ");
+            // Opción 3: Reparar (solo si hay coste de reparación)
+            if (costeReparacion > 0) {
+                System.out.println("     03. Reparar (Coste: $" + costeReparacion + ")");
+                System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaReparacion.getTime()));
+                if (diasRetrasoReparacion > 0) {
+                    if (diasRetrasoReparacion == 1) {
+                        System.out.println("         • Penalización: 50% del pago");
+                    } else if (diasRetrasoReparacion == 2) {
+                        System.out.println("         • Penalización: 10% del pago");
+                    } else {
+                        System.out.println("         • Penalización: 65% de multa");
+                    }
+                } else {
+                    System.out.println("         • Sin penalización");
+                }
+            }
+            
+            System.out.print("\nSeleccione solución (01-03): ");
             String solucion = scanner.nextLine();
 
             System.out.println("\n🛠 Aplicando patrón *Template Method*:");
             System.out.println("   1. Identificando causa: " + incidente);
             System.out.println("   2. Asignando recursos...");
             
-            if (solucion.equals("02") || solucion.equals("2")) {
-                System.out.println("   3. Desviando ruta...");
-                System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaDesvio.getTime()));
-                if (diasRetrasoDesvio > 0) {
-                    if (diasRetrasoDesvio == 1) {
-                        pedido.setPago((int)(pedido.getPago() * 0.5));
-                    } else if (diasRetrasoDesvio == 2) {
-                        pedido.setPago((int)(pedido.getPago() * 0.9));
-                    } else {
-                        pedido.setPago((int)(pedido.getPago() * 0.35));
+            switch (solucion) {
+                case "02":
+                case "2":
+                    System.out.println("   3. Desviando ruta...");
+                    System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaDesvio.getTime()));
+                    if (diasRetrasoDesvio > 0) {
+                        if (diasRetrasoDesvio == 1) {
+                            pedido.setPago((int)(pedido.getPago() * 0.5));
+                        } else if (diasRetrasoDesvio == 2) {
+                            pedido.setPago((int)(pedido.getPago() * 0.9));
+                        } else {
+                            pedido.setPago((int)(pedido.getPago() * 0.35));
+                        }
                     }
-                }
-                jugador.gastar(1000); // Coste adicional por desviar
-                vehiculoAfectado.aplicarDesgaste(); // Desgaste adicional por desviar
-            } else {
-                System.out.println("   3. Esperando resolución...");
-                System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
-                if (diasRetrasoEspera > 0) {
-                    if (diasRetrasoEspera == 1) {
-                        pedido.setPago((int)(pedido.getPago() * 0.5));
-                    } else if (diasRetrasoEspera == 2) {
-                        pedido.setPago((int)(pedido.getPago() * 0.9));
+                    jugador.gastar(1000); // Coste adicional por desviar
+                    vehiculoAfectado.aplicarDesgaste(); // Desgaste adicional por desviar
+                    break;
+                    
+                case "03":
+                case "3":
+                    if (costeReparacion > 0) {
+                        if (jugador.getPresupuesto() >= costeReparacion) {
+                            System.out.println("   3. Realizando reparación...");
+                            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaReparacion.getTime()));
+                            if (diasRetrasoReparacion > 0) {
+                                if (diasRetrasoReparacion == 1) {
+                                    pedido.setPago((int)(pedido.getPago() * 0.5));
+                                } else if (diasRetrasoReparacion == 2) {
+                                    pedido.setPago((int)(pedido.getPago() * 0.9));
+                                } else {
+                                    pedido.setPago((int)(pedido.getPago() * 0.35));
+                                }
+                            }
+                            jugador.gastar(costeReparacion);
+                            vehiculoAfectado.reparar(); // Reparar el vehículo
+                        } else {
+                            System.out.println("❌ No hay suficiente presupuesto para la reparación");
+                            System.out.println("   3. Esperando resolución...");
+                            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
+                            if (diasRetrasoEspera > 0) {
+                                if (diasRetrasoEspera == 1) {
+                                    pedido.setPago((int)(pedido.getPago() * 0.5));
+                                } else if (diasRetrasoEspera == 2) {
+                                    pedido.setPago((int)(pedido.getPago() * 0.9));
+                                } else {
+                                    pedido.setPago((int)(pedido.getPago() * 0.35));
+                                }
+                            }
+                            vehiculoAfectado.aplicarDesgaste(); // Desgaste adicional por esperar
+                        }
                     } else {
-                        pedido.setPago((int)(pedido.getPago() * 0.35));
+                        System.out.println("❌ No se puede reparar este tipo de incidente");
+                        System.out.println("   3. Esperando resolución...");
+                        System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
+                        if (diasRetrasoEspera > 0) {
+                            if (diasRetrasoEspera == 1) {
+                                pedido.setPago((int)(pedido.getPago() * 0.5));
+                            } else if (diasRetrasoEspera == 2) {
+                                pedido.setPago((int)(pedido.getPago() * 0.9));
+                            } else {
+                                pedido.setPago((int)(pedido.getPago() * 0.35));
+                            }
+                        }
+                        vehiculoAfectado.aplicarDesgaste(); // Desgaste adicional por esperar
                     }
-                }
-                vehiculoAfectado.aplicarDesgaste(); // Desgaste adicional por esperar
+                    break;
+                    
+                default:
+                    System.out.println("   3. Esperando resolución...");
+                    System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
+                    if (diasRetrasoEspera > 0) {
+                        if (diasRetrasoEspera == 1) {
+                            pedido.setPago((int)(pedido.getPago() * 0.5));
+                        } else if (diasRetrasoEspera == 2) {
+                            pedido.setPago((int)(pedido.getPago() * 0.9));
+                        } else {
+                            pedido.setPago((int)(pedido.getPago() * 0.35));
+                        }
+                    }
+                    vehiculoAfectado.aplicarDesgaste(); // Desgaste adicional por esperar
             }
             
-            pedido.setDiasRestantes(pedido.getDiasRestantes() + 1);
+            pedido.setDiasRestantes(pedido.getDiasRestantes() + diasRetraso);
             satisfaccionClientes -= 5;
         }
     }
@@ -1815,4 +1958,4 @@ public class JuegoLogistica {
         generarPedidosDia();
         mostrarEstadisticas();
     }
-} 
+}
