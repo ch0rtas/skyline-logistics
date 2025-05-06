@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Clase principal que gestiona el juego de logística
@@ -266,7 +267,7 @@ public class JuegoLogistica {
         System.out.println("\n🚗 FLOTA DE VEHÍCULOS:");
         
         // Calcular anchos máximos para cada columna
-        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "ESTADO", "CARGAS PERMITIDAS"};
+        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "ESTADO", "SALUD", "CARGAS PERMITIDAS"};
         int[] anchos = new int[encabezados.length];
         
         // Inicializar anchos con los encabezados
@@ -293,6 +294,7 @@ public class JuegoLogistica {
                 String.valueOf(vehiculo.getVelocidad()),
                 "$" + vehiculo.getCostePorKm(),
                 estado,
+                vehiculo.getSalud() + "%",
                 String.join(", ", vehiculo.getTiposPaquetesPermitidos())
             };
             
@@ -324,16 +326,118 @@ public class JuegoLogistica {
                 String.valueOf(vehiculo.getVelocidad()),
                 "$" + vehiculo.getCostePorKm(),
                 estado,
+                vehiculo.getSalud() + "%",
                 String.join(", ", vehiculo.getTiposPaquetesPermitidos())
             };
             System.out.println(generarFilaTabla(valores, anchos));
         }
 
-        System.out.println("\n¿Desea ver el mercado de vehículos? (S/N)");
-        String opcion = scanner.nextLine().toUpperCase();
+        System.out.println("\n01. Reparar vehículo");
+        System.out.println("02. Ver mercado de vehículos");
+        System.out.print("\nSeleccione una opción: ");
+        String opcion = scanner.nextLine();
         
-        if (opcion.equals("S")) {
-            mostrarMercadoVehiculos();
+        switch (opcion) {
+            case "01":
+            case "1":
+                repararVehiculo();
+                break;
+            case "02":
+            case "2":
+                mostrarMercadoVehiculos();
+                break;
+        }
+    }
+
+    /**
+     * Muestra el menú de reparación de vehículos
+     */
+    private void repararVehiculo() {
+        System.out.println("\n🔧 REPARACIÓN DE VEHÍCULOS");
+        
+        // Filtrar vehículos disponibles y que no estén al 100%
+        List<Vehiculo> vehiculosReparables = flota.stream()
+            .filter(v -> v.estaDisponible() && v.getSalud() < 100)
+            .collect(Collectors.toList());
+            
+        if (vehiculosReparables.isEmpty()) {
+            System.out.println("\n❌ No hay vehículos que necesiten reparación");
+            return;
+        }
+        
+        // Calcular anchos máximos para cada columna
+        String[] encabezados = {"TIPO", "ID", "SALUD", "COSTE REPARACIÓN"};
+        int[] anchos = new int[encabezados.length];
+        
+        // Inicializar anchos con los encabezados
+        for (int i = 0; i < encabezados.length; i++) {
+            anchos[i] = encabezados[i].length();
+        }
+        
+        // Calcular anchos máximos basados en el contenido
+        for (Vehiculo vehiculo : vehiculosReparables) {
+            String[] valores = {
+                vehiculo.getTipo(),
+                vehiculo.getId(),
+                vehiculo.getSalud() + "%",
+                "$" + vehiculo.calcularCosteReparacion()
+            };
+            
+            for (int i = 0; i < valores.length; i++) {
+                anchos[i] = Math.max(anchos[i], valores[i].length());
+            }
+        }
+
+        // Mostrar tabla
+        System.out.println(generarFilaTabla(encabezados, anchos));
+        System.out.println(generarLineaSeparadora(anchos));
+        
+        // Mostrar datos
+        for (Vehiculo vehiculo : vehiculosReparables) {
+            String[] valores = {
+                vehiculo.getTipo(),
+                vehiculo.getId(),
+                vehiculo.getSalud() + "%",
+                "$" + vehiculo.calcularCosteReparacion()
+            };
+            System.out.println(generarFilaTabla(valores, anchos));
+        }
+
+        System.out.print("\nIngrese el ID del vehículo a reparar (o 0 para cancelar): ");
+        String idVehiculo = scanner.nextLine().toUpperCase();
+        
+        if (idVehiculo.equals("0")) {
+            return;
+        }
+        
+        Vehiculo vehiculoSeleccionado = vehiculosReparables.stream()
+            .filter(v -> v.getId().equals(idVehiculo))
+            .findFirst()
+            .orElse(null);
+            
+        if (vehiculoSeleccionado == null) {
+            System.out.println("❌ ID de vehículo no válido");
+            return;
+        }
+        
+        int costeReparacion = vehiculoSeleccionado.calcularCosteReparacion();
+        
+        if (jugador.getPresupuesto() < costeReparacion) {
+            System.out.println("❌ Balance insuficiente para realizar la reparación");
+            return;
+        }
+        
+        System.out.println("\n⚠️ ¿Está seguro de reparar el vehículo " + vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId() + "?");
+        System.out.println("   - Coste de reparación: $" + costeReparacion);
+        System.out.print("   - Confirmar (S/N): ");
+        
+        String confirmacion = scanner.nextLine().toUpperCase();
+        if (confirmacion.equals("S")) {
+            jugador.gastar(costeReparacion);
+            vehiculoSeleccionado.reparar();
+            System.out.println("\n✅ Vehículo reparado exitosamente");
+            System.out.println("   - Coste: $" + costeReparacion);
+            System.out.println("   - Nueva salud: 100%");
         }
     }
 
@@ -1132,8 +1236,19 @@ public class JuegoLogistica {
     private void mostrarVehiculosDisponibles(Pedido pedido) {
         System.out.println("\n🚗 VEHÍCULOS DISPONIBLES:");
         
+        // Filtrar vehículos disponibles
+        List<Vehiculo> vehiculosDisponibles = flota.stream()
+            .filter(v -> v.estaDisponible() && v.puedeTransportarTipo(pedido.getTipoPaquete()))
+            .collect(Collectors.toList());
+            
+        if (vehiculosDisponibles.isEmpty()) {
+            System.out.println("\n❌ No hay vehículos disponibles para este tipo de carga");
+            pedidosPendientes.remove(pedido);
+            return;
+        }
+        
         // Calcular anchos máximos para cada columna
-        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "COSTE TOTAL", "DÍA LLEGADA", "PENALIZACIÓN", "CARGAS PERMITIDAS"};
+        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "SALUD", "DESGASTE", "CARGAS PERMITIDAS"};
         int[] anchos = new int[encabezados.length];
         
         // Inicializar anchos con los encabezados
@@ -1142,50 +1257,15 @@ public class JuegoLogistica {
         }
         
         // Calcular anchos máximos basados en el contenido
-        for (Vehiculo vehiculo : flota) {
-            if (!vehiculo.estaDisponible() || !vehiculo.puedeTransportarTipo(pedido.getTipoPaquete())) {
-                continue;
-            }
-            
-            // Verificar si el vehículo puede realizar la ruta
-            if (!vehiculoPuedeRealizarRuta(vehiculo, almacenPrincipal, pedido.getDestino())) {
-                continue;
-            }
-            
-            int costeTotal = calcularCosteEnvio(vehiculo, almacenPrincipal, pedido.getDestino());
-            int horasViaje = vehiculo.calcularTiempoEntrega(obtenerDistancia(almacenPrincipal, pedido.getDestino()));
-            int diasViaje = (int) Math.ceil(horasViaje / 8.0);
-            
-            Calendar fechaLlegada = Calendar.getInstance();
-            fechaLlegada.setTime(fechaActual.getTime());
-            fechaLlegada.add(Calendar.DAY_OF_MONTH, diasViaje);
-            
-            Calendar fechaEntrega = Calendar.getInstance();
-            fechaEntrega.setTime(fechaActual.getTime());
-            fechaEntrega.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
-            
-            int diasRetraso = (int) ((fechaLlegada.getTimeInMillis() - fechaEntrega.getTimeInMillis()) / (1000 * 60 * 60 * 24));
-            
-            String penalizacion;
-            if (diasRetraso <= 0) {
-                penalizacion = "Sin penalización";
-            } else if (diasRetraso == 1) {
-                penalizacion = "50% del pago";
-            } else if (diasRetraso == 2) {
-                penalizacion = "10% del pago";
-            } else {
-                penalizacion = "Multa 65%";
-            }
-            
+        for (Vehiculo vehiculo : vehiculosDisponibles) {
             String[] valores = {
                 vehiculo.getTipo(),
                 vehiculo.getId(),
                 String.valueOf(vehiculo.getCapacidad()),
                 String.valueOf(vehiculo.getVelocidad()),
                 "$" + vehiculo.getCostePorKm(),
-                "$" + costeTotal,
-                formatoFecha.format(fechaLlegada.getTime()),
-                penalizacion,
+                vehiculo.getSalud() + "%",
+                vehiculo.getDesgastePorViaje() + "%",
                 String.join(", ", vehiculo.getTiposPaquetesPermitidos())
             };
             
@@ -1199,49 +1279,15 @@ public class JuegoLogistica {
         System.out.println(generarLineaSeparadora(anchos));
         
         // Mostrar datos
-        for (Vehiculo vehiculo : flota) {
-            if (!vehiculo.estaDisponible() || !vehiculo.puedeTransportarTipo(pedido.getTipoPaquete())) {
-                continue;
-            }
-            
-            if (!vehiculoPuedeRealizarRuta(vehiculo, almacenPrincipal, pedido.getDestino())) {
-                continue;
-            }
-            
-            int costeTotal = calcularCosteEnvio(vehiculo, almacenPrincipal, pedido.getDestino());
-            int horasViaje = vehiculo.calcularTiempoEntrega(obtenerDistancia(almacenPrincipal, pedido.getDestino()));
-            int diasViaje = (int) Math.ceil(horasViaje / 8.0);
-            
-            Calendar fechaLlegada = Calendar.getInstance();
-            fechaLlegada.setTime(fechaActual.getTime());
-            fechaLlegada.add(Calendar.DAY_OF_MONTH, diasViaje);
-            
-            Calendar fechaEntrega = Calendar.getInstance();
-            fechaEntrega.setTime(fechaActual.getTime());
-            fechaEntrega.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
-            
-            int diasRetraso = (int) ((fechaLlegada.getTimeInMillis() - fechaEntrega.getTimeInMillis()) / (1000 * 60 * 60 * 24));
-            
-            String penalizacion;
-            if (diasRetraso <= 0) {
-                penalizacion = "Sin penalización";
-            } else if (diasRetraso == 1) {
-                penalizacion = "50% del pago";
-            } else if (diasRetraso == 2) {
-                penalizacion = "10% del pago";
-            } else {
-                penalizacion = "Multa 65%";
-            }
-            
+        for (Vehiculo vehiculo : vehiculosDisponibles) {
             String[] valores = {
                 vehiculo.getTipo(),
                 vehiculo.getId(),
                 String.valueOf(vehiculo.getCapacidad()),
                 String.valueOf(vehiculo.getVelocidad()),
                 "$" + vehiculo.getCostePorKm(),
-                "$" + costeTotal,
-                formatoFecha.format(fechaLlegada.getTime()),
-                penalizacion,
+                vehiculo.getSalud() + "%",
+                vehiculo.getDesgastePorViaje() + "%",
                 String.join(", ", vehiculo.getTiposPaquetesPermitidos())
             };
             System.out.println(generarFilaTabla(valores, anchos));
@@ -1364,176 +1410,161 @@ public class JuegoLogistica {
     private void resolverIncidente(Pedido pedido) {
         String tipoTransporte = pedido.getTransporteAsignado().split(" ")[0];
         String idVehiculo = pedido.getTransporteAsignado().split(" ")[1];
-        String[] incidentesTerrestres = {
-            "Caída de árbol en la carretera",
-            "Accidente de tráfico",
-            "Obras en la vía",
-            "Protesta de agricultores",
-            "Control policial",
-            "Avería mecánica",
-            "Desprendimiento de rocas",
-            "Nieve en la carretera",
-            "Niebla densa"
-        };
-
-        String[] incidentesAereos = {
-            "Turbulencias severas",
-            "Retraso en el despegue",
-            "Problemas técnicos en el avión",
-            "Mal tiempo en el aeropuerto",
-            "Huelga de controladores",
-            "Restricciones de espacio aéreo",
-            "Problemas de navegación",
-            "Viento fuerte en pista"
-        };
-
-        String[] incidentesMaritimos = {
-            "Tormenta en el mar",
-            "Niebla en la costa",
-            "Problemas en el puerto",
-            "Avería en el motor",
-            "Oleaje fuerte",
-            "Retraso en la descarga",
-            "Problemas de navegación",
-            "Control de aduanas"
-        };
-
-        String incidente;
-        int idIncidente = 100 + random.nextInt(900);
-
-        // Seleccionar incidente según el tipo de transporte
-        switch (tipoTransporte) {
-            case "Furgoneta":
-            case "Camión":
-                incidente = incidentesTerrestres[random.nextInt(incidentesTerrestres.length)];
-                break;
-            case "Avión":
-                incidente = incidentesAereos[random.nextInt(incidentesAereos.length)];
-                break;
-            case "Barco":
-                incidente = incidentesMaritimos[random.nextInt(incidentesMaritimos.length)];
-                break;
-            default:
-                incidente = "Incidente desconocido";
+        
+        // Encontrar el vehículo afectado
+        Vehiculo vehiculoAfectado = flota.stream()
+            .filter(v -> v.getId().equals(idVehiculo))
+            .findFirst()
+            .orElse(null);
+            
+        if (vehiculoAfectado == null) {
+            return;
         }
-
-        // Obtener la fecha límite de entrega del pedido
-        Calendar fechaLimite = Calendar.getInstance();
-        fechaLimite.setTime(fechaActual.getTime());
-        fechaLimite.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
         
-        // Calcular fechas de llegada para cada opción
-        Calendar fechaEspera = (Calendar) fechaActual.clone();
-        fechaEspera.add(Calendar.DAY_OF_MONTH, 3); // 3 días de retraso por esperar
+        // Aplicar desgaste normal por el viaje
+        vehiculoAfectado.aplicarDesgaste();
         
-        Calendar fechaDesvio = (Calendar) fechaActual.clone();
-        fechaDesvio.add(Calendar.DAY_OF_MONTH, 1); // 1 día de retraso por desviar
+        // Posibilidad de incidente adicional
+        if (random.nextDouble() < 0.3) { // 30% de probabilidad de incidente
+            String[] incidentesTerrestres = {
+                "Caída de árbol en la carretera",
+                "Accidente de tráfico",
+                "Obras en la vía",
+                "Protesta de agricultores",
+                "Control policial",
+                "Avería mecánica",
+                "Desprendimiento de rocas",
+                "Nieve en la carretera",
+                "Niebla densa"
+            };
 
-        // Calcular los días de retraso para cada opción
-        int diasRetrasoEspera = calcularDiasRetraso(fechaEspera, fechaLimite);
-        int diasRetrasoDesvio = calcularDiasRetraso(fechaDesvio, fechaLimite);
+            String[] incidentesAereos = {
+                "Turbulencias severas",
+                "Retraso en el despegue",
+                "Problemas técnicos en el avión",
+                "Mal tiempo en el aeropuerto",
+                "Huelga de controladores",
+                "Restricciones de espacio aéreo",
+                "Problemas de navegación",
+                "Viento fuerte en pista"
+            };
 
-        System.out.println("\n❗ ALERTA: Incidente #" + idIncidente + " - " + incidente);
-        System.out.println("   - Riesgo: Retraso en entrega");
-        System.out.println("   - Fecha límite de entrega: " + formatoFecha.format(fechaLimite.getTime()));
-        System.out.println("   - Soluciones posibles:");
-        System.out.println("     01. Esperar");
-        System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaEspera.getTime()));
-        if (diasRetrasoEspera > 0) {
-            if (diasRetrasoEspera == 1) {
-                System.out.println("         • Penalización: 50% del pago");
-            } else if (diasRetrasoEspera == 2) {
-                System.out.println("         • Penalización: 10% del pago");
-            } else {
-                System.out.println("         • Penalización: 65% de multa");
+            String[] incidentesMaritimos = {
+                "Tormenta en el mar",
+                "Niebla en la costa",
+                "Problemas en el puerto",
+                "Avería en el motor",
+                "Oleaje fuerte",
+                "Retraso en la descarga",
+                "Problemas de navegación",
+                "Control de aduanas"
+            };
+
+            String incidente;
+            int idIncidente = 100 + random.nextInt(900);
+
+            // Seleccionar incidente según el tipo de transporte
+            switch (tipoTransporte) {
+                case "Furgoneta":
+                case "Camión":
+                    incidente = incidentesTerrestres[random.nextInt(incidentesTerrestres.length)];
+                    break;
+                case "Avión":
+                    incidente = incidentesAereos[random.nextInt(incidentesAereos.length)];
+                    break;
+                case "Barco":
+                    incidente = incidentesMaritimos[random.nextInt(incidentesMaritimos.length)];
+                    break;
+                default:
+                    incidente = "Incidente desconocido";
             }
-        } else {
-            System.out.println("         • Sin penalización");
-        }
-        
-        System.out.println("     02. Desviar ruta (Coste adicional: $1,000)");
-        System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaDesvio.getTime()));
-        if (diasRetrasoDesvio > 0) {
-            if (diasRetrasoDesvio == 1) {
-                System.out.println("         • Penalización: 50% del pago");
-            } else if (diasRetrasoDesvio == 2) {
-                System.out.println("         • Penalización: 10% del pago");
-            } else {
-                System.out.println("         • Penalización: 65% de multa");
-            }
-        } else {
-            System.out.println("         • Sin penalización");
-        }
-        
-        System.out.print("\nSeleccione solución (01-02): ");
-        String solucion = scanner.nextLine();
 
-        System.out.println("\n🛠 Aplicando patrón *Template Method*:");
-        System.out.println("   1. Identificando causa: " + incidente);
-        System.out.println("   2. Asignando recursos...");
-        
-        if (solucion.equals("02") || solucion.equals("2")) {
-            System.out.println("   3. Desviando ruta...");
-            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaDesvio.getTime()));
+            // Obtener la fecha límite de entrega del pedido
+            Calendar fechaLimite = Calendar.getInstance();
+            fechaLimite.setTime(fechaActual.getTime());
+            fechaLimite.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
+            
+            // Calcular fechas de llegada para cada opción
+            Calendar fechaEspera = (Calendar) fechaActual.clone();
+            fechaEspera.add(Calendar.DAY_OF_MONTH, 3); // 3 días de retraso por esperar
+            
+            Calendar fechaDesvio = (Calendar) fechaActual.clone();
+            fechaDesvio.add(Calendar.DAY_OF_MONTH, 1); // 1 día de retraso por desviar
+
+            // Calcular los días de retraso para cada opción
+            int diasRetrasoEspera = calcularDiasRetraso(fechaEspera, fechaLimite);
+            int diasRetrasoDesvio = calcularDiasRetraso(fechaDesvio, fechaLimite);
+
+            System.out.println("\n❗ ALERTA: Incidente #" + idIncidente + " - " + incidente);
+            System.out.println("   - Riesgo: Retraso en entrega");
+            System.out.println("   - Fecha límite de entrega: " + formatoFecha.format(fechaLimite.getTime()));
+            System.out.println("   - Soluciones posibles:");
+            System.out.println("     01. Esperar");
+            System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaEspera.getTime()));
+            if (diasRetrasoEspera > 0) {
+                if (diasRetrasoEspera == 1) {
+                    System.out.println("         • Penalización: 50% del pago");
+                } else if (diasRetrasoEspera == 2) {
+                    System.out.println("         • Penalización: 10% del pago");
+                } else {
+                    System.out.println("         • Penalización: 65% de multa");
+                }
+            } else {
+                System.out.println("         • Sin penalización");
+            }
+            
+            System.out.println("     02. Desviar ruta (Coste adicional: $1,000)");
+            System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaDesvio.getTime()));
             if (diasRetrasoDesvio > 0) {
                 if (diasRetrasoDesvio == 1) {
-                    System.out.println("   - Penalización: 50% del pago");
+                    System.out.println("         • Penalización: 50% del pago");
                 } else if (diasRetrasoDesvio == 2) {
-                    System.out.println("   - Penalización: 10% del pago");
+                    System.out.println("         • Penalización: 10% del pago");
                 } else {
-                    System.out.println("   - Penalización: 65% de multa");
+                    System.out.println("         • Penalización: 65% de multa");
                 }
-                aplicarPenalizacion(pedido, diasRetrasoDesvio);
+            } else {
+                System.out.println("         • Sin penalización");
             }
+            
+            System.out.print("\nSeleccione solución (01-02): ");
+            String solucion = scanner.nextLine();
+
+            System.out.println("\n🛠 Aplicando patrón *Template Method*:");
+            System.out.println("   1. Identificando causa: " + incidente);
+            System.out.println("   2. Asignando recursos...");
+            
+            if (solucion.equals("02") || solucion.equals("2")) {
+                System.out.println("   3. Desviando ruta...");
+                System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaDesvio.getTime()));
+                if (diasRetrasoDesvio > 0) {
+                    if (diasRetrasoDesvio == 1) {
+                        pedido.setPago((int)(pedido.getPago() * 0.5));
+                    } else if (diasRetrasoDesvio == 2) {
+                        pedido.setPago((int)(pedido.getPago() * 0.9));
+                    } else {
+                        pedido.setPago((int)(pedido.getPago() * 0.35));
+                    }
+                }
+                jugador.gastar(1000); // Coste adicional por desviar
+                vehiculoAfectado.aplicarDesgaste(); // Desgaste adicional por desviar
+            } else {
+                System.out.println("   3. Esperando resolución...");
+                System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
+                if (diasRetrasoEspera > 0) {
+                    if (diasRetrasoEspera == 1) {
+                        pedido.setPago((int)(pedido.getPago() * 0.5));
+                    } else if (diasRetrasoEspera == 2) {
+                        pedido.setPago((int)(pedido.getPago() * 0.9));
+                    } else {
+                        pedido.setPago((int)(pedido.getPago() * 0.35));
+                    }
+                }
+                vehiculoAfectado.aplicarDesgaste(); // Desgaste adicional por esperar
+            }
+            
             pedido.setDiasRestantes(pedido.getDiasRestantes() + 1);
-            
-            // Actualizar el coste total del envío
-            int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
-            int costeAdicional = 1000; // Coste por desviar ruta
-            
-            // Buscar el vehículo en la flota
-            Vehiculo vehiculo = null;
-            for (Vehiculo v : flota) {
-                if (v.getId().equals(idVehiculo)) {
-                    vehiculo = v;
-                    break;
-                }
-            }
-            
-            if (vehiculo != null) {
-                int costeTotal = distancia * vehiculo.getCostePorKm() + costeAdicional;
-                pedido.setPago(costeTotal);
-                System.out.println("💰 Coste total actualizado: $" + costeTotal);
-            }
-        } else if (solucion.equals("01") || solucion.equals("1")) {
-            System.out.println("   3. Esperando condiciones...");
-            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
-            if (diasRetrasoEspera > 0) {
-                if (diasRetrasoEspera == 1) {
-                    System.out.println("   - Penalización: 50% del pago");
-                } else if (diasRetrasoEspera == 2) {
-                    System.out.println("   - Penalización: 10% del pago");
-                } else {
-                    System.out.println("   - Penalización: 65% de multa");
-                }
-                aplicarPenalizacion(pedido, diasRetrasoEspera);
-            }
-            pedido.setDiasRestantes(pedido.getDiasRestantes() + 3);
-        } else {
-            System.out.println("\n❌ Opción no válida, seleccionando esperar por defecto");
-            System.out.println("   3. Esperando condiciones...");
-            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
-            if (diasRetrasoEspera > 0) {
-                if (diasRetrasoEspera == 1) {
-                    System.out.println("   - Penalización: 50% del pago");
-                } else if (diasRetrasoEspera == 2) {
-                    System.out.println("   - Penalización: 10% del pago");
-                } else {
-                    System.out.println("   - Penalización: 65% de multa");
-                }
-                aplicarPenalizacion(pedido, diasRetrasoEspera);
-            }
-            pedido.setDiasRestantes(pedido.getDiasRestantes() + 3);
+            satisfaccionClientes -= 5;
         }
     }
     
@@ -1541,20 +1572,6 @@ public class JuegoLogistica {
         long diffMillis = fechaLlegada.getTimeInMillis() - fechaLimite.getTimeInMillis();
         int dias = (int) (diffMillis / (1000 * 60 * 60 * 24));
         return Math.max(0, dias); // Retornar 0 si la fecha es anterior o igual
-    }
-    
-    private void aplicarPenalizacion(Pedido pedido, int diasRetraso) {
-        double porcentajePenalizacion;
-        if (diasRetraso == 1) {
-            porcentajePenalizacion = 0.50; // 50% de penalización
-        } else if (diasRetraso == 2) {
-            porcentajePenalizacion = 0.10; // 10% de penalización
-        } else {
-            porcentajePenalizacion = 0.65; // 65% de penalización
-        }
-        
-        double penalizacion = pedido.getPago() * porcentajePenalizacion;
-        pedido.setPago((int)(pedido.getPago() - penalizacion));
     }
 
     /**
@@ -1696,8 +1713,37 @@ public class JuegoLogistica {
         procesarAccidentes();
         
         // Procesar envíos
-        for (Pedido pedido : new ArrayList<>(pedidosEnCurso)) {
-            pedido.reducirDiasRestantes();
+        procesarPedidosEnCurso();
+        
+        // Procesar impuestos
+        procesarImpuestos();
+        
+        // Generar nuevos vehículos en el mercado
+        generarVehiculosMercado();
+        
+        pedidos.clear();
+        generarPedidosDia();
+        mostrarEstadisticas();
+    }
+
+    /**
+     * Muestra la pantalla de fin de juego
+     */
+    private void mostrarGameOver() {
+        System.out.println("\n==============================================");
+        System.out.println("🎮 GAME OVER");
+        System.out.println("==============================================");
+        System.out.println("💰 Balance final: $" + jugador.getPresupuesto());
+        System.out.println("😊 Satisfacción final: " + satisfaccionClientes + "%");
+        System.out.println("🚚 Envíos totales: " + enviosTotales);
+        System.out.println("✅ Envíos exitosos: " + enviosExitosos);
+    }
+
+    private void procesarPedidosEnCurso() {
+        List<Pedido> pedidosCompletados = new ArrayList<>();
+        
+        for (Pedido pedido : pedidosEnCurso) {
+            pedido.setDiasRestantes(pedido.getDiasRestantes() - 1);
             
             if (pedido.getDiasRestantes() <= 0) {
                 int diasRetraso = Math.abs(pedido.getDiasRestantes());
@@ -1739,10 +1785,25 @@ public class JuegoLogistica {
                 System.out.println("💰 Multa por retraso: $" + multa);
                 System.out.println("💰 Ganancia final: $" + ganancia);
                 
+                // Encontrar y liberar el vehículo
+                String idVehiculo = pedido.getTransporteAsignado().split(" ")[1];
+                Vehiculo vehiculo = flota.stream()
+                    .filter(v -> v.getId().equals(idVehiculo))
+                    .findFirst()
+                    .orElse(null);
+                    
+                if (vehiculo != null) {
+                    vehiculo.asignarPedido(null);
+                    vehiculo.aplicarDesgaste(); // Aplicar desgaste por completar el viaje
+                }
+                
                 enviosTotales++;
-                pedidosEnCurso.remove(pedido);
+                pedidosCompletados.add(pedido);
             }
         }
+        
+        // Eliminar pedidos completados
+        pedidosEnCurso.removeAll(pedidosCompletados);
         
         // Procesar impuestos
         procesarImpuestos();
@@ -1753,18 +1814,5 @@ public class JuegoLogistica {
         pedidos.clear();
         generarPedidosDia();
         mostrarEstadisticas();
-    }
-
-    /**
-     * Muestra la pantalla de fin de juego
-     */
-    private void mostrarGameOver() {
-        System.out.println("\n==============================================");
-        System.out.println("🎮 GAME OVER");
-        System.out.println("==============================================");
-        System.out.println("💰 Balance final: $" + jugador.getPresupuesto());
-        System.out.println("😊 Satisfacción final: " + satisfaccionClientes + "%");
-        System.out.println("🚚 Envíos totales: " + enviosTotales);
-        System.out.println("✅ Envíos exitosos: " + enviosExitosos);
     }
 } 

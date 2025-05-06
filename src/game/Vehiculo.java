@@ -20,6 +20,8 @@ public class Vehiculo {
     private int costePorKm;
     private Set<String> tiposPaquetesPermitidos;
     private static final Random random = new Random();
+    private int salud; // Porcentaje de salud del vehículo (0-100)
+    private int desgastePorViaje; // Porcentaje de desgaste por viaje
     
     private static final Map<String, Map<String, int[]>> RANGOS_VEHICULOS = new HashMap<>();
     
@@ -62,8 +64,30 @@ public class Vehiculo {
     public Vehiculo(String tipo, String id, String... tiposPaquetes) {
         this.tipo = tipo;
         this.id = id;
+        this.pedidoAsignado = null;
         this.tiposPaquetesPermitidos = new HashSet<>();
-        this.tiposPaquetesPermitidos.add("NORMAL"); // Todos los vehículos pueden transportar carga normal
+        this.salud = 100; // Inicialmente al 100%
+        
+        // Calcular desgaste por viaje según el tipo de vehículo
+        switch (tipo.toLowerCase()) {
+            case "furgoneta":
+                this.desgastePorViaje = 5;
+                break;
+            case "camión":
+                this.desgastePorViaje = 8;
+                break;
+            case "barco":
+                this.desgastePorViaje = 3;
+                break;
+            case "avión":
+                this.desgastePorViaje = 10;
+                break;
+            default:
+                this.desgastePorViaje = 5;
+        }
+        
+        // Todos los vehículos pueden transportar carga normal
+        this.tiposPaquetesPermitidos.add("NORMAL");
         
         // Añadir tipos específicos si se proporcionan
         for (String tipoPaquete : tiposPaquetes) {
@@ -214,5 +238,64 @@ public class Vehiculo {
      */
     public Set<String> getTiposPaquetesPermitidos() {
         return tiposPaquetesPermitidos;
+    }
+
+    /**
+     * Obtiene la salud actual del vehículo
+     * @return int con el porcentaje de salud (0-100)
+     */
+    public int getSalud() {
+        return salud;
+    }
+
+    /**
+     * Obtiene el desgaste por viaje
+     * @return int con el porcentaje de desgaste por viaje
+     */
+    public int getDesgastePorViaje() {
+        return desgastePorViaje;
+    }
+
+    /**
+     * Aplica el desgaste por viaje al vehículo
+     */
+    public void aplicarDesgaste() {
+        salud = Math.max(0, salud - desgastePorViaje);
+    }
+
+    /**
+     * Calcula el coste de reparación del vehículo
+     * @return int con el coste de reparación
+     */
+    public int calcularCosteReparacion() {
+        int costeBase = 0;
+        switch (tipo.toLowerCase()) {
+            case "furgoneta":
+                costeBase = 1000;
+                break;
+            case "camión":
+                costeBase = 2000;
+                break;
+            case "barco":
+                costeBase = 5000;
+                break;
+            case "avión":
+                costeBase = 10000;
+                break;
+        }
+        
+        // El coste aumenta según el daño que tenga
+        int porcentajeDano = 100 - salud;
+        return costeBase + (costeBase * porcentajeDano / 100);
+    }
+
+    /**
+     * Repara el vehículo
+     * @return int con el coste de la reparación
+     */
+    public int reparar() {
+        int coste = calcularCosteReparacion();
+        salud = 100;
+        return coste;
     }
 } 
