@@ -1865,9 +1865,11 @@ public class JuegoLogistica {
         System.out.println("💰 Balance final: " + jugador.getBalance() + "€");
         System.out.println("☠️ Días restantes para impuestos: " + (calcularDiasImpuestos() - (diaActual % calcularDiasImpuestos())));
         
-        if (modoJuego.equals("libre")) {
-            System.out.println("\n🎮 Modo Libre completado");
-        } else if (modoJuego.equals("campaña")) {
+        if (modoJuego.equals("libre") || modoJuego.equals("campaña") || jugador.getBalance() <= 0) {
+            return; // No mostrar mensajes de finalización en estadísticas
+        }
+        
+        if (modoJuego.equals("campaña")) {
             if (verificarObjetivosCampaña()) {
                 System.out.println("\n🎉 ¡Felicidades! Has completado la campaña");
             } else {
@@ -1962,6 +1964,8 @@ public class JuegoLogistica {
         
         pedidos.clear();
         generarPedidosDia();
+
+        // Mostrar estadísticas solo una vez
         mostrarEstadisticas();
     }
 
