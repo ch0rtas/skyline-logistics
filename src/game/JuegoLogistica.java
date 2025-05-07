@@ -13,18 +13,24 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Arrays;
 import java.util.function.Function;
+import java.io.Serializable;
+// Updated import to reflect the new package of Main
+import game.Main;
+
 
 /**
  * Clase principal que gestiona el juego de logística
  */
-public class JuegoLogistica {
+public class JuegoLogistica implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Jugador jugador;
-    private Scanner scanner;
-    private Random random;
+    private transient Scanner scanner; // Exclude from serialization
+    private transient Random random; // Exclude from serialization
     private Map<String, Pedido> pedidos;
-    private List<Pedido> pedidosPendientes;
-    private List<Pedido> pedidosEnCurso;
-    private List<Vehiculo> flota;
+    private List<Pedido> pedidosPendientes = new ArrayList<>();
+    private List<Pedido> pedidosEnCurso = new ArrayList<>();
+    private List<Vehiculo> flota = new ArrayList<>();
     private int diaActual;
     private Calendar fechaActual;
     private String almacenPrincipal;
@@ -39,11 +45,6 @@ public class JuegoLogistica {
         "Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza",
         "Málaga", "Murcia", "Palma de Mallorca", "Las Palmas", "Bilbao",
         "Alicante", "Córdoba", "Valladolid", "Vigo", "Gijón"
-    };
-
-    // Provincias que son islas
-    private static final String[] ISLAS = {
-        "Palma de Mallorca", "Las Palmas"
     };
 
     // Provincias con acceso marítimo (puertos)
@@ -72,7 +73,7 @@ public class JuegoLogistica {
         {450, 800, 700, 800, 600, 900, 800, 900, 1800, 300, 700, 700, 300, 200, 0}  // Gijón
     };
 
-    private List<Vehiculo> vehiculosMercado;
+    private List<Vehiculo> vehiculosMercado = new ArrayList<>();
     private static final String[] TIPOS_CARGA = {"NORMAL", "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"};
 
     /**
@@ -89,8 +90,6 @@ public class JuegoLogistica {
         this.scanner = new Scanner(System.in);
         this.random = new Random();
         this.pedidos = new HashMap<>();
-        this.pedidosPendientes = new ArrayList<>();
-        this.pedidosEnCurso = new ArrayList<>();
         this.diaActual = 1;
         this.fechaActual = Calendar.getInstance();
         this.satisfaccionClientes = 100;
@@ -169,19 +168,21 @@ public class JuegoLogistica {
     }
 
     /**
-     * Inicia el juego
+     * Inicia el juego, evitando reinitializar elementos si es una partida cargada.
      */
-    public void iniciar() {
+    public void iniciar(boolean esPartidaCargada) {
         mostrarBienvenida();
-        inicializarFlota();
-        generarVehiculosMercado();
-        generarPedidosDia();
-        
+        if (!esPartidaCargada) {
+            inicializarFlota();
+            generarVehiculosMercado();
+            generarPedidosDia();
+        }
+
         while (!jugador.estaDerrotado()) {
             mostrarMenuPrincipal();
             procesarOpcion(scanner.nextLine());
         }
-        
+
         mostrarGameOver();
     }
 
@@ -467,6 +468,7 @@ public class JuegoLogistica {
         System.out.println("04. Ver flota");
         System.out.println("05. Ver estadísticas");
         System.out.println("06. Pasar al siguiente día");
+        System.out.println("07. Guardar partida"); // Nueva opción para guardar partida
         System.out.println("99. Salir");
         System.out.print("\nSeleccione una opción: ");
     }
@@ -500,6 +502,18 @@ public class JuegoLogistica {
             case "06":
             case "6":
                 pasarDia();
+                break;
+            case "07":
+            case "7":
+                // Opción para guardar partida
+                System.out.print("\n💾 ¿Deseas guardar la partida? (S/N): ");
+                String confirmarGuardar = scanner.nextLine().toUpperCase();
+                if (confirmarGuardar.equals("S")) {
+                    Main.guardarPartida(this);
+                    System.out.println("\n✅ Partida guardada exitosamente. Regresando al menú principal...");
+                    Main.main(new String[0]); // Regresa al menú principal de Main
+                    return;
+                }
                 break;
             case "99":
                 SalirJuego.ejecutar();
@@ -743,20 +757,6 @@ public class JuegoLogistica {
             default:
                 return base;
         }
-    }
-
-    /**
-     * Calcula el ancho máximo necesario para una columna basado en su contenido
-     * @param contenido Array de strings con el contenido de la columna
-     * @param encabezado String con el encabezado de la columna
-     * @return int con el ancho máximo necesario
-     */
-    private int calcularAnchoColumna(String[] contenido, String encabezado) {
-        int anchoMaximo = encabezado.length();
-        for (String item : contenido) {
-            anchoMaximo = Math.max(anchoMaximo, item.length());
-        }
-        return anchoMaximo;
     }
 
     /**
@@ -1249,6 +1249,22 @@ public class JuegoLogistica {
     }
 
     /**
+     * Permite establecer un nuevo objeto Scanner después de cargar la partida.
+     * @param scanner Scanner a asignar
+     */
+    public void setScanner(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
+    /**
+     * Permite establecer un nuevo objeto Random después de cargar la partida.
+     * @param random Random a asignar
+     */
+    public void setRandom(Random random) {
+        this.random = random;
+    }
+
+    /**
      * Permite gestionar un pedido
      */
     private void gestionarPedido() {
@@ -1685,6 +1701,15 @@ public class JuegoLogistica {
             return;
         }
 
+        // Prompt to save the game before advancing
+        System.out.print("\n💾 ¿Deseas guardar la partida antes de avanzar al siguiente día? (S/N): ");
+        String opcion = scanner.nextLine().toUpperCase();
+        if (opcion.equals("S")) {
+            Main.guardarPartida(this);
+            System.out.println("\n✅ Partida guardada exitosamente. Regresando al menú principal...");
+            return; // Regresa al menú principal
+        }
+
         diaActual++;
         fechaActual.add(Calendar.DAY_OF_MONTH, 1); // Añadir un día a la fecha actual
         
@@ -1767,4 +1792,8 @@ public class JuegoLogistica {
         System.out.println("🚚 Envíos totales: " + enviosTotales);
         System.out.println("✅ Envíos exitosos: " + enviosExitosos);
     }
-} 
+
+    public Jugador getJugador() {
+        return jugador;
+    }
+}
