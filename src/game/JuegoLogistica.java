@@ -2147,4 +2147,16 @@ public class JuegoLogistica {
 
         return objetivosMinimosAlcanzados;
     }
+
+    /**
+     * Verifica si el jugador ha perdido y guarda las estadísticas en el histórico si es así.
+     */
+    private void verificarDerrota() {
+        if (jugador.getBalance() <= 0) {
+            System.out.println("\n❌ Has perdido. Tu balance ha llegado a 0€.");
+            guardarEstadisticas();
+            System.out.println("📊 Tus estadísticas han sido guardadas en el histórico.");
+            System.exit(0);
+        }
+    }
 }
