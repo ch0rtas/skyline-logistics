@@ -1909,46 +1909,6 @@ public class JuegoLogistica {
     }
 
     /**
-     * Procesa los accidentes aleatorios
-     */
-    private void procesarAccidentes() {
-        for (Pedido pedido : new ArrayList<>(pedidosEnCurso)) {
-            if (random.nextDouble() < 0.15) { // 15% de probabilidad de accidente
-                String tipoTransporte = pedido.getTransporteAsignado().split(" ")[0];
-                String incidente;
-                int costeAdicional = 0;
-
-                switch (tipoTransporte) {
-                    case "Furgoneta":
-                    case "Camión":
-                        incidente = "Accidente en carretera";
-                        costeAdicional = 2000;
-                        break;
-                    case "Avión":
-                        incidente = "Turbulencias severas";
-                        costeAdicional = 5000;
-                        break;
-                    case "Barco":
-                        incidente = "Tormenta en el mar";
-                        costeAdicional = 3000;
-                        break;
-                    default:
-                        incidente = "Incidente desconocido";
-                        costeAdicional = 1000;
-                }
-
-                System.out.println("\n⚠️ ¡INCIDENTE! El paquete #" + pedido.getId() + " ha sufrido " + incidente);
-                System.out.println("   - Cliente: " + pedido.getCliente());
-                System.out.println("   - Carga: " + pedido.getCarga());
-                System.out.println("   - Coste adicional: $" + costeAdicional);
-                
-                pedido.setDiasRestantes(pedido.getDiasRestantes() + 1);
-                satisfaccionClientes -= 5;
-            }
-        }
-    }
-
-    /**
      * Procesa el pago de impuestos
      */
     private void procesarImpuestos() {
@@ -2016,9 +1976,6 @@ public class JuegoLogistica {
         System.out.println("\n==================================================");
         System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ENTREGA FINAL");
         System.out.println("==================================================");
-        
-        // Procesar accidentes
-        procesarAccidentes();
         
         // Procesar envíos
         procesarPedidosEnCurso();
