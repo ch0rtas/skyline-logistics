@@ -172,32 +172,32 @@ public class JuegoLogistica {
      * @return int con el monto de la multa
      */
     private int calcularMultaRechazo(Pedido pedido) {
-        int base = 5000;
+        int base = 1000; // Reducir la base de la multa
         int multa = base;
-        
+
         // Aumentar según la dificultad
         switch (dificultad) {
             case "easy":
                 multa *= 1;
                 break;
             case "medium":
-                multa *= 1.5;
+                multa *= 1.2; // Ajustar multiplicador
                 break;
             case "hard":
-                multa *= 2;
+                multa *= 1.5; // Ajustar multiplicador
                 break;
         }
-        
+
         // Aumentar según el día actual
-        multa *= (1 + (diaActual * 0.1)); // 10% más por cada día
-        
+        multa *= (1 + (diaActual * 0.05)); // Reducir el incremento por día
+
         // Aumentar según la prioridad
         if (pedido.getPrioridad().equals("URGENTE")) {
-            multa *= 2;
+            multa *= 1.5; // Ajustar multiplicador
         } else if (pedido.getPrioridad().equals("NORMAL")) {
-            multa *= 1.5;
+            multa *= 1.2; // Ajustar multiplicador
         }
-        
+
         return (int) multa;
     }
 
