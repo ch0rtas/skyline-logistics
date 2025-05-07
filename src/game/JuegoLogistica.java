@@ -477,49 +477,50 @@ public class JuegoLogistica {
      * Muestra el mercado de vehículos
      */
     private void mostrarMercadoVehiculos() {
-        System.out.println("\n=== 🚗 MERCADO DE VEHÍCULOS 🚗 ===");
-        System.out.println("Balance actual: " + jugador.getBalance() + "€");
-        
-        for (int i = 0; i < vehiculosMercado.size(); i++) {
-            Vehiculo v = vehiculosMercado.get(i);
-            System.out.printf("\n%d. %s\n", i + 1, v.getNombre());
-            System.out.println("   Capacidad: " + v.getCapacidad() + " kg");
-            System.out.println("   Velocidad: " + v.getVelocidad() + " km/h");
-            System.out.println("   Consumo: " + v.getConsumo() + " L/100km");
-            System.out.println("   Precio: " + v.getPrecio() + "€");
-        }
-        
-        System.out.println("\n0. Volver al menú principal");
-        System.out.print("\nSeleccione un vehículo para comprar (0 para volver): ");
-        String opcion = scanner.nextLine();
-        
-        if (opcion.equals("0")) {
-            mostrarMenuPartida();
-            return;
-        }
-        
-        try {
-            int indice = Integer.parseInt(opcion) - 1;
-            if (indice >= 0 && indice < vehiculosMercado.size()) {
-                Vehiculo vehiculoSeleccionado = vehiculosMercado.get(indice);
-                if (modoJuego.equals("libre") || jugador.getBalance() >= vehiculoSeleccionado.getPrecio()) {
-                    flota.add(vehiculoSeleccionado);
-                    if (!modoJuego.equals("libre")) {
-                        jugador.gastar(vehiculoSeleccionado.getPrecio());
-                    }
-                    System.out.println("\n✅ Has comprado un " + vehiculoSeleccionado.getNombre());
-                    vehiculosMercado.remove(indice);
-                } else {
-                    System.out.println("\n❌ No tienes suficiente dinero para comprar este vehículo");
-                }
-            } else {
-                System.out.println("\n❌ Opción no válida");
+        while (true) {
+            System.out.println("\n=== 🚗 MERCADO DE VEHÍCULOS 🚗 ===");
+            System.out.println("Balance actual: " + jugador.getBalance() + "€\n");
+
+            for (int i = 0; i < vehiculosMercado.size(); i++) {
+                Vehiculo vehiculo = vehiculosMercado.get(i);
+                String indice = String.format("%02d", i + 1);
+                System.out.println(indice + ". " + vehiculo.getTipo() + " " + vehiculo.getId());
+                System.out.println("   Capacidad: " + vehiculo.getCapacidad() + " kg");
+                System.out.println("   Velocidad: " + vehiculo.getVelocidad() + " km/h");
+                System.out.println("   Consumo: " + vehiculo.getConsumo() + " L/100km");
+                System.out.println("   Precio: " + vehiculo.getPrecio() + "€\n");
             }
-        } catch (NumberFormatException e) {
-            System.out.println("\n❌ Por favor, introduce un número válido");
+
+            System.out.println("0. Volver al menú principal\n");
+            System.out.print("Seleccione una opción: ");
+            String opcion = scanner.nextLine();
+
+            if (opcion.equals("0") || opcion.equals("00")) {
+                break; // Salir del mercado de vehículos
+            }
+
+            try {
+                int indice = Integer.parseInt(opcion);
+                if (indice < 1 || indice > vehiculosMercado.size()) {
+                    System.out.println("❌ Opción no válida");
+                    continue;
+                }
+
+                Vehiculo vehiculoSeleccionado = vehiculosMercado.get(indice - 1);
+                if (jugador.getBalance() < vehiculoSeleccionado.getPrecio()) {
+                    System.out.println("❌ No tienes suficiente balance para comprar este vehículo");
+                    continue;
+                }
+
+                jugador.gastar(vehiculoSeleccionado.getPrecio());
+                flota.add(vehiculoSeleccionado);
+                vehiculosMercado.remove(vehiculoSeleccionado);
+
+                System.out.println("✅ Has comprado el vehículo " + vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId());
+            } catch (NumberFormatException e) {
+                System.out.println("❌ Opción no válida");
+            }
         }
-        
-        mostrarMercadoVehiculos();
     }
 
     /**
