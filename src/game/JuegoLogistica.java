@@ -134,7 +134,8 @@ public class JuegoLogistica {
         this.pedidosEnCurso = new ArrayList<>();
         this.diaActual = 1;
         this.fechaActual = Calendar.getInstance();
-        this.satisfaccionClientes = 100;
+        this.satisfaccionClientes = 100; // Inicialización por defecto
+        inicializarSatisfaccionClientes();
         this.enviosExitosos = 0;
         this.enviosTotales = 0;
         this.beneficiosAcumulados = 0;
@@ -2141,6 +2142,51 @@ public class JuegoLogistica {
             guardarEstadisticas();
             System.out.println("📊 Tus estadísticas han sido guardadas en el histórico.");
             System.exit(0);
+        }
+    }
+
+    /**
+     * Ajusta la satisfacción del cliente al inicio del juego según el modo de juego.
+     */
+    private void inicializarSatisfaccionClientes() {
+        if (modoJuego.equals("libre")) {
+            satisfaccionClientes = 100;
+        } else {
+            satisfaccionClientes = 50;
+        }
+    }
+
+    /**
+     * Ajusta la satisfacción del cliente al enviar un pedido.
+     */
+    private void ajustarSatisfaccionEnvioExitoso() {
+        switch (dificultad) {
+            case "easy":
+                satisfaccionClientes = Math.min(100, satisfaccionClientes + 15);
+                break;
+            case "medium":
+                satisfaccionClientes = Math.min(100, satisfaccionClientes + 10);
+                break;
+            case "hard":
+                satisfaccionClientes = Math.min(100, satisfaccionClientes + 5);
+                break;
+        }
+    }
+
+    /**
+     * Ajusta la satisfacción del cliente al no entregar un pedido a tiempo o rechazarlo.
+     */
+    private void ajustarSatisfaccionEnvioFallido() {
+        switch (dificultad) {
+            case "easy":
+                satisfaccionClientes = Math.max(0, satisfaccionClientes - 15);
+                break;
+            case "medium":
+                satisfaccionClientes = Math.max(0, satisfaccionClientes - 10);
+                break;
+            case "hard":
+                satisfaccionClientes = Math.max(0, satisfaccionClientes - 5);
+                break;
         }
     }
 }
