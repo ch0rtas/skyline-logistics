@@ -1393,7 +1393,7 @@ public class JuegoLogistica {
         }
         
         // Calcular anchos máximos para cada columna
-        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "SALUD", "DESGASTE", "CARGAS PERMITIDAS"};
+        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "SALUD", "DESGASTE", "CARGAS PERMITIDAS", "FECHA ENTREGA"};
         int[] anchos = new int[encabezados.length];
         
         // Inicializar anchos con los encabezados
@@ -1403,6 +1403,9 @@ public class JuegoLogistica {
         
         // Calcular anchos máximos basados en el contenido
         for (Vehiculo vehiculo : vehiculosDisponibles) {
+            Calendar fechaEntrega = (Calendar) fechaActual.clone();
+            fechaEntrega.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
+
             String[] valores = {
                 vehiculo.getTipo(),
                 vehiculo.getId(),
@@ -1411,9 +1414,10 @@ public class JuegoLogistica {
                 "$" + vehiculo.getCostePorKm(),
                 vehiculo.getSalud() + "%",
                 vehiculo.getDesgastePorViaje() + "%",
-                String.join(", ", vehiculo.getTiposPaquetesPermitidos())
+                String.join(", ", vehiculo.getTiposPaquetesPermitidos()),
+                formatoFecha.format(fechaEntrega.getTime())
             };
-            
+
             for (int i = 0; i < valores.length; i++) {
                 anchos[i] = Math.max(anchos[i], valores[i].length());
             }
@@ -1425,6 +1429,9 @@ public class JuegoLogistica {
         
         // Mostrar datos
         for (Vehiculo vehiculo : vehiculosDisponibles) {
+            Calendar fechaEntrega = (Calendar) fechaActual.clone();
+            fechaEntrega.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
+
             String[] valores = {
                 vehiculo.getTipo(),
                 vehiculo.getId(),
@@ -1433,7 +1440,8 @@ public class JuegoLogistica {
                 "$" + vehiculo.getCostePorKm(),
                 vehiculo.getSalud() + "%",
                 vehiculo.getDesgastePorViaje() + "%",
-                String.join(", ", vehiculo.getTiposPaquetesPermitidos())
+                String.join(", ", vehiculo.getTiposPaquetesPermitidos()),
+                formatoFecha.format(fechaEntrega.getTime())
             };
             System.out.println(generarFilaTabla(valores, anchos));
         }
@@ -1748,6 +1756,7 @@ public class JuegoLogistica {
         }
         
             // Opción 2: Desviar ruta
+
         System.out.println("     02. Desviar ruta (Coste adicional: $1,000)");
         System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaDesvio.getTime()));
         if (diasRetrasoDesvio > 0) {
