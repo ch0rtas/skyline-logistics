@@ -436,7 +436,7 @@ public class JuegoLogistica {
 
         for (int i = 0; i < vehiculosReparables.size(); i++) {
             Vehiculo v = vehiculosReparables.get(i);
-            System.out.printf("\n%d. %s\n", i + 1, v.getNombre());
+            System.out.printf("\n%02d. %s\n", i + 1, v.getNombre());
             System.out.println("   Salud: " + v.getSalud() + "%");
             System.out.println("   Coste de reparación: " + v.getCosteReparacion() + "€");
         }
