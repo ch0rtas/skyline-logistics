@@ -2,11 +2,14 @@ package game;
 
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
+import java.io.Serializable;
 
 /**
  * Clase que representa un pedido en el juego
  */
-public class Pedido {
+public class Pedido implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private String id;
     private String cliente;
     private String carga;
@@ -251,4 +254,4 @@ public class Pedido {
             "Entrega: " + getFechaEntrega()
         );
     }
-} 
+}
