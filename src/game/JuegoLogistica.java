@@ -30,6 +30,7 @@ public class JuegoLogistica {
     private Calendar fechaActual;
     private String almacenPrincipal;
     private String dificultad;
+    private String modoJuego;
     private int satisfaccionClientes;
     private int enviosExitosos;
     private int enviosTotales;
@@ -76,16 +77,46 @@ public class JuegoLogistica {
     private List<Vehiculo> vehiculosMercado;
     private static final String[] TIPOS_CARGA = {"NORMAL", "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL", "PERECEDERO", "ALTO_VALOR", "SERES_VIVOS"};
 
+    private static final Map<String, Map<String, Integer>> OBJETIVOS_CAMPANA = new HashMap<>();
+    
+    static {
+        // Objetivos mínimos
+        Map<String, Integer> objetivosMinimos = new HashMap<>();
+        objetivosMinimos.put("dias", 30);
+        objetivosMinimos.put("enviosExitosos", 50);
+        objetivosMinimos.put("satisfaccion", 80);
+        objetivosMinimos.put("beneficios", 100000);
+        OBJETIVOS_CAMPANA.put("minimos", objetivosMinimos);
+        
+        // Objetivos avanzados
+        Map<String, Integer> objetivosAvanzados = new HashMap<>();
+        objetivosAvanzados.put("dias", 60);
+        objetivosAvanzados.put("enviosExitosos", 100);
+        objetivosAvanzados.put("satisfaccion", 90);
+        objetivosAvanzados.put("beneficios", 250000);
+        OBJETIVOS_CAMPANA.put("avanzados", objetivosAvanzados);
+        
+        // Objetivos élite
+        Map<String, Integer> objetivosElite = new HashMap<>();
+        objetivosElite.put("dias", 100);
+        objetivosElite.put("enviosExitosos", 200);
+        objetivosElite.put("satisfaccion", 95);
+        objetivosElite.put("beneficios", 500000);
+        OBJETIVOS_CAMPANA.put("elite", objetivosElite);
+    }
+
     /**
      * Constructor del juego
      * @param almacenPrincipal Provincia seleccionada como almacén principal
      * @param dificultad Nivel de dificultad
      * @param nombreJugador Nombre del jugador
+     * @param modoJuego Modo de juego seleccionado
      */
-    public JuegoLogistica(String almacenPrincipal, String dificultad, String nombreJugador) {
+    public JuegoLogistica(String almacenPrincipal, String dificultad, String nombreJugador, String modoJuego) {
         // Normalizar el nombre del almacén principal
         this.almacenPrincipal = normalizarNombreProvincia(almacenPrincipal);
         this.dificultad = dificultad.toLowerCase();
+        this.modoJuego = modoJuego.toLowerCase();
         this.jugador = new Jugador(nombreJugador, calcularBalanceInicial());
         this.scanner = new Scanner(System.in);
         this.random = new Random();
@@ -101,10 +132,14 @@ public class JuegoLogistica {
     }
 
     /**
-     * Calcula el balance inicial según la dificultad
+     * Calcula el balance inicial según la dificultad y modo de juego
      * @return int con el balance inicial
      */
     private int calcularBalanceInicial() {
+        if (modoJuego.equals("libre")) {
+            return 999999;
+        }
+        
         switch (dificultad) {
             case "easy":
                 return 50000;
@@ -178,7 +213,7 @@ public class JuegoLogistica {
         generarVehiculosMercado();
         generarPedidosDia();
         
-        while (!jugador.estaDerrotado()) {
+        while (!jugadorDerrotado()) {
             mostrarMenuPrincipal();
             procesarOpcion(scanner.nextLine());
         }
@@ -349,7 +384,7 @@ public class JuegoLogistica {
                 break;
             case "03":
             case "3":
-                mostrarMercadoVehiculos();
+            mostrarMercadoVehiculos();
                 break;
             default:
                 System.out.println("\n❌ Opción no válida");
@@ -361,209 +396,101 @@ public class JuegoLogistica {
      * Muestra el menú de reparación de vehículos
      */
     private void repararVehiculo() {
-        System.out.println("\n🔧 REPARACIÓN DE VEHÍCULOS");
+        if (flota.isEmpty()) {
+            System.out.println("\n❌ No tienes vehículos para reparar");
+            mostrarMenuPrincipal();
+            return;
+        }
+
+        System.out.println("\n=== 🔧 REPARACIÓN DE VEHÍCULOS 🔧 ===");
+        System.out.println("Balance actual: " + jugador.getPresupuesto() + "€");
         
-        // Filtrar vehículos disponibles y que no estén al 100%
-        List<Vehiculo> vehiculosReparables = flota.stream()
-            .filter(v -> v.estaDisponible() && v.getSalud() < 100)
-            .collect(Collectors.toList());
-            
-        if (vehiculosReparables.isEmpty()) {
-            System.out.println("\n❌ No hay vehículos que necesiten reparación");
+        for (int i = 0; i < flota.size(); i++) {
+            Vehiculo v = flota.get(i);
+            System.out.printf("\n%d. %s\n", i + 1, v.getNombre());
+            System.out.println("   Salud: " + v.getSalud() + "%");
+            System.out.println("   Coste de reparación: " + v.getCosteReparacion() + "€");
+        }
+        
+        System.out.println("\n0. Volver al menú principal");
+        System.out.print("\nSeleccione un vehículo para reparar (0 para volver): ");
+        String opcion = scanner.nextLine();
+        
+        if (opcion.equals("0")) {
+            mostrarMenuPrincipal();
             return;
         }
         
-        // Calcular anchos máximos para cada columna
-        String[] encabezados = {"TIPO", "ID", "SALUD", "COSTE REPARACIÓN"};
-        int[] anchos = new int[encabezados.length];
-        
-        // Inicializar anchos con los encabezados
-        for (int i = 0; i < encabezados.length; i++) {
-            anchos[i] = encabezados[i].length();
-        }
-        
-        // Calcular anchos máximos basados en el contenido
-        for (Vehiculo vehiculo : vehiculosReparables) {
-            String[] valores = {
-                vehiculo.getTipo(),
-                vehiculo.getId(),
-                vehiculo.getSalud() + "%",
-                "$" + vehiculo.calcularCosteReparacion()
-            };
-            
-            for (int i = 0; i < valores.length; i++) {
-                anchos[i] = Math.max(anchos[i], valores[i].length());
+        try {
+            int indice = Integer.parseInt(opcion) - 1;
+            if (indice >= 0 && indice < flota.size()) {
+                Vehiculo vehiculoSeleccionado = flota.get(indice);
+                if (modoJuego.equals("libre") || jugador.getPresupuesto() >= vehiculoSeleccionado.getCosteReparacion()) {
+                    if (!modoJuego.equals("libre")) {
+                        jugador.gastar(vehiculoSeleccionado.getCosteReparacion());
+                    }
+                    vehiculoSeleccionado.reparar();
+                    System.out.println("\n✅ Has reparado el " + vehiculoSeleccionado.getNombre());
+                } else {
+                    System.out.println("\n❌ No tienes suficiente dinero para reparar este vehículo");
+                }
+            } else {
+                System.out.println("\n❌ Opción no válida");
             }
-        }
-
-        // Mostrar tabla
-        System.out.println(generarFilaTabla(encabezados, anchos));
-        System.out.println(generarLineaSeparadora(anchos));
-        
-        // Mostrar datos
-        for (Vehiculo vehiculo : vehiculosReparables) {
-            String[] valores = {
-                vehiculo.getTipo(),
-                vehiculo.getId(),
-                vehiculo.getSalud() + "%",
-                "$" + vehiculo.calcularCosteReparacion()
-            };
-            System.out.println(generarFilaTabla(valores, anchos));
-        }
-
-        System.out.print("\nIngrese el ID del vehículo a reparar (o 0 para cancelar): ");
-        String idVehiculo = scanner.nextLine().toUpperCase();
-        
-        if (idVehiculo.equals("0")) {
-            return;
+        } catch (NumberFormatException e) {
+            System.out.println("\n❌ Por favor, introduce un número válido");
         }
         
-        Vehiculo vehiculoSeleccionado = vehiculosReparables.stream()
-            .filter(v -> v.getId().equals(idVehiculo))
-            .findFirst()
-            .orElse(null);
-            
-        if (vehiculoSeleccionado == null) {
-            System.out.println("❌ ID de vehículo no válido");
-            return;
-        }
-        
-        int costeReparacion = vehiculoSeleccionado.calcularCosteReparacion();
-        
-        if (jugador.getPresupuesto() < costeReparacion) {
-            System.out.println("❌ Balance insuficiente para realizar la reparación");
-            return;
-        }
-        
-        System.out.println("\n⚠️ ¿Está seguro de reparar el vehículo " + vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId() + "?");
-        System.out.println("   - Coste de reparación: $" + costeReparacion);
-        System.out.print("   - Confirmar (S/N): ");
-        
-        String confirmacion = scanner.nextLine().toUpperCase();
-        if (confirmacion.equals("S")) {
-            jugador.gastar(costeReparacion);
-            vehiculoSeleccionado.reparar();
-            System.out.println("\n✅ Vehículo reparado exitosamente");
-            System.out.println("   - Coste: $" + costeReparacion);
-            System.out.println("   - Nueva salud: 100%");
-        }
+        repararVehiculo();
     }
 
     /**
      * Muestra el mercado de vehículos
      */
     private void mostrarMercadoVehiculos() {
-        if (vehiculosMercado.isEmpty()) {
-            System.out.println("\n❌ No hay vehículos disponibles en el mercado hoy");
+        System.out.println("\n=== 🚗 MERCADO DE VEHÍCULOS 🚗 ===");
+        System.out.println("Balance actual: " + jugador.getPresupuesto() + "€");
+        
+        for (int i = 0; i < vehiculosMercado.size(); i++) {
+            Vehiculo v = vehiculosMercado.get(i);
+            System.out.printf("\n%d. %s\n", i + 1, v.getNombre());
+            System.out.println("   Capacidad: " + v.getCapacidad() + " kg");
+            System.out.println("   Velocidad: " + v.getVelocidad() + " km/h");
+            System.out.println("   Consumo: " + v.getConsumo() + " L/100km");
+            System.out.println("   Precio: " + v.getPrecio() + "€");
+        }
+        
+        System.out.println("\n0. Volver al menú principal");
+        System.out.print("\nSeleccione un vehículo para comprar (0 para volver): ");
+        String opcion = scanner.nextLine();
+        
+        if (opcion.equals("0")) {
+            mostrarMenuPrincipal();
             return;
         }
-
-        System.out.println("\n🏪 MERCADO DE VEHÍCULOS:");
         
-        // Calcular anchos máximos para cada columna
-        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "PRECIO", "CARGAS PERMITIDAS"};
-        int[] anchos = new int[encabezados.length];
-        
-        // Inicializar anchos con los encabezados
-        for (int i = 0; i < encabezados.length; i++) {
-            anchos[i] = encabezados[i].length();
-        }
-        
-        // Calcular anchos máximos basados en el contenido
-        for (Vehiculo vehiculo : vehiculosMercado) {
-            int precio = calcularPrecioVehiculo(vehiculo);
-            
-            String[] valores = {
-                vehiculo.getTipo(),
-                vehiculo.getId(),
-                String.valueOf(vehiculo.getCapacidad()),
-                String.valueOf(vehiculo.getVelocidad()),
-                "$" + vehiculo.getCostePorKm(),
-                "$" + precio,
-                String.join(", ", vehiculo.getTiposPaquetesPermitidos())
-            };
-            
-            for (int i = 0; i < valores.length; i++) {
-                anchos[i] = Math.max(anchos[i], valores[i].length());
-            }
-        }
-
-        // Mostrar tabla
-        System.out.println(generarFilaTabla(encabezados, anchos));
-        System.out.println(generarLineaSeparadora(anchos));
-        
-        // Mostrar datos
-        for (Vehiculo vehiculo : vehiculosMercado) {
-            int precio = calcularPrecioVehiculo(vehiculo);
-            
-            String[] valores = {
-                vehiculo.getTipo(),
-                vehiculo.getId(),
-                String.valueOf(vehiculo.getCapacidad()),
-                String.valueOf(vehiculo.getVelocidad()),
-                "$" + vehiculo.getCostePorKm(),
-                "$" + precio,
-                String.join(", ", vehiculo.getTiposPaquetesPermitidos())
-            };
-            System.out.println(generarFilaTabla(valores, anchos));
-        }
-
-        System.out.println("\n¿Desea comprar algún vehículo? (S/N)");
-        String opcion = scanner.nextLine().toUpperCase();
-        
-        if (opcion.equals("S")) {
-            System.out.println("\nIngrese el ID del vehículo que desea comprar:");
-            String idVehiculo = scanner.nextLine().toUpperCase();
-            
-            Vehiculo vehiculoSeleccionado = null;
-            for (Vehiculo v : vehiculosMercado) {
-                if (v.getId().equals(idVehiculo)) {
-                    vehiculoSeleccionado = v;
-                    break;
-                }
-            }
-            
-            if (vehiculoSeleccionado != null) {
-                int precio = calcularPrecioVehiculo(vehiculoSeleccionado);
-                if (jugador.getPresupuesto() >= precio) {
-                    jugador.recibirDanio(precio);
+        try {
+            int indice = Integer.parseInt(opcion) - 1;
+            if (indice >= 0 && indice < vehiculosMercado.size()) {
+                Vehiculo vehiculoSeleccionado = vehiculosMercado.get(indice);
+                if (modoJuego.equals("libre") || jugador.getPresupuesto() >= vehiculoSeleccionado.getPrecio()) {
                     flota.add(vehiculoSeleccionado);
-                    vehiculosMercado.remove(vehiculoSeleccionado);
-                    System.out.println("\n✅ Vehículo comprado exitosamente");
-                    System.out.println("   - Precio pagado: $" + precio);
-                    System.out.println("   - Presupuesto restante: $" + jugador.getPresupuesto());
-                    System.out.println("   - El vehículo estará disponible a partir del próximo día");
+                    if (!modoJuego.equals("libre")) {
+                        jugador.gastar(vehiculoSeleccionado.getPrecio());
+                    }
+                    System.out.println("\n✅ Has comprado un " + vehiculoSeleccionado.getNombre());
+                    vehiculosMercado.remove(indice);
                 } else {
                     System.out.println("\n❌ No tienes suficiente dinero para comprar este vehículo");
-                    System.out.println("   - Precio del vehículo: $" + precio);
-                    System.out.println("   - Tu presupuesto: $" + jugador.getPresupuesto());
                 }
             } else {
-                System.out.println("❌ ID de vehículo no válido");
+                System.out.println("\n❌ Opción no válida");
             }
-        }
-    }
-
-    /**
-     * Calcula el precio de un vehículo según sus características
-     * @param vehiculo Vehículo a calcular precio
-     * @return int con el precio calculado
-     */
-    private int calcularPrecioVehiculo(Vehiculo vehiculo) {
-        int precioBase = vehiculo.getCapacidad() * 2 + vehiculo.getVelocidad() * 10 + vehiculo.getCostePorKm() * 100;
-        precioBase += vehiculo.getTiposPaquetesPermitidos().size() * 1000; // Cada tipo adicional suma 1000
-        
-        // Ajuste según dificultad
-        switch (dificultad) {
-            case "easy":
-                precioBase *= 0.8; // 20% más barato
-                break;
-            case "hard":
-                precioBase *= 1.2; // 20% más caro
-                break;
+        } catch (NumberFormatException e) {
+            System.out.println("\n❌ Por favor, introduce un número válido");
         }
         
-        return precioBase;
+        mostrarMercadoVehiculos();
     }
 
     /**
@@ -657,7 +584,7 @@ public class JuegoLogistica {
         cargasPorTipo.put("PERECEDERO", new String[]{"Frutas Frescas", "Verduras", "Lácteos", "Carnes"});
         cargasPorTipo.put("ALTO_VALOR", new String[]{"Obras de Arte", "Metales Preciosos", "Electrónica de Alta Gama", "Documentos Confidenciales"});
         cargasPorTipo.put("SERES_VIVOS", new String[]{"Animales Domésticos", "Ganado", "Aves", "Peces"});
-
+        
         String[] prioridades = {"URGENTE", "NORMAL", "BAJA"};
         String[] tiposPaquetes = {"NORMAL", "REFRIGERADO", "CONGELADO", "ESCOLTADO", "PELIGROSO", "FRÁGIL", "PERECEDERO", "ALTO_VALOR", "SERES_VIVOS"};
 
@@ -1464,15 +1391,15 @@ public class JuegoLogistica {
         
         // Posibilidad de incidente adicional
         if (random.nextDouble() < 0.3) { // 30% de probabilidad de incidente
-            String[] incidentesTerrestres = {
-                "Caída de árbol en la carretera",
-                "Accidente de tráfico",
-                "Obras en la vía",
-                "Protesta de agricultores",
-                "Control policial",
-                "Avería mecánica",
-                "Desprendimiento de rocas",
-                "Nieve en la carretera",
+        String[] incidentesTerrestres = {
+            "Caída de árbol en la carretera",
+            "Accidente de tráfico",
+            "Obras en la vía",
+            "Protesta de agricultores",
+            "Control policial",
+            "Avería mecánica",
+            "Desprendimiento de rocas",
+            "Nieve en la carretera",
                 "Niebla densa",
                 "Pinchazo de neumático",
                 "Fallo en el sistema de frenos",
@@ -1480,16 +1407,16 @@ public class JuegoLogistica {
                 "Batería descargada",
                 "Problemas con el sistema de refrigeración",
                 "Fallo en el sistema eléctrico"
-            };
+        };
 
-            String[] incidentesAereos = {
-                "Turbulencias severas",
-                "Retraso en el despegue",
-                "Problemas técnicos en el avión",
-                "Mal tiempo en el aeropuerto",
-                "Huelga de controladores",
-                "Restricciones de espacio aéreo",
-                "Problemas de navegación",
+        String[] incidentesAereos = {
+            "Turbulencias severas",
+            "Retraso en el despegue",
+            "Problemas técnicos en el avión",
+            "Mal tiempo en el aeropuerto",
+            "Huelga de controladores",
+            "Restricciones de espacio aéreo",
+            "Problemas de navegación",
                 "Viento fuerte en pista",
                 "Fallo en el sistema de presurización",
                 "Problemas con el tren de aterrizaje",
@@ -1498,16 +1425,16 @@ public class JuegoLogistica {
                 "Fallo en el sistema de oxígeno",
                 "Problemas con el sistema de navegación",
                 "Avería en el sistema de climatización"
-            };
+        };
 
-            String[] incidentesMaritimos = {
-                "Tormenta en el mar",
-                "Niebla en la costa",
-                "Problemas en el puerto",
-                "Avería en el motor",
-                "Oleaje fuerte",
-                "Retraso en la descarga",
-                "Problemas de navegación",
+        String[] incidentesMaritimos = {
+            "Tormenta en el mar",
+            "Niebla en la costa",
+            "Problemas en el puerto",
+            "Avería en el motor",
+            "Oleaje fuerte",
+            "Retraso en la descarga",
+            "Problemas de navegación",
                 "Control de aduanas",
                 "Fallo en el sistema de propulsión",
                 "Problemas con el sistema de carga",
@@ -1516,18 +1443,18 @@ public class JuegoLogistica {
                 "Fallo en el sistema de comunicación",
                 "Problemas con el sistema de estabilización",
                 "Avería en el sistema de lastre"
-            };
+        };
 
-            String incidente;
-            int idIncidente = 100 + random.nextInt(900);
+        String incidente;
+        int idIncidente = 100 + random.nextInt(900);
             int costeReparacion = 0;
             int diasRetraso = 0;
 
-            // Seleccionar incidente según el tipo de transporte
-            switch (tipoTransporte) {
-                case "Furgoneta":
-                case "Camión":
-                    incidente = incidentesTerrestres[random.nextInt(incidentesTerrestres.length)];
+        // Seleccionar incidente según el tipo de transporte
+        switch (tipoTransporte) {
+            case "Furgoneta":
+            case "Camión":
+                incidente = incidentesTerrestres[random.nextInt(incidentesTerrestres.length)];
                     // Asignar costes y retrasos según el tipo de incidente
                     if (incidente.contains("Pinchazo")) {
                         costeReparacion = 500;
@@ -1542,9 +1469,9 @@ public class JuegoLogistica {
                         costeReparacion = 1000;
                         diasRetraso = 1;
                     }
-                    break;
-                case "Avión":
-                    incidente = incidentesAereos[random.nextInt(incidentesAereos.length)];
+                break;
+            case "Avión":
+                incidente = incidentesAereos[random.nextInt(incidentesAereos.length)];
                     if (incidente.contains("Fallo") || incidente.contains("Avería")) {
                         costeReparacion = 10000;
                         diasRetraso = 2;
@@ -1555,9 +1482,9 @@ public class JuegoLogistica {
                         costeReparacion = 5000;
                         diasRetraso = 1;
                     }
-                    break;
-                case "Barco":
-                    incidente = incidentesMaritimos[random.nextInt(incidentesMaritimos.length)];
+                break;
+            case "Barco":
+                incidente = incidentesMaritimos[random.nextInt(incidentesMaritimos.length)];
                     if (incidente.contains("Fallo") || incidente.contains("Avería")) {
                         costeReparacion = 8000;
                         diasRetraso = 2;
@@ -1568,68 +1495,68 @@ public class JuegoLogistica {
                         costeReparacion = 3000;
                         diasRetraso = 1;
                     }
-                    break;
-                default:
-                    incidente = "Incidente desconocido";
+                break;
+            default:
+                incidente = "Incidente desconocido";
                     costeReparacion = 1000;
                     diasRetraso = 1;
-            }
+        }
 
-            // Obtener la fecha límite de entrega del pedido
-            Calendar fechaLimite = Calendar.getInstance();
-            fechaLimite.setTime(fechaActual.getTime());
-            fechaLimite.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
-            
-            // Calcular fechas de llegada para cada opción
-            Calendar fechaEspera = (Calendar) fechaActual.clone();
+        // Obtener la fecha límite de entrega del pedido
+        Calendar fechaLimite = Calendar.getInstance();
+        fechaLimite.setTime(fechaActual.getTime());
+        fechaLimite.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
+        
+        // Calcular fechas de llegada para cada opción
+        Calendar fechaEspera = (Calendar) fechaActual.clone();
             fechaEspera.add(Calendar.DAY_OF_MONTH, diasRetraso + 2); // Días de retraso + 2 días de espera
-            
-            Calendar fechaDesvio = (Calendar) fechaActual.clone();
+        
+        Calendar fechaDesvio = (Calendar) fechaActual.clone();
             fechaDesvio.add(Calendar.DAY_OF_MONTH, diasRetraso + 1); // Días de retraso + 1 día por desviar
             
             Calendar fechaReparacion = (Calendar) fechaActual.clone();
             fechaReparacion.add(Calendar.DAY_OF_MONTH, diasRetraso); // Solo los días de retraso por reparación
 
-            // Calcular los días de retraso para cada opción
-            int diasRetrasoEspera = calcularDiasRetraso(fechaEspera, fechaLimite);
-            int diasRetrasoDesvio = calcularDiasRetraso(fechaDesvio, fechaLimite);
+        // Calcular los días de retraso para cada opción
+        int diasRetrasoEspera = calcularDiasRetraso(fechaEspera, fechaLimite);
+        int diasRetrasoDesvio = calcularDiasRetraso(fechaDesvio, fechaLimite);
             int diasRetrasoReparacion = calcularDiasRetraso(fechaReparacion, fechaLimite);
 
-            System.out.println("\n❗ ALERTA: Incidente #" + idIncidente + " - " + incidente);
-            System.out.println("   - Riesgo: Retraso en entrega");
-            System.out.println("   - Fecha límite de entrega: " + formatoFecha.format(fechaLimite.getTime()));
-            System.out.println("   - Soluciones posibles:");
+        System.out.println("\n❗ ALERTA: Incidente #" + idIncidente + " - " + incidente);
+        System.out.println("   - Riesgo: Retraso en entrega");
+        System.out.println("   - Fecha límite de entrega: " + formatoFecha.format(fechaLimite.getTime()));
+        System.out.println("   - Soluciones posibles:");
             
             // Opción 1: Esperar
-            System.out.println("     01. Esperar");
-            System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaEspera.getTime()));
-            if (diasRetrasoEspera > 0) {
-                if (diasRetrasoEspera == 1) {
-                    System.out.println("         • Penalización: 50% del pago");
-                } else if (diasRetrasoEspera == 2) {
-                    System.out.println("         • Penalización: 10% del pago");
-                } else {
-                    System.out.println("         • Penalización: 65% de multa");
-                }
+        System.out.println("     01. Esperar");
+        System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaEspera.getTime()));
+        if (diasRetrasoEspera > 0) {
+            if (diasRetrasoEspera == 1) {
+                System.out.println("         • Penalización: 50% del pago");
+            } else if (diasRetrasoEspera == 2) {
+                System.out.println("         • Penalización: 10% del pago");
             } else {
-                System.out.println("         • Sin penalización");
+                System.out.println("         • Penalización: 65% de multa");
             }
-            
+        } else {
+            System.out.println("         • Sin penalización");
+        }
+        
             // Opción 2: Desviar ruta
-            System.out.println("     02. Desviar ruta (Coste adicional: $1,000)");
-            System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaDesvio.getTime()));
-            if (diasRetrasoDesvio > 0) {
-                if (diasRetrasoDesvio == 1) {
-                    System.out.println("         • Penalización: 50% del pago");
-                } else if (diasRetrasoDesvio == 2) {
-                    System.out.println("         • Penalización: 10% del pago");
-                } else {
-                    System.out.println("         • Penalización: 65% de multa");
-                }
+        System.out.println("     02. Desviar ruta (Coste adicional: $1,000)");
+        System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaDesvio.getTime()));
+        if (diasRetrasoDesvio > 0) {
+            if (diasRetrasoDesvio == 1) {
+                System.out.println("         • Penalización: 50% del pago");
+            } else if (diasRetrasoDesvio == 2) {
+                System.out.println("         • Penalización: 10% del pago");
             } else {
-                System.out.println("         • Sin penalización");
+                System.out.println("         • Penalización: 65% de multa");
             }
-            
+        } else {
+            System.out.println("         • Sin penalización");
+        }
+        
             // Opción 3: Reparar (solo si hay coste de reparación)
             if (costeReparacion > 0) {
                 System.out.println("     03. Reparar (Coste: $" + costeReparacion + ")");
@@ -1648,23 +1575,23 @@ public class JuegoLogistica {
             }
             
             System.out.print("\nSeleccione solución (01-03): ");
-            String solucion = scanner.nextLine();
+        String solucion = scanner.nextLine();
 
-            System.out.println("\n🛠 Aplicando patrón *Template Method*:");
-            System.out.println("   1. Identificando causa: " + incidente);
-            System.out.println("   2. Asignando recursos...");
-            
+        System.out.println("\n🛠 Aplicando patrón *Template Method*:");
+        System.out.println("   1. Identificando causa: " + incidente);
+        System.out.println("   2. Asignando recursos...");
+        
             switch (solucion) {
                 case "02":
                 case "2":
-                    System.out.println("   3. Desviando ruta...");
-                    System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaDesvio.getTime()));
-                    if (diasRetrasoDesvio > 0) {
-                        if (diasRetrasoDesvio == 1) {
+            System.out.println("   3. Desviando ruta...");
+            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaDesvio.getTime()));
+            if (diasRetrasoDesvio > 0) {
+                if (diasRetrasoDesvio == 1) {
                             pedido.setPago((int)(pedido.getPago() * 0.5));
-                        } else if (diasRetrasoDesvio == 2) {
+                } else if (diasRetrasoDesvio == 2) {
                             pedido.setPago((int)(pedido.getPago() * 0.9));
-                        } else {
+                } else {
                             pedido.setPago((int)(pedido.getPago() * 0.35));
                         }
                     }
@@ -1692,28 +1619,28 @@ public class JuegoLogistica {
                         } else {
                             System.out.println("❌ No hay suficiente presupuesto para la reparación");
                             System.out.println("   3. Esperando resolución...");
-                            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
-                            if (diasRetrasoEspera > 0) {
-                                if (diasRetrasoEspera == 1) {
+            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
+            if (diasRetrasoEspera > 0) {
+                if (diasRetrasoEspera == 1) {
                                     pedido.setPago((int)(pedido.getPago() * 0.5));
-                                } else if (diasRetrasoEspera == 2) {
+                } else if (diasRetrasoEspera == 2) {
                                     pedido.setPago((int)(pedido.getPago() * 0.9));
-                                } else {
+                } else {
                                     pedido.setPago((int)(pedido.getPago() * 0.35));
-                                }
-                            }
+                }
+            }
                             vehiculoAfectado.aplicarDesgaste(); // Desgaste adicional por esperar
                         }
-                    } else {
+        } else {
                         System.out.println("❌ No se puede reparar este tipo de incidente");
                         System.out.println("   3. Esperando resolución...");
-                        System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
-                        if (diasRetrasoEspera > 0) {
-                            if (diasRetrasoEspera == 1) {
+            System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
+            if (diasRetrasoEspera > 0) {
+                if (diasRetrasoEspera == 1) {
                                 pedido.setPago((int)(pedido.getPago() * 0.5));
-                            } else if (diasRetrasoEspera == 2) {
+                } else if (diasRetrasoEspera == 2) {
                                 pedido.setPago((int)(pedido.getPago() * 0.9));
-                            } else {
+                } else {
                                 pedido.setPago((int)(pedido.getPago() * 0.35));
                             }
                         }
@@ -1748,30 +1675,31 @@ public class JuegoLogistica {
     }
 
     /**
-     * Muestra las estadísticas del juego
+     * Muestra las estadísticas actuales del juego
      */
     private void mostrarEstadisticas() {
-        System.out.println("\n📊 MÉTRICAS ACTUALES:");
-        System.out.println("   - 👤 " + jugador.getNombre() + ", aquí están tus métricas:");
-        System.out.println("   - 🎮 Dificultad: " + dificultad.toUpperCase());
-        System.out.println("   - 💰 Balance: $" + jugador.getPresupuesto());
-        System.out.println("   - 😊 Satisfacción clientes: " + satisfaccionClientes + "%");
-        System.out.println("   - 🚚 Envíos exitosos: " + enviosExitosos + "/" + enviosTotales);
-        System.out.println("   - 📦 Pedidos pendientes: " + pedidosPendientes.size());
-        System.out.println("   - 📦 Pedidos en curso: " + pedidosEnCurso.size());
-        System.out.println("   - 🚗 Flota de vehículos: " + flota.size());
-        System.out.println("\n   🚗 VEHÍCULOS DISPONIBLES:");
+        System.out.println("\n=== 📊 ESTADÍSTICAS FINALES 📊 ===");
+        System.out.println("Días jugados: " + diaActual);
+        System.out.println("Envíos exitosos: " + enviosExitosos);
+        System.out.println("Envíos totales: " + enviosTotales);
+        System.out.println("Satisfacción de clientes: " + satisfaccionClientes + "%");
+        System.out.println("Beneficios acumulados: " + beneficiosAcumulados + "€");
+        System.out.println("Balance final: " + jugador.getPresupuesto() + "€");
         
-        // Contar vehículos por tipo
-        Map<String, Integer> conteoVehiculos = new HashMap<>();
-        for (Vehiculo v : flota) {
-            conteoVehiculos.merge(v.getTipo(), 1, Integer::sum);
-        }
-        
-        // Mostrar total por tipo
-        for (Map.Entry<String, Integer> entry : conteoVehiculos.entrySet()) {
-            String unidad = entry.getValue() == 1 ? "unidad" : "unidades";
-            System.out.println("      • " + entry.getKey() + ": " + entry.getValue() + " " + unidad);
+        if (modoJuego.equals("libre")) {
+            System.out.println("\n🎮 Modo Libre completado");
+        } else if (modoJuego.equals("campaña")) {
+            if (verificarObjetivosCampaña()) {
+                System.out.println("\n🎉 ¡Felicidades! Has completado la campaña");
+            } else {
+                System.out.println("\n❌ No has alcanzado los objetivos de la campaña");
+            }
+        } else {
+            if (jugador.getPresupuesto() <= 0) {
+                System.out.println("\n❌ GAME OVER - Te has quedado sin dinero");
+            } else {
+                System.out.println("\n🎉 ¡Felicidades! Has completado el modo Desafío");
+            }
         }
     }
 
@@ -1988,4 +1916,188 @@ public class JuegoLogistica {
         generarPedidosDia();
         mostrarEstadisticas();
     }
-}
+
+    /**
+     * Verifica si el jugador está derrotado según el modo de juego
+     * @return true si el jugador está derrotado, false si no
+     */
+    private boolean jugadorDerrotado() {
+        if (modoJuego.equals("libre")) {
+            return false; // En modo libre nunca se pierde
+        }
+        return jugador.getPresupuesto() < 0; // Cambiado de <= 0 a < 0 para que termine cuando sea negativo
+    }
+
+    /**
+     * Gasta dinero según el modo de juego
+     * @param cantidad Cantidad a gastar
+     */
+    private void gastarDinero(int cantidad) {
+        if (!modoJuego.equals("libre")) {
+            jugador.gastar(cantidad);
+        }
+    }
+
+    /**
+     * Recibe dinero según el modo de juego
+     * @param cantidad Cantidad a recibir
+     */
+    private void recibirDinero(int cantidad) {
+        if (!modoJuego.equals("libre")) {
+            jugador.recuperarPresupuesto(cantidad);
+        }
+    }
+
+    public static void iniciarJuego() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\n=== 🚛 SKYLINE LOGISTICS 🚛 ===");
+        System.out.println("Bienvenido a tu nueva empresa de logística");
+        
+        // Solicitar nombre del jugador
+        System.out.print("\n📝 Introduce tu nombre: ");
+        String nombreJugador = scanner.nextLine();
+        
+        // Selección del modo de juego
+        System.out.println("\n=== 🎮 MODOS DE JUEGO 🎮 ===");
+        System.out.println("1. Modo Libre");
+        System.out.println("   - Sin restricciones de tiempo ni recursos");
+        System.out.println("   - Balance inicial ilimitado");
+        System.out.println("   - Ideal para experimentar y aprender");
+        System.out.println("\n2. Modo Desafío");
+        System.out.println("   - Gestión de recursos limitados");
+        System.out.println("   - Balance inicial según dificultad");
+        System.out.println("   - Desafío de supervivencia empresarial");
+        
+        String modoJuego;
+        while (true) {
+            System.out.print("\nSelecciona el modo de juego (1-2): ");
+            String opcion = scanner.nextLine();
+            if (opcion.equals("1")) {
+                modoJuego = "libre";
+                break;
+            } else if (opcion.equals("2")) {
+                modoJuego = "desafio";
+                break;
+            } else {
+                System.out.println("❌ Opción no válida. Por favor, selecciona 1 o 2.");
+            }
+        }
+        
+        // Selección de provincia
+        System.out.println("\n=== 📍 SELECCIÓN DE PROVINCIA 📍 ===");
+        System.out.println("Selecciona la provincia donde establecerás tu almacén principal:");
+        System.out.println("1. Madrid");
+        System.out.println("2. Barcelona");
+        System.out.println("3. Valencia");
+        System.out.println("4. Sevilla");
+        System.out.println("5. Bilbao");
+        
+        String provincia = "";
+        while (provincia.isEmpty()) {
+            System.out.print("\nSelecciona una provincia (1-5): ");
+            String opcion = scanner.nextLine();
+            switch (opcion) {
+                case "1": provincia = "Madrid"; break;
+                case "2": provincia = "Barcelona"; break;
+                case "3": provincia = "Valencia"; break;
+                case "4": provincia = "Sevilla"; break;
+                case "5": provincia = "Bilbao"; break;
+                default: System.out.println("❌ Opción no válida. Por favor, selecciona una provincia válida.");
+            }
+        }
+        
+        // Selección de dificultad
+        System.out.println("\n=== 🎯 DIFICULTAD 🎯 ===");
+        System.out.println("Selecciona el nivel de dificultad:");
+        System.out.println("1. Fácil (50.000€ iniciales)");
+        System.out.println("2. Medio (25.000€ iniciales)");
+        System.out.println("3. Difícil (10.000€ iniciales)");
+        
+        String dificultad = "";
+        while (dificultad.isEmpty()) {
+            System.out.print("\nSelecciona la dificultad (1-3): ");
+            String opcion = scanner.nextLine();
+            switch (opcion) {
+                case "1": dificultad = "easy"; break;
+                case "2": dificultad = "medium"; break;
+                case "3": dificultad = "hard"; break;
+                default: System.out.println("❌ Opción no válida. Por favor, selecciona una dificultad válida.");
+            }
+        }
+        
+        // Crear e iniciar el juego
+        JuegoLogistica juego = new JuegoLogistica(provincia, dificultad, nombreJugador, modoJuego);
+        juego.jugar();
+    }
+
+    public void jugar() {
+        System.out.println("\n=== 🎮 INICIANDO PARTIDA 🎮 ===");
+        System.out.println("Modo de juego: " + (modoJuego.equals("libre") ? "Libre" : "Desafío"));
+        System.out.println("Dificultad: " + dificultad);
+        System.out.println("Almacén principal: " + almacenPrincipal);
+        System.out.println("Balance inicial: " + jugador.getPresupuesto() + "€");
+        
+        // Generar pedidos iniciales
+        generarPedidosDia();
+        
+        while (!jugadorDerrotado()) {
+            mostrarMenuPrincipal();
+            procesarOpcion(scanner.nextLine());
+        }
+        
+        mostrarEstadisticas();
+    }
+
+    /**
+     * Verifica si se han alcanzado los objetivos de la campaña
+     * @return true si se han alcanzado los objetivos, false si no
+     */
+    private boolean verificarObjetivosCampaña() {
+        if (!modoJuego.equals("campaña")) {
+            return false;
+        }
+
+        // Obtener multiplicador según la dificultad
+        double multiplicador = 1.0;
+        switch (dificultad) {
+            case "easy":
+                multiplicador = 0.8;
+                break;
+            case "hard":
+                multiplicador = 1.2;
+                break;
+        }
+
+        // Verificar objetivos mínimos
+        Map<String, Integer> objetivosMinimos = OBJETIVOS_CAMPANA.get("minimos");
+        boolean objetivosMinimosAlcanzados = 
+            diaActual >= (int)(objetivosMinimos.get("dias") * multiplicador) &&
+            enviosExitosos >= (int)(objetivosMinimos.get("enviosExitosos") * multiplicador) &&
+            satisfaccionClientes >= (int)(objetivosMinimos.get("satisfaccion") * multiplicador) &&
+            beneficiosAcumulados >= (int)(objetivosMinimos.get("beneficios") * multiplicador);
+
+        // Verificar objetivos avanzados
+        Map<String, Integer> objetivosAvanzados = OBJETIVOS_CAMPANA.get("avanzados");
+        boolean objetivosAvanzadosAlcanzados = 
+            diaActual >= (int)(objetivosAvanzados.get("dias") * multiplicador) &&
+            enviosExitosos >= (int)(objetivosAvanzados.get("enviosExitosos") * multiplicador) &&
+            satisfaccionClientes >= (int)(objetivosAvanzados.get("satisfaccion") * multiplicador) &&
+            beneficiosAcumulados >= (int)(objetivosAvanzados.get("beneficios") * multiplicador);
+
+        // Verificar objetivos élite
+        Map<String, Integer> objetivosElite = OBJETIVOS_CAMPANA.get("elite");
+        boolean objetivosEliteAlcanzados = 
+            diaActual >= (int)(objetivosElite.get("dias") * multiplicador) &&
+            enviosExitosos >= (int)(objetivosElite.get("enviosExitosos") * multiplicador) &&
+            satisfaccionClientes >= (int)(objetivosElite.get("satisfaccion") * multiplicador) &&
+            beneficiosAcumulados >= (int)(objetivosElite.get("beneficios") * multiplicador);
+
+        // Mostrar progreso
+        System.out.println("\n=== 📊 PROGRESO DE LA CAMPAÑA 📊 ===");
+        System.out.println("Objetivos Mínimos: " + (objetivosMinimosAlcanzados ? "✅" : "❌"));
+        System.out.println("Objetivos Avanzados: " + (objetivosAvanzadosAlcanzados ? "✅" : "❌"));
+        System.out.println("Objetivos Élite: " + (objetivosEliteAlcanzados ? "✅" : "❌"));
+
+        return objetivosMinimosAlcanzados;
+    }
+} 
