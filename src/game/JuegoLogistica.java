@@ -1341,24 +1341,28 @@ public class JuegoLogistica {
         for (Vehiculo vehiculo : vehiculosDisponibles) {
             // Calcular tiempo de entrega basado en la velocidad y distancia
             int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
-            int horasViaje = vehiculo.calcularTiempoEntrega(distancia);
-            int diasViaje = (int) Math.ceil(horasViaje / 24.0); // Convertir horas a días
             
-            // Ajustar días según el tipo de vehículo y la distancia
+            // Calcular horas de viaje basadas en la velocidad real del vehículo
+            double horasViaje = (double) distancia / vehiculo.getVelocidad();
+            
+            // Ajustar horas según el tipo de vehículo
             switch (vehiculo.getTipo()) {
                 case "Furgoneta":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.8); // 20% más rápido
+                    horasViaje *= 1.2; // 20% más lento por paradas y tráfico
                     break;
                 case "Camión":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.9); // 10% más rápido
+                    horasViaje *= 1.3; // 30% más lento por paradas y restricciones
                     break;
                 case "Barco":
-                    diasViaje = (int) Math.ceil(diasViaje * 1.2); // 20% más lento
+                    horasViaje *= 1.5; // 50% más lento por condiciones marítimas
                     break;
                 case "Avión":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.5); // 50% más rápido
+                    horasViaje *= 1.1; // 10% más lento por procedimientos aeroportuarios
                     break;
             }
+            
+            // Convertir horas a días (considerando 8 horas de trabajo por día)
+            int diasViaje = (int) Math.ceil(horasViaje / 8.0);
             
             // Asegurar un mínimo de 1 día de viaje
             diasViaje = Math.max(1, diasViaje);
@@ -1395,24 +1399,28 @@ public class JuegoLogistica {
         for (Vehiculo vehiculo : vehiculosDisponibles) {
             // Calcular tiempo de entrega basado en la velocidad y distancia
             int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
-            int horasViaje = vehiculo.calcularTiempoEntrega(distancia);
-            int diasViaje = (int) Math.ceil(horasViaje / 24.0); // Convertir horas a días
             
-            // Ajustar días según el tipo de vehículo y la distancia
+            // Calcular horas de viaje basadas en la velocidad real del vehículo
+            double horasViaje = (double) distancia / vehiculo.getVelocidad();
+            
+            // Ajustar horas según el tipo de vehículo
             switch (vehiculo.getTipo()) {
                 case "Furgoneta":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.8); // 20% más rápido
+                    horasViaje *= 1.2; // 20% más lento por paradas y tráfico
                     break;
                 case "Camión":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.9); // 10% más rápido
+                    horasViaje *= 1.3; // 30% más lento por paradas y restricciones
                     break;
                 case "Barco":
-                    diasViaje = (int) Math.ceil(diasViaje * 1.2); // 20% más lento
+                    horasViaje *= 1.5; // 50% más lento por condiciones marítimas
                     break;
                 case "Avión":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.5); // 50% más rápido
+                    horasViaje *= 1.1; // 10% más lento por procedimientos aeroportuarios
                     break;
             }
+            
+            // Convertir horas a días (considerando 8 horas de trabajo por día)
+            int diasViaje = (int) Math.ceil(horasViaje / 8.0);
             
             // Asegurar un mínimo de 1 día de viaje
             diasViaje = Math.max(1, diasViaje);
