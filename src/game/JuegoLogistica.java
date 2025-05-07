@@ -1474,7 +1474,32 @@ public class JuegoLogistica {
             System.out.println("   - Origen: " + almacenPrincipal);
             System.out.println("   - Destino: " + pedido.getDestino());
             System.out.println("   - Tipo de carga: " + pedido.getTipoPaquete());
-            return;
+            
+            System.out.println("\n¿Qué desea hacer con el pedido #" + idPedido + "?");
+            System.out.println("02. Rechazar (Multa: $" + calcularMultaRechazo(pedido) + ")");
+            System.out.print("\nOpción: ");
+            String opcion = scanner.nextLine();
+
+            if (opcion.equals("02") || opcion.equals("2")) {
+                String confirmacion;
+                do {
+                    System.out.println("\n⚠️ ¿Está seguro de rechazar el pedido #" + idPedido + "?");
+                    System.out.println("   - Multa por rechazo: $" + calcularMultaRechazo(pedido));
+                    System.out.print("   - Confirmar (S/N): ");
+                    confirmacion = scanner.nextLine().toUpperCase();
+                } while (!confirmacion.equals("S") && !confirmacion.equals("N"));
+
+                if (confirmacion.equals("S")) {
+                    pedidosPendientes.remove(pedido);
+                    System.out.println("❌ Pedido #" + idPedido + " rechazado");
+                    System.out.println("💰 Multa aplicada: $" + calcularMultaRechazo(pedido));
+                }
+                return;
+            } else {
+                System.out.println("\n❌ Opción no válida");
+                gestionarPedido();
+                return;
+            }
         }
 
         System.out.println("\n¿Qué desea hacer con el pedido #" + idPedido + "?");
@@ -1980,6 +2005,8 @@ public class JuegoLogistica {
     private void pasarDia() {
         if (!pedidosPendientes.isEmpty()) {
             System.out.println("\n❌ " + jugador.getNombre() + ", no puedes pasar al siguiente día con pedidos pendientes");
+            mostrarMenuPrincipal();
+            procesarOpcion(scanner.nextLine());
             return;
         }
 
