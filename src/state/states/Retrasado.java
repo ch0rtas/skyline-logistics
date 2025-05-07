@@ -3,12 +3,15 @@ package state.states;
 import state.core.EstadoPedido;
 import domain.model.pedido.Pedido;
 import state.states.Entregado;
+import java.io.Serializable;
 
 /**
  * Implementación del estado Retrasado para los pedidos.
  * Representa el estado cuando un pedido ha sufrido un retraso en su entrega.
  */
-public class Retrasado implements EstadoPedido {
+public class Retrasado implements EstadoPedido, Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public void procesar(Pedido pedido) {
         System.out.println("Procesando pedido " + pedido.getId() + " en estado Retrasado");
@@ -36,4 +39,4 @@ public class Retrasado implements EstadoPedido {
     public String getNombreEstado() {
         return "Retrasado";
     }
-} 
+}
