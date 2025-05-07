@@ -1442,7 +1442,7 @@ public class JuegoLogistica {
             System.out.println("   - Origen: " + almacenPrincipal);
             System.out.println("   - Destino: " + pedido.getDestino());
             System.out.println("   - Tipo de carga: " + pedido.getTipoPaquete());
-            
+
             System.out.println("\n¿Qué desea hacer con el pedido #" + idPedido + "?");
             System.out.println("02. Rechazar (Multa: $" + calcularMultaRechazo(pedido) + ")");
             System.out.print("\nOpción: ");
@@ -1451,16 +1451,16 @@ public class JuegoLogistica {
             if (opcion.equals("02") || opcion.equals("2")) {
                 String confirmacion;
                 do {
-                    System.out.println("\n⚠️ ¿Está seguro de rechazar el pedido #" + idPedido + "?");
-                    System.out.println("   - Multa por rechazo: $" + calcularMultaRechazo(pedido));
-                    System.out.print("   - Confirmar (S/N): ");
+                    System.out.print("¿Confirmar rechazo? (S/N): ");
                     confirmacion = scanner.nextLine().toUpperCase();
                 } while (!confirmacion.equals("S") && !confirmacion.equals("N"));
 
                 if (confirmacion.equals("S")) {
+                    int multa = calcularMultaRechazo(pedido);
+                    jugador.gastar(multa); // Restar la multa del balance del jugador
                     pedidosPendientes.remove(pedido);
                     System.out.println("❌ Pedido #" + idPedido + " rechazado");
-                    System.out.println("💰 Multa aplicada: $" + calcularMultaRechazo(pedido));
+                    System.out.println("💰 Multa aplicada: $" + multa);
                 }
                 return;
             } else {
@@ -1480,12 +1480,14 @@ public class JuegoLogistica {
             System.out.println("\n⚠️ ¿Está seguro de rechazar el pedido #" + idPedido + "?");
             System.out.println("   - Multa por rechazo: $" + calcularMultaRechazo(pedido));
             System.out.print("   - Confirmar (S/N): ");
-            
+
             String confirmacion = scanner.nextLine().toUpperCase();
             if (confirmacion.equals("S")) {
+                int multa = calcularMultaRechazo(pedido);
+                jugador.gastar(multa); // Restar la multa del balance del jugador
                 pedidosPendientes.remove(pedido);
                 System.out.println("❌ Pedido #" + idPedido + " rechazado");
-                System.out.println("💰 Multa aplicada: $" + calcularMultaRechazo(pedido));
+                System.out.println("💰 Multa aplicada: $" + multa);
             }
             return;
         } else if (!opcion.equals("01") && !opcion.equals("1")) {
@@ -1502,7 +1504,7 @@ public class JuegoLogistica {
 
         System.out.print("\nIngrese ID del vehículo a utilizar: ");
         String idVehiculo = scanner.nextLine().toUpperCase();
-        
+
         Vehiculo vehiculoSeleccionado = null;
         for (Vehiculo v : flota) {
             if (v.getId().equals(idVehiculo)) {
@@ -1518,12 +1520,15 @@ public class JuegoLogistica {
 
         // Calcular costo total
         int costoTotal = calcularCosteEnvio(vehiculoSeleccionado, almacenPrincipal, pedido.getDestino());
-        
+
         // Verificar balance
         if (jugador.getBalance() < costoTotal) {
             System.out.println("❌ Balance insuficiente para realizar el envío");
             return;
         }
+
+        // Restar el costo del balance del jugador
+        jugador.gastar(costoTotal);
 
         // Asignar vehículo al pedido
         vehiculoSeleccionado.asignarPedido(pedido);
