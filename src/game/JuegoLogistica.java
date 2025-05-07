@@ -14,6 +14,12 @@ import java.util.Set;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.IOException;
 
 /**
  * Clase principal que gestiona el juego de logística
@@ -29,12 +35,15 @@ public class JuegoLogistica {
     private int diaActual;
     private Calendar fechaActual;
     private String almacenPrincipal;
+    private String provincia;
     private String dificultad;
     private String modoJuego;
     private int satisfaccionClientes;
     private int enviosExitosos;
     private int enviosTotales;
     private int beneficiosAcumulados;
+    private int[] beneficiosPorDia;
+    private String fechaInicio;
     private static final double TASA_IMPUESTOS = 0.45;
     private static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
     private static final String[] PROVINCIAS = {
@@ -107,14 +116,14 @@ public class JuegoLogistica {
 
     /**
      * Constructor del juego
-     * @param almacenPrincipal Provincia seleccionada como almacén principal
+     * @param provincia Provincia seleccionada como almacén principal
      * @param dificultad Nivel de dificultad
      * @param nombreJugador Nombre del jugador
      * @param modoJuego Modo de juego seleccionado
      */
-    public JuegoLogistica(String almacenPrincipal, String dificultad, String nombreJugador, String modoJuego) {
-        // Normalizar el nombre del almacén principal
-        this.almacenPrincipal = normalizarNombreProvincia(almacenPrincipal);
+    public JuegoLogistica(String provincia, String dificultad, String nombreJugador, String modoJuego) {
+        this.provincia = provincia;
+        this.almacenPrincipal = normalizarNombreProvincia(provincia);
         this.dificultad = dificultad.toLowerCase();
         this.modoJuego = modoJuego.toLowerCase();
         this.jugador = new Jugador(nombreJugador, calcularBalanceInicial());
@@ -129,6 +138,11 @@ public class JuegoLogistica {
         this.enviosExitosos = 0;
         this.enviosTotales = 0;
         this.beneficiosAcumulados = 0;
+        this.beneficiosPorDia = new int[365]; // Máximo 365 días
+        
+        // Guardar fecha y hora de inicio
+        SimpleDateFormat formatoFechaHora = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        this.fechaInicio = formatoFechaHora.format(new Date());
     }
 
     /**
@@ -542,12 +556,177 @@ public class JuegoLogistica {
                 break;
             case "99":
                 mostrarEstadisticas();
+                guardarEstadisticas();
                 System.exit(0);
                 break;
             default:
                 System.out.println("\n❌ Opción no válida");
                 mostrarMenuPrincipal();
                 procesarOpcion(scanner.nextLine());
+        }
+    }
+
+    /**
+     * Guarda las estadísticas del jugador en el archivo de histórico
+     */
+    private void guardarEstadisticas() {
+        try {
+            FileWriter fw = new FileWriter("historico_jugadores.txt", true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            
+            // Calcular beneficios acumulados
+            int beneficiosAcumulados = 0;
+            for (int i = 0; i < diaActual; i++) {
+                beneficiosAcumulados += beneficiosPorDia[i];
+            }
+            
+            // Formato: modoJuego|nombreJugador|dias|dinero|enviosExitosos|satisfaccion|beneficios|fechaInicio|fechaFin|dificultad|ciudad
+            String linea = String.format("%s|%s|%d|%d|%d|%d|%d|%s|%s|%s|%s",
+                modoJuego,
+                jugador.getNombre(),
+                diaActual,
+                jugador.getPresupuesto(),
+                enviosExitosos,
+                satisfaccionClientes,
+                beneficiosAcumulados,
+                fechaInicio,
+                new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()),
+                dificultad,
+                provincia);
+            
+            bw.write(linea);
+            bw.newLine();
+            bw.close();
+            
+        } catch (IOException e) {
+            System.out.println("❌ Error al guardar estadísticas: " + e.getMessage());
+        }
+    }
+
+    private void mostrarHistoricoJugadores() {
+        try {
+            File archivo = new File("historico_jugadores.txt");
+            if (!archivo.exists()) {
+                System.out.println("\n📊 No hay registros de jugadores aún");
+                System.out.println("\nEscribe 0 para volver al menú principal...");
+                new Scanner(System.in).nextLine();
+                return;
+            }
+
+            BufferedReader br = new BufferedReader(new FileReader(archivo));
+            Map<String, List<JugadorHistorico>> jugadoresPorModo = new HashMap<>();
+            String linea;
+
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split("\\|");
+                if (datos.length == 10) {
+                    String modo = datos[0];
+                    String nombre = datos[1];
+                    int dias = Integer.parseInt(datos[2]);
+                    int dinero = Integer.parseInt(datos[3]);
+                    int envios = Integer.parseInt(datos[4]);
+                    int satisfaccion = Integer.parseInt(datos[5]);
+                    int beneficios = Integer.parseInt(datos[6]);
+                    String fechaInicio = datos[7];
+                    String fechaFin = datos[8];
+                    String dificultad = datos[9];
+
+                    JugadorHistorico jugador = new JugadorHistorico(nombre, dias, dinero, envios, satisfaccion, beneficios, fechaInicio, fechaFin, dificultad);
+                    jugadoresPorModo.computeIfAbsent(modo, k -> new ArrayList<>()).add(jugador);
+                }
+            }
+            br.close();
+
+            // Mostrar Top 5 para cada modo
+            for (Map.Entry<String, List<JugadorHistorico>> entry : jugadoresPorModo.entrySet()) {
+                String modo = entry.getKey();
+                List<JugadorHistorico> jugadores = entry.getValue();
+
+                // Ordenar por dificultad (descendente) y luego por dinero (descendente)
+                jugadores.sort((j1, j2) -> {
+                    int comparacionDificultad = obtenerPesoDificultad(j2.dificultad) - obtenerPesoDificultad(j1.dificultad);
+                    if (comparacionDificultad != 0) {
+                        return comparacionDificultad;
+                    }
+                    return j2.dinero - j1.dinero;
+                });
+
+                System.out.println("\n" + "=".repeat(50));
+                System.out.println("🏆 TOP 5 - MODO " + modo.toUpperCase() + " 🏆");
+                System.out.println("=".repeat(50));
+                
+                for (int i = 0; i < Math.min(5, jugadores.size()); i++) {
+                    JugadorHistorico j = jugadores.get(i);
+                    System.out.println("\n🥇 POSICIÓN " + (i + 1));
+                    System.out.println("👤 Jugador: " + j.nombre);
+                    System.out.println("🎮 Dificultad: " + obtenerEmojiDificultad(j.dificultad) + " " + j.dificultad.toUpperCase());
+                    System.out.println("📅 Días jugados: " + j.dias);
+                    System.out.println("💰 Balance final: " + j.dinero + "€");
+                    System.out.println("📦 Envíos exitosos: " + j.envios);
+                    System.out.println("😊 Satisfacción: " + j.satisfaccion + "%");
+                    System.out.println("💵 Beneficios: " + j.beneficios + "€");
+                    System.out.println("⏰ Duración: " + j.fechaInicio + " → " + j.fechaFin);
+                    System.out.println("-".repeat(50));
+                }
+            }
+
+            System.out.println("\nEscribe 0 para volver al menú principal...");
+            new Scanner(System.in).nextLine();
+
+        } catch (IOException e) {
+            System.out.println("\n❌ Error al leer el histórico: " + e.getMessage());
+            System.out.println("\nEscribe 0 para volver al menú principal...");
+            new Scanner(System.in).nextLine();
+        }
+    }
+
+    private static class JugadorHistorico {
+        String nombre;
+        int dias;
+        int dinero;
+        int envios;
+        int satisfaccion;
+        int beneficios;
+        String fechaInicio;
+        String fechaFin;
+        String dificultad;
+
+        public JugadorHistorico(String nombre, int dias, int dinero, int envios, int satisfaccion, int beneficios, String fechaInicio, String fechaFin, String dificultad) {
+            this.nombre = nombre;
+            this.dias = dias;
+            this.dinero = dinero;
+            this.envios = envios;
+            this.satisfaccion = satisfaccion;
+            this.beneficios = beneficios;
+            this.fechaInicio = fechaInicio;
+            this.fechaFin = fechaFin;
+            this.dificultad = dificultad;
+        }
+    }
+
+    private int obtenerPesoDificultad(String dificultad) {
+        switch (dificultad.toLowerCase()) {
+            case "hard":
+                return 3;
+            case "medium":
+                return 2;
+            case "easy":
+                return 1;
+            default:
+                return 0;
+        }
+    }
+
+    private String obtenerEmojiDificultad(String dificultad) {
+        switch (dificultad.toLowerCase()) {
+            case "hard":
+                return "🔥";
+            case "medium":
+                return "⚡";
+            case "easy":
+                return "⭐";
+            default:
+                return "❓";
         }
     }
 
