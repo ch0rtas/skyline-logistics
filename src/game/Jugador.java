@@ -11,18 +11,18 @@ import game.state.EstadoAgotado;
  */
 public class Jugador {
     private String nombre;
-    private int presupuesto;
+    private int balance;
     private int puntos;
     private EstadoJugador estado;
 
     /**
      * Constructor de la clase Jugador
      * @param nombre Nombre del jugador
-     * @param presupuestoInicial Presupuesto inicial
+     * @param balanceInicial Balance inicial
      */
-    public Jugador(String nombre, int presupuestoInicial) {
+    public Jugador(String nombre, int balanceInicial) {
         this.nombre = nombre;
-        this.presupuesto = presupuestoInicial;
+        this.balance = balanceInicial;
         this.puntos = 0;
         this.estado = new EstadoNormal();
     }
@@ -41,21 +41,21 @@ public class Jugador {
     public void recibirDanio(int danio) {
         int danioReal = (int) (danio * estado.getMultiplicadorDefensa());
         estado.recibirDanio(danioReal);
-        presupuesto -= danioReal;
+        balance -= danioReal;
         
-        // Actualizar estado según el presupuesto
+        // Actualizar estado según el balance
         actualizarEstado();
     }
 
     /**
-     * El jugador recupera presupuesto
+     * El jugador recupera balance
      * @param cantidad Cantidad a recuperar
      */
-    public void recuperarPresupuesto(int cantidad) {
-        estado.recuperarPresupuesto(cantidad);
-        presupuesto += cantidad;
+    public void recuperarBalance(int cantidad) {
+        estado.recuperarBalance(cantidad);
+        balance += cantidad;
         
-        // Actualizar estado según el presupuesto
+        // Actualizar estado según el balance
         actualizarEstado();
     }
 
@@ -68,12 +68,12 @@ public class Jugador {
     }
 
     /**
-     * Actualiza el estado del jugador según su presupuesto
+     * Actualiza el estado del jugador según su balance
      */
     private void actualizarEstado() {
-        if (presupuesto <= 20000) {
+        if (balance <= 20000) {
             estado = new EstadoAgotado();
-        } else if (presupuesto >= 80000) {
+        } else if (balance >= 80000) {
             estado = new EstadoEstresado();
         } else {
             estado = new EstadoNormal();
@@ -89,11 +89,11 @@ public class Jugador {
     }
 
     /**
-     * Obtiene el presupuesto actual
-     * @return int con el presupuesto
+     * Obtiene el balance actual
+     * @return int con el balance
      */
-    public int getPresupuesto() {
-        return presupuesto;
+    public int getBalance() {
+        return balance;
     }
 
     /**
@@ -117,7 +117,7 @@ public class Jugador {
      * @return boolean indicando si está derrotado
      */
     public boolean estaDerrotado() {
-        return presupuesto <= 0;
+        return balance <= 0;
     }
 
     /**
@@ -126,8 +126,8 @@ public class Jugador {
      * @return true si se pudo gastar, false si no hay suficiente dinero
      */
     public boolean gastar(int cantidad) {
-        presupuesto -= cantidad;
+        balance -= cantidad;
         actualizarEstado();
         return true;
     }
-} 
+}

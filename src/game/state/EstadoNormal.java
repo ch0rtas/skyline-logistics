@@ -16,8 +16,8 @@ public class EstadoNormal implements EstadoJugador {
     }
 
     @Override
-    public void recuperarPresupuesto(int presupuesto) {
-        System.out.println("El jugador recupera " + presupuesto + " de presupuesto");
+    public void recuperarBalance(int balance) {
+        System.out.println("El jugador recupera " + balance + " de balance");
     }
 
     @Override
@@ -34,4 +34,4 @@ public class EstadoNormal implements EstadoJugador {
     public double getMultiplicadorDefensa() {
         return 1.0;
     }
-} 
+}
