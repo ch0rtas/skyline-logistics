@@ -4,15 +4,12 @@ import state.core.EstadoPedido;
 import domain.model.pedido.Pedido;
 import state.states.Entregado;
 import state.states.Retrasado;
-import java.io.Serializable;
 
 /**
  * Implementación del estado EnTransito para los pedidos.
  * Representa el estado cuando un pedido está siendo transportado.
  */
-public class EnTransito implements EstadoPedido, Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class EnTransito implements EstadoPedido {
     @Override
     public void procesar(Pedido pedido) {
         System.out.println("Procesando pedido " + pedido.getId() + " en estado EnTransito");
@@ -41,4 +38,4 @@ public class EnTransito implements EstadoPedido, Serializable {
     public String getNombreEstado() {
         return "En Tránsito";
     }
-}
+} 

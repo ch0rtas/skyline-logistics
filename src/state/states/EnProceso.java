@@ -4,15 +4,11 @@ import state.core.EstadoPedido;
 import domain.model.pedido.Pedido;
 import state.states.EnTransito;
 
-import java.io.Serializable;
-
 /**
  * Implementación del estado EnProceso para los pedidos.
  * Representa el estado inicial de un pedido cuando se crea.
  */
-public class EnProceso implements EstadoPedido, Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class EnProceso implements EstadoPedido {
     @Override
     public void procesar(Pedido pedido) {
         System.out.println("Procesando pedido " + pedido.getId() + " en estado EnProceso");
@@ -39,4 +35,4 @@ public class EnProceso implements EstadoPedido, Serializable {
     public String getNombreEstado() {
         return "En Proceso";
     }
-}
+} 

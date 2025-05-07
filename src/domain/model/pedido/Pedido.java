@@ -3,15 +3,12 @@ package domain.model.pedido;
 import state.core.EstadoPedido;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import java.io.Serializable;
 
 /**
  * Clase que representa un pedido en el sistema.
  * Implementa el patrón State para gestionar su ciclo de vida.
  */
-public class Pedido implements Serializable {
-    private static final long serialVersionUID = 1L;
-    
+public class Pedido {
     private final String id;
     private final String origen;
     private final String destino;
@@ -186,4 +183,4 @@ public class Pedido implements Serializable {
     public String getNombreEstado() {
         return estado.getNombreEstado();
     }
-}
+} 
