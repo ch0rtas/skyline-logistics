@@ -42,6 +42,7 @@ public class JuegoLogistica {
     private int enviosExitosos;
     private int enviosTotales;
     private int beneficiosAcumulados;
+    private int gastosAcumulados = 0;
     private int[] beneficiosPorDia;
     private String fechaInicio;
     private static final double TASA_IMPUESTOS = 0.45;
@@ -805,106 +806,71 @@ public class JuegoLogistica {
         // Ajustar peso según el tipo de paquete
         switch (tipoPaquete) {
             case "NORMAL":
-                peso = 100 + random.nextInt(900); // 100-1000 kg
+                peso = 1000 + random.nextInt(4000);
                 break;
             case "REFRIGERADO":
-                peso = 200 + random.nextInt(800); // 200-1000 kg
+                peso = 500 + random.nextInt(2000);
                 break;
             case "CONGELADO":
-                peso = 500 + random.nextInt(1500); // 500-2000 kg
+                peso = 1000 + random.nextInt(3000);
                 break;
             case "PELIGROSO":
-                peso = 1000 + random.nextInt(4000); // 1000-5000 kg
+                peso = 500 + random.nextInt(1500);
                 break;
             case "ESCOLTADO":
-                peso = 50 + random.nextInt(450); // 50-500 kg
+                peso = 100 + random.nextInt(900);
                 break;
             case "FRÁGIL":
-                peso = 10 + random.nextInt(490); // 10-500 kg
+                peso = 100 + random.nextInt(500);
                 break;
             case "PERECEDERO":
-                peso = 50 + random.nextInt(450); // 50-500 kg
+                peso = 500 + random.nextInt(2000);
                 break;
             case "ALTO_VALOR":
-                peso = 10 + random.nextInt(90); // 10-100 kg
+                peso = 100 + random.nextInt(400);
                 break;
             case "SERES_VIVOS":
-                peso = 100 + random.nextInt(900); // 100-1000 kg
+                peso = 100 + random.nextInt(900);
                 break;
             default:
-                peso = 100 + random.nextInt(900);
+                peso = 1000 + random.nextInt(2000);
         }
-
-        // Seleccionar un destino aleatorio que no sea el almacén principal
+        
+        // Seleccionar origen y destino
+        String origen = CIUDADES[random.nextInt(CIUDADES.length)];
         String destino;
         do {
             destino = CIUDADES[random.nextInt(CIUDADES.length)];
-        } while (destino.equalsIgnoreCase(almacenPrincipal));
-
-        // Calcular distancia base
-        int distancia = obtenerDistancia(almacenPrincipal, destino);
+        } while (destino.equals(origen));
         
-        // Calcular coste base del envío (usando el vehículo más económico)
-        int costeBaseEnvio = distancia * 2; // 2€/km como mínimo (furgoneta)
-        
-        // Si es ruta marítima, usar barco como base
-        if (esRutaMaritima(almacenPrincipal, destino)) {
-            costeBaseEnvio = (int)(distancia * 3 * 1.5); // 3€/km * 1.5 por ser marítimo
+        // Calcular el coste mínimo basado en el vehículo más barato disponible
+        int costeMinimo = Integer.MAX_VALUE;
+        for (Vehiculo v : flota) {
+            if (v.estaDisponible() && v.puedeTransportarTipo(tipoPaquete)) {
+                int distancia = obtenerDistancia(origen, destino);
+                int costeViaje = distancia * v.getCostePorKm();
+                costeMinimo = Math.min(costeMinimo, costeViaje);
+            }
         }
         
-        // Si es ruta aérea, usar avión como base
-        if (esIsla(almacenPrincipal) || esIsla(destino)) {
-            costeBaseEnvio = (int)(distancia * 10 * 2.0); // 10€/km * 2.0 por ser aéreo
-        }
-
-        // Calcular pago base según peso, tipo y distancia
-        int pagoBase = peso * 2; // 2€ por kg base
-        
-        // Ajustar pago según tipo de paquete
-        switch (tipoPaquete) {
-            case "REFRIGERADO":
-                pagoBase *= 1.3; // 30% más
-                break;
-            case "CONGELADO":
-                pagoBase *= 1.5; // 50% más
-                break;
-            case "ESCOLTADO":
-                pagoBase *= 1.8; // 80% más
-                break;
-            case "PELIGROSO":
-                pagoBase *= 1.6; // 60% más
-                break;
-            case "FRÁGIL":
-                pagoBase *= 1.4; // 40% más
-                break;
-            case "PERECEDERO":
-                pagoBase *= 1.2; // 20% más
-                break;
-            case "ALTO_VALOR":
-                pagoBase *= 2.0; // 100% más
-                break;
-            case "SERES_VIVOS":
-                pagoBase *= 1.5; // 50% más
-                break;
+        // Si no hay vehículos disponibles, usar un coste base
+        if (costeMinimo == Integer.MAX_VALUE) {
+            costeMinimo = 1000;
         }
         
-        // Ajustar pago según distancia
-        pagoBase = (int)(pagoBase * (1 + (distancia / 2000.0))); // Aumenta 1% por cada 20km
+        // El pago base será al menos un 20% más que el coste mínimo
+        int pagoBase = (int)(costeMinimo * 1.2);
+        
+        // Añadir un bonus aleatorio entre 0% y 50%
+        pagoBase += (int)(pagoBase * random.nextDouble() * 0.5);
         
         // Ajustar pago según prioridad
         if (prioridad.equals("URGENTE")) {
-            pagoBase *= 1.5; // 50% más
+            pagoBase *= 1.5;
         } else if (prioridad.equals("BAJA")) {
-            pagoBase *= 0.8; // 20% menos
+            pagoBase *= 0.8;
         }
         
-        // Asegurar que el pago sea al menos 1.5 veces el coste base del envío
-        pagoBase = Math.max(pagoBase, (int)(costeBaseEnvio * 1.5));
-        
-        // Asegurar un pago mínimo para pedidos pequeños
-        pagoBase = Math.max(pagoBase, 2000); // Mínimo 2000€ para cualquier pedido
-
-        // Calcular fecha de entrega según la prioridad y el tipo de paquete
         Calendar fechaEntrega = (Calendar) fechaActual.clone();
         int diasBase;
         
@@ -1346,6 +1312,14 @@ public class JuegoLogistica {
         // Filtrar vehículos disponibles
         List<Vehiculo> vehiculosDisponibles = flota.stream()
             .filter(v -> v.estaDisponible() && v.puedeTransportarTipo(pedido.getTipoPaquete()) && v.getSalud() >= 10)
+            .filter(v -> {
+                // Si es un barco, verificar que tanto origen como destino sean marítimos
+                if (v.getTipo().equals("Barco")) {
+                    return Arrays.asList(CIUDADES_MARITIMAS).contains(almacenPrincipal) && 
+                           Arrays.asList(CIUDADES_MARITIMAS).contains(pedido.getDestino());
+                }
+                return true;
+            })
             .collect(Collectors.toList());
             
         if (vehiculosDisponibles.isEmpty()) {
@@ -1355,7 +1329,7 @@ public class JuegoLogistica {
         }
         
         // Calcular anchos máximos para cada columna
-        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "SALUD", "DESGASTE", "CARGAS PERMITIDAS", "FECHA ENTREGA"};
+        String[] encabezados = {"TIPO", "ID", "CAPACIDAD", "VELOCIDAD", "COSTE/KM", "SALUD", "DESGASTE", "CARGAS PERMITIDAS", "COSTE TOTAL", "FECHA ENTREGA"};
         int[] anchos = new int[encabezados.length];
         
         // Inicializar anchos con los encabezados
@@ -1365,8 +1339,35 @@ public class JuegoLogistica {
         
         // Calcular anchos máximos basados en el contenido
         for (Vehiculo vehiculo : vehiculosDisponibles) {
+            // Calcular tiempo de entrega basado en la velocidad y distancia
+            int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
+            int horasViaje = vehiculo.calcularTiempoEntrega(distancia);
+            int diasViaje = (int) Math.ceil(horasViaje / 24.0); // Convertir horas a días
+            
+            // Ajustar días según el tipo de vehículo y la distancia
+            switch (vehiculo.getTipo()) {
+                case "Furgoneta":
+                    diasViaje = (int) Math.ceil(diasViaje * 0.8); // 20% más rápido
+                    break;
+                case "Camión":
+                    diasViaje = (int) Math.ceil(diasViaje * 0.9); // 10% más rápido
+                    break;
+                case "Barco":
+                    diasViaje = (int) Math.ceil(diasViaje * 1.2); // 20% más lento
+                    break;
+                case "Avión":
+                    diasViaje = (int) Math.ceil(diasViaje * 0.5); // 50% más rápido
+                    break;
+            }
+            
+            // Asegurar un mínimo de 1 día de viaje
+            diasViaje = Math.max(1, diasViaje);
+            
             Calendar fechaEntrega = (Calendar) fechaActual.clone();
-            fechaEntrega.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
+            fechaEntrega.add(Calendar.DAY_OF_MONTH, diasViaje);
+
+            // Calcular coste total del envío
+            int costeTotal = calcularCosteEnvio(vehiculo, almacenPrincipal, pedido.getDestino());
 
             String[] valores = {
                 vehiculo.getTipo(),
@@ -1377,6 +1378,7 @@ public class JuegoLogistica {
                 vehiculo.getSalud() + "%",
                 vehiculo.getDesgastePorViaje() + "%",
                 String.join(", ", vehiculo.getTiposPaquetesPermitidos()),
+                "$" + costeTotal,
                 formatoFecha.format(fechaEntrega.getTime())
             };
 
@@ -1391,8 +1393,35 @@ public class JuegoLogistica {
         
         // Mostrar datos
         for (Vehiculo vehiculo : vehiculosDisponibles) {
+            // Calcular tiempo de entrega basado en la velocidad y distancia
+            int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
+            int horasViaje = vehiculo.calcularTiempoEntrega(distancia);
+            int diasViaje = (int) Math.ceil(horasViaje / 24.0); // Convertir horas a días
+            
+            // Ajustar días según el tipo de vehículo y la distancia
+            switch (vehiculo.getTipo()) {
+                case "Furgoneta":
+                    diasViaje = (int) Math.ceil(diasViaje * 0.8); // 20% más rápido
+                    break;
+                case "Camión":
+                    diasViaje = (int) Math.ceil(diasViaje * 0.9); // 10% más rápido
+                    break;
+                case "Barco":
+                    diasViaje = (int) Math.ceil(diasViaje * 1.2); // 20% más lento
+                    break;
+                case "Avión":
+                    diasViaje = (int) Math.ceil(diasViaje * 0.5); // 50% más rápido
+                    break;
+            }
+            
+            // Asegurar un mínimo de 1 día de viaje
+            diasViaje = Math.max(1, diasViaje);
+            
             Calendar fechaEntrega = (Calendar) fechaActual.clone();
-            fechaEntrega.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
+            fechaEntrega.add(Calendar.DAY_OF_MONTH, diasViaje);
+
+            // Calcular coste total del envío
+            int costeTotal = calcularCosteEnvio(vehiculo, almacenPrincipal, pedido.getDestino());
 
             String[] valores = {
                 vehiculo.getTipo(),
@@ -1403,6 +1432,7 @@ public class JuegoLogistica {
                 vehiculo.getSalud() + "%",
                 vehiculo.getDesgastePorViaje() + "%",
                 String.join(", ", vehiculo.getTiposPaquetesPermitidos()),
+                "$" + costeTotal,
                 formatoFecha.format(fechaEntrega.getTime())
             };
             System.out.println(generarFilaTabla(valores, anchos));
@@ -1460,6 +1490,7 @@ public class JuegoLogistica {
                 if (confirmacion.equals("S")) {
                     int multa = calcularMultaRechazo(pedido);
                     jugador.gastar(multa); // Restar la multa del balance del jugador
+                    gastosAcumulados += multa; // Añadir la multa a los gastos acumulados
                     pedidosPendientes.remove(pedido);
                     System.out.println("❌ Pedido #" + idPedido + " rechazado");
                     System.out.println("💰 Multa aplicada: $" + multa);
@@ -1487,6 +1518,7 @@ public class JuegoLogistica {
             if (confirmacion.equals("S")) {
                 int multa = calcularMultaRechazo(pedido);
                 jugador.gastar(multa); // Restar la multa del balance del jugador
+                gastosAcumulados += multa; // Añadir la multa a los gastos acumulados
                 pedidosPendientes.remove(pedido);
                 System.out.println("❌ Pedido #" + idPedido + " rechazado");
                 System.out.println("💰 Multa aplicada: $" + multa);
@@ -1531,6 +1563,7 @@ public class JuegoLogistica {
 
         // Restar el costo del balance del jugador
         jugador.gastar(costoTotal);
+        gastosAcumulados += costoTotal;
 
         // Asignar vehículo al pedido
         vehiculoSeleccionado.asignarPedido(pedido);
@@ -1565,9 +1598,6 @@ public class JuegoLogistica {
         if (vehiculoAfectado == null) {
             return;
         }
-        
-        // Aplicar desgaste normal por el viaje
-        vehiculoAfectado.aplicarDesgaste();
         
         // Posibilidad de incidente adicional
         if (random.nextDouble() < 0.3) { // 30% de probabilidad de incidente
@@ -1863,15 +1893,15 @@ public class JuegoLogistica {
      * Muestra las estadísticas actuales del juego
      */
     private void mostrarEstadisticas() {
-        System.out.println("\n=========== 📊 ESTADÍSTICAS 📊 ============");
-        System.out.println("📅 Días jugados: " + diaActual);
+        System.out.println("\n📊 ESTADÍSTICAS DEL DÍA " + diaActual);
+        System.out.println("==================================================");
+        System.out.println("💰 Balance actual: $" + jugador.getBalance());
+        System.out.println("💰 Beneficios acumulados: $" + (beneficiosAcumulados - gastosAcumulados));
+        System.out.println("🚚 Envíos totales: " + enviosTotales);
         System.out.println("✅ Envíos exitosos: " + enviosExitosos);
-        System.out.println("📦 Envíos totales: " + enviosTotales);
-        System.out.println("😊 Satisfacción de clientes: " + satisfaccionClientes + "%");
-        System.out.println("💵 Beneficios acumulados: " + beneficiosAcumulados + "€");
-        System.out.println("💰 Balance final: " + jugador.getBalance() + "€");
-        System.out.println("☠️ Días restantes para impuestos: " + (calcularDiasImpuestos() - (diaActual % calcularDiasImpuestos())));
-        System.out.println("===============================================");
+        System.out.println("❌ Envíos fallidos: " + (enviosTotales - enviosExitosos));
+        System.out.println("😊 Satisfacción clientes: " + satisfaccionClientes + "%");
+        System.out.println("==================================================");
     }
 
     /**
@@ -1940,7 +1970,7 @@ public class JuegoLogistica {
         fechaActual.add(Calendar.DAY_OF_MONTH, 1); // Añadir un día a la fecha actual
 
         System.out.println("\n==================================================");
-        System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ENTREGA FINAL");
+        System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ALMACÉN PRINCIPAL: \" + almacenPrincipal");
         System.out.println("==================================================");
         
         // Procesar envíos
@@ -1963,35 +1993,35 @@ public class JuegoLogistica {
         List<Pedido> pedidosCompletados = new ArrayList<>();
         
         for (Pedido pedido : pedidosEnCurso) {
-            pedido.setDiasRestantes(pedido.getDiasRestantes() - 1);
+            pedido.reducirDiasRestantes();
             
             if (pedido.getDiasRestantes() <= 0) {
-                int diasRetraso = Math.abs(pedido.getDiasRestantes());
                 int pagoOriginal = pedido.getPago();
                 int multa = 0;
+                int ganancia = pagoOriginal;
                 boolean exito = true;
                 String mensaje = "";
-
-                if (diasRetraso == 0) {
-                    // Entrega a tiempo
-                    mensaje = "✅ " + jugador.getNombre() + ", el envío #" + pedido.getId() + " se completó exitosamente";
-                    multa = 0;
-                } else if (diasRetraso == 1) {
-                    // 1 día de retraso: 35% de multa
-                    multa = (int)(pagoOriginal * 0.35);
-                    mensaje = "⚠️ " + jugador.getNombre() + ", el envío #" + pedido.getId() + " se completó con 1 día de retraso";
-                } else if (diasRetraso == 2) {
-                    // 2 días de retraso: 90% de multa
-                    multa = (int)(pagoOriginal * 0.90);
-                    mensaje = "⚠️ " + jugador.getNombre() + ", el envío #" + pedido.getId() + " se completó con 2 días de retraso";
-                } else {
-                    // Más de 2 días: fallo y 150% de multa
-                    multa = (int)(pagoOriginal * 1.50);
+                
+                // Verificar si hay retraso
+                Calendar fechaLlegada = (Calendar) fechaActual.clone();
+                Calendar fechaEntrega = pedido.getFechaEntregaCalendar();
+                int diasRetraso = calcularDiasRetraso(fechaLlegada, fechaEntrega);
+                
+                if (diasRetraso > 0) {
+                    multa = diasRetraso * pedido.getMultaPorDia();
+                    ganancia = pagoOriginal - multa;
+                    mensaje = "⚠️ Envío retrasado " + diasRetraso + " días";
                     exito = false;
-                    mensaje = "❌ " + jugador.getNombre() + ", el envío #" + pedido.getId() + " falló por exceso de retraso";
+                } else {
+                    int diasAdelanto = pedido.getDiasEntrega() - pedido.getDiasRestantes();
+                    if (diasAdelanto > 0) {
+                        ganancia = pagoOriginal + (diasAdelanto * pedido.getBonificacionPorDia());
+                        mensaje = "✅ Envío completado con " + diasAdelanto + " días de adelanto";
+                    } else {
+                        mensaje = "✅ Envío completado a tiempo";
+                    }
                 }
-
-                int ganancia = pagoOriginal - multa;
+                
                 if (exito) {
                     enviosExitosos++;
                     jugador.recuperarBalance(ganancia);

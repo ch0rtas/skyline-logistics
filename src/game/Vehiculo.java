@@ -221,7 +221,12 @@ public class Vehiculo {
      * @return int con las horas estimadas
      */
     public int calcularTiempoEntrega(int distancia) {
-        return (int) Math.ceil((double) distancia / velocidad);
+        // Considerar que los vehículos no pueden viajar 24 horas seguidas
+        // Asumimos que viajan 8 horas al día
+        double horasViaje = (double) distancia / velocidad;
+        // Añadir un 20% de tiempo extra por paradas, descansos, etc.
+        horasViaje *= 1.2;
+        return (int) Math.ceil(horasViaje);
     }
 
     /**
