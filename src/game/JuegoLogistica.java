@@ -1861,7 +1861,7 @@ public class JuegoLogistica {
      * Muestra las estadísticas actuales del juego
      */
     private void mostrarEstadisticas() {
-        System.out.println("\n=== 📊 ESTADÍSTICAS 📊 ===");
+        System.out.println("\n=========== 📊 ESTADÍSTICAS 📊 ============");
         System.out.println("📅 Días jugados: " + diaActual);
         System.out.println("✅ Envíos exitosos: " + enviosExitosos);
         System.out.println("📦 Envíos totales: " + enviosTotales);
@@ -1869,24 +1869,7 @@ public class JuegoLogistica {
         System.out.println("💵 Beneficios acumulados: " + beneficiosAcumulados + "€");
         System.out.println("💰 Balance final: " + jugador.getBalance() + "€");
         System.out.println("☠️ Días restantes para impuestos: " + (calcularDiasImpuestos() - (diaActual % calcularDiasImpuestos())));
-        
-        if (modoJuego.equals("libre") || modoJuego.equals("campaña") || jugador.getBalance() <= 0) {
-            return; // No mostrar mensajes de finalización en estadísticas
-        }
-        
-        if (modoJuego.equals("campaña")) {
-            if (verificarObjetivosCampaña()) {
-                System.out.println("\n🎉 ¡Felicidades! Has completado la campaña");
-            } else {
-                System.out.println("\n❌ No has alcanzado los objetivos de la campaña");
-            }
-        } else {
-            if (jugador.getBalance() <= 0) {
-                System.out.println("\n❌ GAME OVER - Te has quedado sin dinero");
-            } else {
-                System.out.println("\n🎉 ¡Felicidades! Has completado el modo Desafío");
-            }
-        }
+        System.out.println("===============================================");
     }
 
     /**
