@@ -68,29 +68,34 @@ public class Main {
      * @return String con la ciudad seleccionada
      */
     private static String seleccionarCiudad(Scanner scanner) {
-        System.out.println("\n🌍 SELECCIONA UNA CIUDAD:");
-        int columnas = 3;
-        int filas = (int) Math.ceil((double) CIUDADES.length / columnas);
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                int indice = i + j * filas;
-                if (indice < CIUDADES.length) {
-                    System.out.printf("%02d. %-20s", indice + 1, CIUDADES[indice]);
+        String opcion;
+        do {
+            System.out.println("\n🌍 SELECCIONA UNA CIUDAD:");
+            int columnas = 3;
+            int filas = (int) Math.ceil((double) CIUDADES.length / columnas);
+            for (int i = 0; i < filas; i++) {
+                for (int j = 0; j < columnas; j++) {
+                    int indice = i + j * filas;
+                    if (indice < CIUDADES.length) {
+                        System.out.printf("%02d. %-20s", indice + 1, CIUDADES[indice]);
+                    }
                 }
+                System.out.println();
             }
-            System.out.println();
-        }
-        System.out.print("\nOpción: ");
-        try {
-            int opcion = Integer.parseInt(scanner.nextLine());
-            if (opcion >= 1 && opcion <= CIUDADES.length) {
-                return CIUDADES[opcion - 1];
+            System.out.print("\nOpción: ");
+            opcion = scanner.nextLine();
+
+            try {
+                int opcionNumerica = Integer.parseInt(opcion);
+                if (opcionNumerica >= 1 && opcionNumerica <= CIUDADES.length) {
+                    return CIUDADES[opcionNumerica - 1];
+                }
+            } catch (NumberFormatException e) {
+                // Si la entrada no es un número, continuamos con el bucle
             }
-        } catch (NumberFormatException e) {
-            // Si la entrada no es un número, continuamos con el valor por defecto
-        }
-        System.out.println("❌ Opción no válida, seleccionando Madrid por defecto");
-        return "Madrid";
+
+            System.out.println("❌ Opción no válida, por favor selecciona una opción válida.");
+        } while (true);
     }
     
     /**
