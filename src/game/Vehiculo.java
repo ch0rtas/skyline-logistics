@@ -7,11 +7,14 @@ import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
+import java.io.Serializable;
 
 /**
  * Clase que representa un vehículo en la flota
  */
-public class Vehiculo {
+public class Vehiculo implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private String tipo;
     private String id;
     private Pedido pedidoAsignado;
@@ -215,4 +218,4 @@ public class Vehiculo {
     public Set<String> getTiposPaquetesPermitidos() {
         return tiposPaquetesPermitidos;
     }
-} 
+}
