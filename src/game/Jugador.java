@@ -126,11 +126,8 @@ public class Jugador {
      * @return true si se pudo gastar, false si no hay suficiente dinero
      */
     public boolean gastar(int cantidad) {
-        if (presupuesto >= cantidad) {
-            presupuesto -= cantidad;
-            actualizarEstado();
-            return true;
-        }
-        return false;
+        presupuesto -= cantidad;
+        actualizarEstado();
+        return true;
     }
 } 

@@ -75,8 +75,11 @@ public class Main {
                     // Seleccionar dificultad
                     String dificultad = seleccionarDificultad(scanner);
                     
+                    // Seleccionar modo de juego
+                    String modoJuego = seleccionarModoJuego(scanner);
+                    
                     // Iniciar juego
-                    game.JuegoLogistica juego = new game.JuegoLogistica(provincia, dificultad, nombreJugador);
+                    game.JuegoLogistica juego = new game.JuegoLogistica(provincia, dificultad, nombreJugador, modoJuego);
                     juego.iniciar();
                     break;
                 case "02":
@@ -114,7 +117,7 @@ public class Main {
      * @return String con la provincia seleccionada
      */
     private static String seleccionarProvincia(Scanner scanner) {
-        System.out.println("\n🌍 SELECCIONA UNA PROVINCIA:");
+        System.out.println("\n🌍 SELECCIONA UNA CIUDAD:");
         
         // Mostrar provincias en 3 columnas
         int columnas = 3;
@@ -171,5 +174,82 @@ public class Main {
                 System.out.println("❌ Opción no válida, seleccionando Medio por defecto");
                 return "medium";
         }
+    }
+
+    /**
+     * Permite al usuario seleccionar el modo de juego
+     * @param scanner Scanner para entrada de usuario
+     * @return String con el modo de juego seleccionado
+     */
+    private static String seleccionarModoJuego(Scanner scanner) {
+        String modoSeleccionado = null;
+        
+        while (modoSeleccionado == null) {
+            System.out.println("\n🎮 SELECCIONA EL MODO DE JUEGO:");
+            System.out.println("01. Modo Libre - Sin restricciones de tiempo ni recursos");
+            System.out.println("02. Modo Desafío - Gestión de recursos limitados");
+            System.out.println("03. Modo Campaña - Completa objetivos específicos (99. Para ver objetivos)");
+            System.out.print("\nOpción: ");
+            
+            String opcion = scanner.nextLine();
+            switch (opcion) {
+                case "01":
+                case "1":
+                    modoSeleccionado = "libre";
+                    break;
+                case "02":
+                case "2":
+                    modoSeleccionado = "desafio";
+                    break;
+                case "03":
+                case "3":
+                    modoSeleccionado = "campaña";
+                    break;
+                case "99":
+                    mostrarObjetivosCampaña();
+                    System.out.println("\nPresiona Enter para volver a la selección de modo...");
+                    scanner.nextLine();
+                    break;
+                default:
+                    System.out.println("❌ Opción no válida. Por favor, selecciona una opción válida.");
+                    break;
+            }
+        }
+        
+        if (modoSeleccionado.equals("campaña")) {
+            mostrarObjetivosCampaña();
+        }
+        
+        return modoSeleccionado;
+    }
+
+    /**
+     * Muestra los objetivos del Modo Campaña según la dificultad
+     */
+    private static void mostrarObjetivosCampaña() {
+        System.out.println("\n=== 🎯 OBJETIVOS DE LA CAMPAÑA 🎯 ===");
+        System.out.println("Para completar la campaña, deberás alcanzar las siguientes estadísticas:");
+        System.out.println("\n📊 OBJETIVOS MÍNIMOS:");
+        System.out.println("• Días jugados: 30");
+        System.out.println("• Envíos exitosos: 50");
+        System.out.println("• Satisfacción de clientes: 80%");
+        System.out.println("• Beneficios acumulados: 100,000€");
+        
+        System.out.println("\n🏆 OBJETIVOS AVANZADOS:");
+        System.out.println("• Días jugados: 60");
+        System.out.println("• Envíos exitosos: 100");
+        System.out.println("• Satisfacción de clientes: 90%");
+        System.out.println("• Beneficios acumulados: 250,000€");
+        
+        System.out.println("\n🌟 OBJETIVOS ÉLITE:");
+        System.out.println("• Días jugados: 100");
+        System.out.println("• Envíos exitosos: 200");
+        System.out.println("• Satisfacción de clientes: 95%");
+        System.out.println("• Beneficios acumulados: 500,000€");
+        
+        System.out.println("\n⚠️ NOTA: Los objetivos se ajustarán según la dificultad seleccionada.");
+        System.out.println("   - Fácil: 80% de los objetivos");
+        System.out.println("   - Medio: 100% de los objetivos");
+        System.out.println("   - Difícil: 120% de los objetivos");
     }
 } 
