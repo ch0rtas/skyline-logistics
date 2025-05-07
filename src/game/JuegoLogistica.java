@@ -421,35 +421,39 @@ public class JuegoLogistica {
      * Muestra el menú de reparación de vehículos
      */
     private void repararVehiculo() {
-        if (flota.isEmpty()) {
-            System.out.println("\n❌ No tienes vehículos para reparar");
-            mostrarMenuPartida();
-            return;
+        // Filtrar vehículos con menos del 100% de salud y que estén disponibles
+        List<Vehiculo> vehiculosReparables = flota.stream()
+            .filter(v -> v.getSalud() < 100 && v.getPedidoAsignado() == null)
+            .collect(Collectors.toList());
+
+        if (vehiculosReparables.isEmpty()) {
+            System.out.println("\n❌ No tienes vehículos disponibles para reparar");
+            return; // Evitar mostrar el menú partida dos veces
         }
 
         System.out.println("\n=== 🔧 REPARACIÓN DE VEHÍCULOS 🔧 ===");
         System.out.println("Balance actual: " + jugador.getBalance() + "€");
-        
-        for (int i = 0; i < flota.size(); i++) {
-            Vehiculo v = flota.get(i);
+
+        for (int i = 0; i < vehiculosReparables.size(); i++) {
+            Vehiculo v = vehiculosReparables.get(i);
             System.out.printf("\n%d. %s\n", i + 1, v.getNombre());
             System.out.println("   Salud: " + v.getSalud() + "%");
             System.out.println("   Coste de reparación: " + v.getCosteReparacion() + "€");
         }
-        
+
         System.out.println("\n0. Volver al menú principal");
         System.out.print("\nSeleccione un vehículo para reparar (0 para volver): ");
         String opcion = scanner.nextLine();
-        
+
         if (opcion.equals("0")) {
             mostrarMenuPartida();
             return;
         }
-        
+
         try {
             int indice = Integer.parseInt(opcion) - 1;
-            if (indice >= 0 && indice < flota.size()) {
-                Vehiculo vehiculoSeleccionado = flota.get(indice);
+            if (indice >= 0 && indice < vehiculosReparables.size()) {
+                Vehiculo vehiculoSeleccionado = vehiculosReparables.get(indice);
                 if (modoJuego.equals("libre") || jugador.getBalance() >= vehiculoSeleccionado.getCosteReparacion()) {
                     if (!modoJuego.equals("libre")) {
                         jugador.gastar(vehiculoSeleccionado.getCosteReparacion());
@@ -465,7 +469,7 @@ public class JuegoLogistica {
         } catch (NumberFormatException e) {
             System.out.println("\n❌ Por favor, introduce un número válido");
         }
-        
+
         repararVehiculo();
     }
 
@@ -1730,6 +1734,7 @@ public class JuegoLogistica {
             // Opción 3: Reparar (solo si hay coste de reparación)
             if (costeReparacion > 0) {
                 System.out.println("     03. Reparar (Coste: $" + costeReparacion + ")");
+
                 System.out.println("         • Nueva fecha de entrega: " + formatoFecha.format(fechaReparacion.getTime()));
                 if (diasRetrasoReparacion > 0) {
                     if (diasRetrasoReparacion == 1) {
