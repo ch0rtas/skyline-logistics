@@ -90,29 +90,29 @@ public class JuegoLogistica {
     private static final Map<String, Map<String, Integer>> OBJETIVOS_CAMPANA = new HashMap<>();
     
     static {
-        // Objetivos mínimos
-        Map<String, Integer> objetivosMinimos = new HashMap<>();
-        objetivosMinimos.put("dias", 30);
-        objetivosMinimos.put("enviosExitosos", 50);
-        objetivosMinimos.put("satisfaccion", 80);
-        objetivosMinimos.put("beneficios", 100000);
-        OBJETIVOS_CAMPANA.put("minimos", objetivosMinimos);
+        // Objetivos nivel fácil
+        Map<String, Integer> objetivosFacil = new HashMap<>();
+        objetivosFacil.put("dias", 30);
+        objetivosFacil.put("enviosExitosos", 100);
+        objetivosFacil.put("satisfaccion", 80);
+        objetivosFacil.put("beneficios", 100000);
+        OBJETIVOS_CAMPANA.put("facil", objetivosFacil);
         
-        // Objetivos avanzados
-        Map<String, Integer> objetivosAvanzados = new HashMap<>();
-        objetivosAvanzados.put("dias", 60);
-        objetivosAvanzados.put("enviosExitosos", 100);
-        objetivosAvanzados.put("satisfaccion", 90);
-        objetivosAvanzados.put("beneficios", 250000);
-        OBJETIVOS_CAMPANA.put("avanzados", objetivosAvanzados);
+        // Objetivos nivel medio
+        Map<String, Integer> objetivosMedio = new HashMap<>();
+        objetivosMedio.put("dias", 60);
+        objetivosMedio.put("enviosExitosos", 350);
+        objetivosMedio.put("satisfaccion", 90);
+        objetivosMedio.put("beneficios", 250000);
+        OBJETIVOS_CAMPANA.put("medio", objetivosMedio);
         
-        // Objetivos élite
-        Map<String, Integer> objetivosElite = new HashMap<>();
-        objetivosElite.put("dias", 100);
-        objetivosElite.put("enviosExitosos", 200);
-        objetivosElite.put("satisfaccion", 95);
-        objetivosElite.put("beneficios", 500000);
-        OBJETIVOS_CAMPANA.put("elite", objetivosElite);
+        // Objetivos nivel difícil
+        Map<String, Integer> objetivosDificil = new HashMap<>();
+        objetivosDificil.put("dias", 100);
+        objetivosDificil.put("enviosExitosos", 920);
+        objetivosDificil.put("satisfaccion", 95);
+        objetivosDificil.put("beneficios", 500000);
+        OBJETIVOS_CAMPANA.put("dificil", objetivosDificil);
     }
 
     /**
@@ -1341,24 +1341,28 @@ public class JuegoLogistica {
         for (Vehiculo vehiculo : vehiculosDisponibles) {
             // Calcular tiempo de entrega basado en la velocidad y distancia
             int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
-            int horasViaje = vehiculo.calcularTiempoEntrega(distancia);
-            int diasViaje = (int) Math.ceil(horasViaje / 24.0); // Convertir horas a días
             
-            // Ajustar días según el tipo de vehículo y la distancia
+            // Calcular horas de viaje basadas en la velocidad real del vehículo
+            double horasViaje = (double) distancia / vehiculo.getVelocidad();
+            
+            // Ajustar horas según el tipo de vehículo
             switch (vehiculo.getTipo()) {
                 case "Furgoneta":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.8); // 20% más rápido
+                    horasViaje *= 1.2; // 20% más lento por paradas y tráfico
                     break;
                 case "Camión":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.9); // 10% más rápido
+                    horasViaje *= 1.3; // 30% más lento por paradas y restricciones
                     break;
                 case "Barco":
-                    diasViaje = (int) Math.ceil(diasViaje * 1.2); // 20% más lento
+                    horasViaje *= 1.5; // 50% más lento por condiciones marítimas
                     break;
                 case "Avión":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.5); // 50% más rápido
+                    horasViaje *= 1.1; // 10% más lento por procedimientos aeroportuarios
                     break;
             }
+            
+            // Convertir horas a días (considerando 8 horas de trabajo por día)
+            int diasViaje = (int) Math.ceil(horasViaje / 8.0);
             
             // Asegurar un mínimo de 1 día de viaje
             diasViaje = Math.max(1, diasViaje);
@@ -1395,24 +1399,28 @@ public class JuegoLogistica {
         for (Vehiculo vehiculo : vehiculosDisponibles) {
             // Calcular tiempo de entrega basado en la velocidad y distancia
             int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
-            int horasViaje = vehiculo.calcularTiempoEntrega(distancia);
-            int diasViaje = (int) Math.ceil(horasViaje / 24.0); // Convertir horas a días
             
-            // Ajustar días según el tipo de vehículo y la distancia
+            // Calcular horas de viaje basadas en la velocidad real del vehículo
+            double horasViaje = (double) distancia / vehiculo.getVelocidad();
+            
+            // Ajustar horas según el tipo de vehículo
             switch (vehiculo.getTipo()) {
                 case "Furgoneta":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.8); // 20% más rápido
+                    horasViaje *= 1.2; // 20% más lento por paradas y tráfico
                     break;
                 case "Camión":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.9); // 10% más rápido
+                    horasViaje *= 1.3; // 30% más lento por paradas y restricciones
                     break;
                 case "Barco":
-                    diasViaje = (int) Math.ceil(diasViaje * 1.2); // 20% más lento
+                    horasViaje *= 1.5; // 50% más lento por condiciones marítimas
                     break;
                 case "Avión":
-                    diasViaje = (int) Math.ceil(diasViaje * 0.5); // 50% más rápido
+                    horasViaje *= 1.1; // 10% más lento por procedimientos aeroportuarios
                     break;
             }
+            
+            // Convertir horas a días (considerando 8 horas de trabajo por día)
+            int diasViaje = (int) Math.ceil(horasViaje / 8.0);
             
             // Asegurar un mínimo de 1 día de viaje
             diasViaje = Math.max(1, diasViaje);
@@ -1970,7 +1978,7 @@ public class JuegoLogistica {
         fechaActual.add(Calendar.DAY_OF_MONTH, 1); // Añadir un día a la fecha actual
 
         System.out.println("\n==================================================");
-        System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ALMACÉN PRINCIPAL: \" + almacenPrincipal");
+        System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ALMACÉN PRINCIPAL: " + almacenPrincipal);
         System.out.println("==================================================");
         
         // Procesar envíos
@@ -1978,6 +1986,11 @@ public class JuegoLogistica {
         
         // Procesar impuestos
         procesarImpuestos();
+        
+        // Verificar objetivos de campaña
+        if (modoJuego.equals("campaña")) {
+            verificarObjetivosCampaña();
+        }
         
         // Generar nuevos vehículos en el mercado
         generarVehiculosMercado();
@@ -2112,48 +2125,37 @@ public class JuegoLogistica {
             return false;
         }
 
-        // Obtener multiplicador según la dificultad
-        double multiplicador = 1.0;
-        switch (dificultad) {
-            case "easy":
-                multiplicador = 0.8;
-                break;
-            case "hard":
-                multiplicador = 1.2;
-                break;
+        // Obtener objetivos según la dificultad
+        Map<String, Integer> objetivos = OBJETIVOS_CAMPANA.get(dificultad);
+        if (objetivos == null) {
+            return false;
         }
 
-        // Verificar objetivos mínimos
-        Map<String, Integer> objetivosMinimos = OBJETIVOS_CAMPANA.get("minimos");
-        boolean objetivosMinimosAlcanzados = 
-            diaActual >= (int)(objetivosMinimos.get("dias") * multiplicador) &&
-            enviosExitosos >= (int)(objetivosMinimos.get("enviosExitosos") * multiplicador) &&
-            satisfaccionClientes >= (int)(objetivosMinimos.get("satisfaccion") * multiplicador) &&
-            beneficiosAcumulados >= (int)(objetivosMinimos.get("beneficios") * multiplicador);
+        // Verificar si se ha alcanzado el día máximo
+        if (diaActual >= objetivos.get("dias")) {
+            // Verificar el resto de objetivos
+            boolean objetivosAlcanzados = 
+                enviosExitosos >= objetivos.get("enviosExitosos") &&
+                satisfaccionClientes >= objetivos.get("satisfaccion") &&
+                beneficiosAcumulados >= objetivos.get("beneficios");
 
-        // Verificar objetivos avanzados
-        Map<String, Integer> objetivosAvanzados = OBJETIVOS_CAMPANA.get("avanzados");
-        boolean objetivosAvanzadosAlcanzados = 
-            diaActual >= (int)(objetivosAvanzados.get("dias") * multiplicador) &&
-            enviosExitosos >= (int)(objetivosAvanzados.get("enviosExitosos") * multiplicador) &&
-            satisfaccionClientes >= (int)(objetivosAvanzados.get("satisfaccion") * multiplicador) &&
-            beneficiosAcumulados >= (int)(objetivosAvanzados.get("beneficios") * multiplicador);
+            // Mostrar resultado final
+            System.out.println("\n=== 🎯 RESULTADO DE LA CAMPAÑA 🎯 ===");
+            System.out.println("Nivel: " + dificultad.toUpperCase());
+            System.out.println("Días jugados: " + diaActual + "/" + objetivos.get("dias"));
+            System.out.println("Envíos exitosos: " + enviosExitosos + "/" + objetivos.get("enviosExitosos"));
+            System.out.println("Satisfacción: " + satisfaccionClientes + "%/" + objetivos.get("satisfaccion") + "%");
+            System.out.println("Beneficios: " + beneficiosAcumulados + "€/" + objetivos.get("beneficios") + "€");
+            System.out.println("\nResultado: " + (objetivosAlcanzados ? "✅ VICTORIA" : "❌ DERROTA"));
 
-        // Verificar objetivos élite
-        Map<String, Integer> objetivosElite = OBJETIVOS_CAMPANA.get("elite");
-        boolean objetivosEliteAlcanzados = 
-            diaActual >= (int)(objetivosElite.get("dias") * multiplicador) &&
-            enviosExitosos >= (int)(objetivosElite.get("enviosExitosos") * multiplicador) &&
-            satisfaccionClientes >= (int)(objetivosElite.get("satisfaccion") * multiplicador) &&
-            beneficiosAcumulados >= (int)(objetivosElite.get("beneficios") * multiplicador);
+            // Guardar estadísticas
+            guardarEstadisticas();
+            
+            // Terminar el juego
+            System.exit(0);
+        }
 
-        // Mostrar progreso
-        System.out.println("\n=== 📊 PROGRESO DE LA CAMPAÑA 📊 ===");
-        System.out.println("Objetivos Mínimos: " + (objetivosMinimosAlcanzados ? "✅" : "❌"));
-        System.out.println("Objetivos Avanzados: " + (objetivosAvanzadosAlcanzados ? "✅" : "❌"));
-        System.out.println("Objetivos Élite: " + (objetivosEliteAlcanzados ? "✅" : "❌"));
-
-        return objetivosMinimosAlcanzados;
+        return false;
     }
 
     /**
@@ -2163,6 +2165,7 @@ public class JuegoLogistica {
         if (jugador.getBalance() <= 0) {
             System.out.println("\n❌ Has perdido. Tu balance ha llegado a 0€.");
             guardarEstadisticas();
+            System.out.println("📊 Tus estadísticas han sido guardadas en el histórico.");
             System.out.println("📊 Tus estadísticas han sido guardadas en el histórico.");
             System.exit(0);
         }
