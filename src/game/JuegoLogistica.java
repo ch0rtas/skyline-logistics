@@ -240,7 +240,7 @@ public class JuegoLogistica {
         generarPedidosDia();
         
         while (!jugadorDerrotado()) {
-            mostrarMenuPrincipal();
+            mostrarMenuPartida();
             procesarOpcion(scanner.nextLine());
         }
         
@@ -393,7 +393,7 @@ public class JuegoLogistica {
             System.out.println(generarFilaTabla(valores, anchos));
         }
 
-        System.out.println("\n01. Volver al menú principal");
+        System.out.println("\n01. Volver al menú partida");
         System.out.println("02. Reparar vehículo");
         System.out.println("03. Ver mercado de vehículos");
         System.out.print("\nSeleccione una opción: ");
@@ -402,15 +402,14 @@ public class JuegoLogistica {
         switch (opcion) {
             case "01":
             case "1":
-                mostrarMenuPrincipal();
-                break;
+                return;
             case "02":
             case "2":
                 repararVehiculo();
                 break;
             case "03":
             case "3":
-            mostrarMercadoVehiculos();
+                mostrarMercadoVehiculos();
                 break;
             default:
                 System.out.println("\n❌ Opción no válida");
@@ -424,7 +423,7 @@ public class JuegoLogistica {
     private void repararVehiculo() {
         if (flota.isEmpty()) {
             System.out.println("\n❌ No tienes vehículos para reparar");
-            mostrarMenuPrincipal();
+            mostrarMenuPartida();
             return;
         }
 
@@ -443,7 +442,7 @@ public class JuegoLogistica {
         String opcion = scanner.nextLine();
         
         if (opcion.equals("0")) {
-            mostrarMenuPrincipal();
+            mostrarMenuPartida();
             return;
         }
         
@@ -491,7 +490,7 @@ public class JuegoLogistica {
         String opcion = scanner.nextLine();
         
         if (opcion.equals("0")) {
-            mostrarMenuPrincipal();
+            mostrarMenuPartida();
             return;
         }
         
@@ -522,7 +521,7 @@ public class JuegoLogistica {
     /**
      * Muestra el menú principal
      */
-    private void mostrarMenuPrincipal() {
+    private void mostrarMenuPartida() {
         System.out.println("\n==================================================");
         System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ALMACÉN PRINCIPAL: " + almacenPrincipal);
         System.out.println("==================================================");
@@ -573,7 +572,7 @@ public class JuegoLogistica {
                 break;
             default:
                 System.out.println("\n❌ Opción no válida");
-                mostrarMenuPrincipal();
+                mostrarMenuPartida();
                 procesarOpcion(scanner.nextLine());
         }
     }
@@ -1935,7 +1934,7 @@ public class JuegoLogistica {
     private void pasarDia() {
         if (!pedidosPendientes.isEmpty()) {
             System.out.println("\n❌ " + jugador.getNombre() + ", no puedes pasar al siguiente día con pedidos pendientes");
-            mostrarMenuPrincipal();
+            mostrarMenuPartida();
             procesarOpcion(scanner.nextLine());
             return;
         }
