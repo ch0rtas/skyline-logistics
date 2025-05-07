@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Clase que representa un vehículo en la flota
@@ -18,8 +19,12 @@ public class Vehiculo {
     private int capacidad;
     private int velocidad; // km/h
     private int costePorKm;
-    private Set<String> tiposPaquetesPermitidos;
+    private List<String> tiposPaquetesPermitidos;
     private static final Random random = new Random();
+    private int salud; // Porcentaje de salud del vehículo (0-100)
+    private int desgastePorViaje; // Porcentaje de desgaste por viaje
+    private int consumo;
+    private int precio;
     
     private static final Map<String, Map<String, int[]>> RANGOS_VEHICULOS = new HashMap<>();
     
@@ -62,8 +67,30 @@ public class Vehiculo {
     public Vehiculo(String tipo, String id, String... tiposPaquetes) {
         this.tipo = tipo;
         this.id = id;
-        this.tiposPaquetesPermitidos = new HashSet<>();
-        this.tiposPaquetesPermitidos.add("NORMAL"); // Todos los vehículos pueden transportar carga normal
+        this.pedidoAsignado = null;
+        this.tiposPaquetesPermitidos = new ArrayList<>();
+        this.salud = 100; // Inicialmente al 100%
+        
+        // Calcular desgaste por viaje según el tipo de vehículo
+        switch (tipo.toLowerCase()) {
+            case "furgoneta":
+                this.desgastePorViaje = 5;
+                break;
+            case "camión":
+                this.desgastePorViaje = 8;
+                break;
+            case "barco":
+                this.desgastePorViaje = 3;
+                break;
+            case "avión":
+                this.desgastePorViaje = 10;
+                break;
+            default:
+                this.desgastePorViaje = 5;
+        }
+        
+        // Todos los vehículos pueden transportar carga normal
+        this.tiposPaquetesPermitidos.add("NORMAL");
         
         // Añadir tipos específicos si se proporcionan
         for (String tipoPaquete : tiposPaquetes) {
@@ -94,6 +121,9 @@ public class Vehiculo {
             this.velocidad = 60;
             this.costePorKm = 5;
         }
+
+        this.consumo = calcularConsumo();
+        this.precio = calcularPrecio();
     }
 
     /**
@@ -105,22 +135,17 @@ public class Vehiculo {
      * @param costePorKm Coste por kilómetro
      * @param tiposPaquetes Tipos de paquetes que puede transportar el vehículo
      */
-    public Vehiculo(String tipo, String id, int capacidad, int velocidad, int costePorKm, String... tiposPaquetes) {
+    public Vehiculo(String tipo, String id, int capacidad, int velocidad, int costePorKm, List<String> tiposPaquetesPermitidos) {
         this.tipo = tipo;
         this.id = id;
         this.capacidad = capacidad;
         this.velocidad = velocidad;
         this.costePorKm = costePorKm;
         this.pedidoAsignado = null;
-        this.tiposPaquetesPermitidos = new HashSet<>();
-        
-        // Todos los vehículos pueden transportar paquetes normales
-        this.tiposPaquetesPermitidos.add("NORMAL");
-        
-        // Añadir los tipos de paquetes específicos
-        for (String tipoPaquete : tiposPaquetes) {
-            this.tiposPaquetesPermitidos.add(tipoPaquete);
-        }
+        this.tiposPaquetesPermitidos = tiposPaquetesPermitidos;
+        this.salud = 100;
+        this.consumo = calcularConsumo();
+        this.precio = calcularPrecio();
     }
 
     /**
@@ -196,7 +221,12 @@ public class Vehiculo {
      * @return int con las horas estimadas
      */
     public int calcularTiempoEntrega(int distancia) {
-        return (int) Math.ceil((double) distancia / velocidad);
+        // Considerar que los vehículos no pueden viajar 24 horas seguidas
+        // Asumimos que viajan 8 horas al día
+        double horasViaje = (double) distancia / velocidad;
+        // Añadir un 20% de tiempo extra por paradas, descansos, etc.
+        horasViaje *= 1.2;
+        return (int) Math.ceil(horasViaje);
     }
 
     /**
@@ -212,7 +242,90 @@ public class Vehiculo {
      * Obtiene los tipos de paquetes que puede transportar el vehículo
      * @return Set con los tipos de paquetes permitidos
      */
-    public Set<String> getTiposPaquetesPermitidos() {
+    public List<String> getTiposPaquetesPermitidos() {
         return tiposPaquetesPermitidos;
+    }
+
+    /**
+     * Obtiene la salud actual del vehículo
+     * @return int con el porcentaje de salud (0-100)
+     */
+    public int getSalud() {
+        return salud;
+    }
+
+    /**
+     * Obtiene el desgaste por viaje
+     * @return int con el porcentaje de desgaste por viaje
+     */
+    public int getDesgastePorViaje() {
+        return desgastePorViaje;
+    }
+
+    /**
+     * Aplica el desgaste por viaje al vehículo
+     */
+    public void aplicarDesgaste() {
+        salud = Math.max(0, salud - desgastePorViaje);
+    }
+
+    /**
+     * Calcula el coste de reparación del vehículo
+     * @return int con el coste de reparación
+     */
+    public int calcularCosteReparacion() {
+        int costeBase = 0;
+        switch (tipo.toLowerCase()) {
+            case "furgoneta":
+                costeBase = 1000;
+                break;
+            case "camión":
+                costeBase = 2000;
+                break;
+            case "barco":
+                costeBase = 5000;
+                break;
+            case "avión":
+                costeBase = 10000;
+                break;
+        }
+        
+        // El coste aumenta según el daño que tenga
+        int porcentajeDano = 100 - salud;
+        return costeBase + (costeBase * porcentajeDano / 100);
+    }
+
+    /**
+     * Repara el vehículo
+     * @return int con el coste de la reparación
+     */
+    public int reparar() {
+        int coste = calcularCosteReparacion();
+        salud = 100;
+        return coste;
+    }
+
+    public String getNombre() {
+        return tipo + " " + id;
+    }
+
+    public int getCosteReparacion() {
+        return (100 - salud) * 100; // 100€ por cada punto de salud perdido
+    }
+
+    public int getConsumo() {
+        return consumo;
+    }
+
+    public int getPrecio() {
+        return precio;
+    }
+
+    private int calcularConsumo() {
+        return (capacidad / 100) + (velocidad / 10); // Consumo base basado en capacidad y velocidad
+    }
+
+    private int calcularPrecio() {
+        return (capacidad * 2) + (velocidad * 10) + (costePorKm * 100) + (tiposPaquetesPermitidos.size() * 1000);
     }
 } 

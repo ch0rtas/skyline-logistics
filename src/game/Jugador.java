@@ -1,62 +1,22 @@
 package game;
 
-import game.state.EstadoJugador;
-import game.state.EstadoNormal;
-import game.state.EstadoEstresado;
-import game.state.EstadoAgotado;
-
 /**
  * Clase que representa al jugador en el juego.
- * Implementa el patrón State para gestionar sus diferentes estados.
  */
 public class Jugador {
     private String nombre;
-    private int presupuesto;
+    private int balance;
     private int puntos;
-    private EstadoJugador estado;
 
     /**
-     * Constructor de la clase Jugador
+     * Constructor que inicializa el jugador con un nombre y un balance inicial.
      * @param nombre Nombre del jugador
-     * @param presupuestoInicial Presupuesto inicial
+     * @param balanceInicial Balance inicial del jugador
      */
-    public Jugador(String nombre, int presupuestoInicial) {
+    public Jugador(String nombre, int balanceInicial) {
         this.nombre = nombre;
-        this.presupuesto = presupuestoInicial;
-        this.puntos = 0;
-        this.estado = new EstadoNormal();
-    }
-
-    /**
-     * Procesa el turno del jugador
-     */
-    public void procesarTurno() {
-        estado.procesarTurno();
-    }
-
-    /**
-     * El jugador recibe daño
-     * @param danio Cantidad de daño recibido
-     */
-    public void recibirDanio(int danio) {
-        int danioReal = (int) (danio * estado.getMultiplicadorDefensa());
-        estado.recibirDanio(danioReal);
-        presupuesto -= danioReal;
-        
-        // Actualizar estado según el presupuesto
-        actualizarEstado();
-    }
-
-    /**
-     * El jugador recupera presupuesto
-     * @param cantidad Cantidad a recuperar
-     */
-    public void recuperarPresupuesto(int cantidad) {
-        estado.recuperarPresupuesto(cantidad);
-        presupuesto += cantidad;
-        
-        // Actualizar estado según el presupuesto
-        actualizarEstado();
+        this.balance = balanceInicial;
+        this.puntos = 0; // Inicializamos los puntos en 0
     }
 
     /**
@@ -68,16 +28,11 @@ public class Jugador {
     }
 
     /**
-     * Actualiza el estado del jugador según su presupuesto
+     * Recupera una cantidad de balance para el jugador.
+     * @param cantidad Cantidad a recuperar
      */
-    private void actualizarEstado() {
-        if (presupuesto <= 20000) {
-            estado = new EstadoAgotado();
-        } else if (presupuesto >= 80000) {
-            estado = new EstadoEstresado();
-        } else {
-            estado = new EstadoNormal();
-        }
+    public void recuperarBalance(int cantidad) {
+        balance += cantidad;
     }
 
     /**
@@ -89,11 +44,11 @@ public class Jugador {
     }
 
     /**
-     * Obtiene el presupuesto actual
-     * @return int con el presupuesto
+     * Obtiene el balance actual
+     * @return int con el balance
      */
-    public int getPresupuesto() {
-        return presupuesto;
+    public int getBalance() {
+        return balance;
     }
 
     /**
@@ -105,18 +60,20 @@ public class Jugador {
     }
 
     /**
-     * Obtiene el estado actual
-     * @return EstadoJugador actual
-     */
-    public EstadoJugador getEstado() {
-        return estado;
-    }
-
-    /**
      * Verifica si el jugador está derrotado
      * @return boolean indicando si está derrotado
      */
     public boolean estaDerrotado() {
-        return presupuesto <= 0;
+        return balance <= 0;
     }
-} 
+
+    /**
+     * El jugador gasta una cantidad de dinero
+     * @param cantidad Cantidad a gastar
+     * @return true si se pudo gastar, false si no hay suficiente dinero
+     */
+    public boolean gastar(int cantidad) {
+        balance -= cantidad;
+        return true;
+    }
+}
