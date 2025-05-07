@@ -99,13 +99,20 @@ public class Main {
      * @return String con la dificultad seleccionada
      */
     private static String seleccionarDificultad(Scanner scanner) {
-        System.out.println("\n🎮 SELECCIONA LA DIFICULTAD:");
-        System.out.println("01. Fácil");
-        System.out.println("02. Medio");
-        System.out.println("03. Difícil");
-        System.out.print("\nOpción: ");
-        
-        String opcion = scanner.nextLine();
+        String opcion;
+        do {
+            System.out.println("\n🎮 SELECCIONA LA DIFICULTAD:");
+            System.out.println("01. Fácil");
+            System.out.println("02. Medio");
+            System.out.println("03. Difícil");
+            System.out.print("\nOpción: ");
+            opcion = scanner.nextLine();
+
+            if (!opcion.equals("01") && !opcion.equals("1") && !opcion.equals("02") && !opcion.equals("2") && !opcion.equals("03") && !opcion.equals("3")) {
+                System.out.println("❌ Opción no válida. Por favor, selecciona una opción válida.");
+            }
+        } while (!opcion.equals("01") && !opcion.equals("1") && !opcion.equals("02") && !opcion.equals("2") && !opcion.equals("03") && !opcion.equals("3"));
+
         switch (opcion) {
             case "01":
             case "1":
@@ -117,8 +124,7 @@ public class Main {
             case "3":
                 return "hard";
             default:
-                System.out.println("❌ Opción no válida, seleccionando Medio por defecto");
-                return "medium";
+                return "medium"; // Esto nunca debería ocurrir debido al bucle
         }
     }
 
