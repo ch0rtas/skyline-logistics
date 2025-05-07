@@ -35,7 +35,7 @@ public class JuegoLogistica {
     private int diaActual;
     private Calendar fechaActual;
     private String almacenPrincipal;
-    private String provincia;
+    private String ciudad;
     private String dificultad;
     private String modoJuego;
     private int satisfaccionClientes;
@@ -46,24 +46,24 @@ public class JuegoLogistica {
     private String fechaInicio;
     private static final double TASA_IMPUESTOS = 0.45;
     private static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
-    private static final String[] PROVINCIAS = {
+    private static final String[] CIUDADES = {
         "Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza",
         "Málaga", "Murcia", "Palma de Mallorca", "Las Palmas", "Bilbao",
         "Alicante", "Córdoba", "Valladolid", "Vigo", "Gijón"
     };
 
-    // Provincias que son islas
+    // Ciudades que son islas
     private static final String[] ISLAS = {
         "Palma de Mallorca", "Las Palmas"
     };
 
-    // Provincias con acceso marítimo (puertos)
-    private static final String[] PROVINCIAS_MARITIMAS = {
+    // Ciudades con acceso marítimo (puertos)
+    private static final String[] CIUDADES_MARITIMAS = {
         "Barcelona", "Valencia", "Málaga", "Bilbao", "Alicante", "Vigo", "Gijón",
         "Palma de Mallorca", "Las Palmas"
     };
 
-    // Matriz de distancias entre provincias (en km)
+    // Matriz de distancias entre ciudades (en km)
     private static final int[][] DISTANCIAS = {
         // Madrid, Barcelona, Valencia, Sevilla, Zaragoza, Málaga, Murcia, Palma, Las Palmas, Bilbao, Alicante, Córdoba, Valladolid, Vigo, Gijón
         {0, 621, 352, 538, 325, 530, 400, 800, 1800, 395, 420, 400, 193, 599, 450}, // Madrid
@@ -116,14 +116,14 @@ public class JuegoLogistica {
 
     /**
      * Constructor del juego
-     * @param provincia Provincia seleccionada como almacén principal
+     * @param ciudad Ciudad seleccionada como almacén principal
      * @param dificultad Nivel de dificultad
      * @param nombreJugador Nombre del jugador
      * @param modoJuego Modo de juego seleccionado
      */
-    public JuegoLogistica(String provincia, String dificultad, String nombreJugador, String modoJuego) {
-        this.provincia = provincia;
-        this.almacenPrincipal = normalizarNombreProvincia(provincia);
+    public JuegoLogistica(String ciudad, String dificultad, String nombreJugador, String modoJuego) {
+        this.ciudad = ciudad;
+        this.almacenPrincipal = normalizarNombreCiudad(ciudad);
         this.dificultad = dificultad.toLowerCase();
         this.modoJuego = modoJuego.toLowerCase();
         this.jugador = new Jugador(nombreJugador, calcularBalanceInicial());
@@ -592,7 +592,7 @@ public class JuegoLogistica {
                 fechaInicio,
                 new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()),
                 dificultad,
-                provincia);
+                ciudad);
             
             bw.write(linea);
             bw.newLine();
@@ -821,7 +821,7 @@ public class JuegoLogistica {
         // Seleccionar un destino aleatorio que no sea el almacén principal
         String destino;
         do {
-            destino = PROVINCIAS[random.nextInt(PROVINCIAS.length)];
+            destino = CIUDADES[random.nextInt(CIUDADES.length)];
         } while (destino.equalsIgnoreCase(almacenPrincipal));
 
         // Calcular distancia base
@@ -1168,99 +1168,14 @@ public class JuegoLogistica {
     }
 
     /**
-     * Obtiene la distancia entre dos provincias
-     * @param origen Provincia de origen
-     * @param destino Provincia de destino
-     * @return int con la distancia en km
-     */
-    private int obtenerDistancia(String origen, String destino) {
-        int indiceOrigen = -1;
-        int indiceDestino = -1;
-        
-        for (int i = 0; i < PROVINCIAS.length; i++) {
-            if (PROVINCIAS[i].equalsIgnoreCase(origen)) {
-                indiceOrigen = i;
-            }
-            if (PROVINCIAS[i].equalsIgnoreCase(destino)) {
-                indiceDestino = i;
-            }
-        }
-        
-        if (indiceOrigen == -1 || indiceDestino == -1) {
-            return 0;
-        }
-        
-        return DISTANCIAS[indiceOrigen][indiceDestino];
-    }
-
-    /**
-     * Verifica si una ruta es marítima
-     * @param origen Provincia de origen
-     * @param destino Provincia de destino
-     * @return true si es una ruta marítima, false si no
-     */
-    private boolean esRutaMaritima(String origen, String destino) {
-        // Normalizar nombres de provincias
-        String origenNormalizado = normalizarNombreProvincia(origen);
-        String destinoNormalizado = normalizarNombreProvincia(destino);
-        
-        boolean origenEsIsla = esIsla(origenNormalizado);
-        boolean destinoEsIsla = esIsla(destinoNormalizado);
-        boolean origenEsCostero = esProvinciaCostera(origenNormalizado);
-        boolean destinoEsCostero = esProvinciaCostera(destinoNormalizado);
-        
-        // Es ruta marítima si:
-        // 1. El origen es una isla y el destino es costero o isla
-        // 2. El origen es costero y el destino es una isla
-        // 3. Ambos son costeros
-        return (origenEsIsla && (destinoEsCostero || destinoEsIsla)) ||
-               (origenEsCostero && destinoEsIsla) ||
-               (origenEsCostero && destinoEsCostero);
-    }
-
-    /**
-     * Verifica si una provincia es costera
-     * @param provincia Nombre de la provincia
-     * @return true si es costera, false si no
-     */
-    private boolean esProvinciaCostera(String provincia) {
-        // Normalizar el nombre de la provincia
-        String provinciaNormalizada = normalizarNombreProvincia(provincia);
-        
-        for (String puerto : PROVINCIAS_MARITIMAS) {
-            if (puerto.equalsIgnoreCase(provinciaNormalizada)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Verifica si una provincia es una isla
-     * @param provincia Nombre de la provincia
-     * @return true si es una isla, false si no
-     */
-    private boolean esIsla(String provincia) {
-        // Normalizar el nombre de la provincia
-        String provinciaNormalizada = normalizarNombreProvincia(provincia);
-        
-        return provinciaNormalizada.equalsIgnoreCase("Palma de Mallorca") || 
-               provinciaNormalizada.equalsIgnoreCase("Las Palmas");
-    }
-
-    /**
-     * Normaliza el nombre de una provincia
-     * @param provincia Nombre de la provincia a normalizar
+     * Normaliza el nombre de una ciudad
+     * @param ciudad Nombre de la ciudad a normalizar
      * @return String con el nombre normalizado
      */
-    private String normalizarNombreProvincia(String provincia) {
-        // Reemplazar guiones bajos por espacios
-        String nombre = provincia.replace("_", " ");
-        
-        // Capitalizar cada palabra
+    private String normalizarNombreCiudad(String ciudad) {
+        String nombre = ciudad.replace("_", " ");
         String[] palabras = nombre.split(" ");
         StringBuilder resultado = new StringBuilder();
-        
         for (int i = 0; i < palabras.length; i++) {
             if (palabras[i].length() > 0) {
                 resultado.append(Character.toUpperCase(palabras[i].charAt(0)));
@@ -1270,15 +1185,45 @@ public class JuegoLogistica {
                 }
             }
         }
-        
         return resultado.toString();
+    }
+
+    /**
+     * Obtiene la distancia entre dos ciudades
+     * @param origen Ciudad de origen
+     * @param destino Ciudad de destino
+     * @return int con la distancia en km
+     */
+    private int obtenerDistancia(String origen, String destino) {
+        int indiceOrigen = Arrays.asList(CIUDADES).indexOf(origen);
+        int indiceDestino = Arrays.asList(CIUDADES).indexOf(destino);
+        return DISTANCIAS[indiceOrigen][indiceDestino];
+    }
+
+    /**
+     * Verifica si una ciudad es una isla
+     * @param ciudad Nombre de la ciudad
+     * @return true si es una isla, false si no
+     */
+    private boolean esIsla(String ciudad) {
+        return Arrays.asList(ISLAS).contains(ciudad);
+    }
+
+    /**
+     * Verifica si una ruta es marítima entre dos ciudades
+     * @param origen Ciudad de origen
+     * @param destino Ciudad de destino
+     * @return true si la ruta es marítima, false si no
+     */
+    private boolean esRutaMaritima(String origen, String destino) {
+        return Arrays.asList(CIUDADES_MARITIMAS).contains(origen) && Arrays.asList(CIUDADES_MARITIMAS).contains(destino);
     }
 
     /**
      * Calcula el coste de envío para un vehículo
      * @param vehiculo Vehículo que realizará el envío
-     * @param origen Provincia de origen
-     * @param destino Provincia de destino
+     * @param origen Ciudad de origen
+     * @param destino Ciudad de destino
      * @return int con el coste total
      */
     private int calcularCosteEnvio(Vehiculo vehiculo, String origen, String destino) {
@@ -1315,30 +1260,30 @@ public class JuegoLogistica {
     }
 
     /**
-     * Verifica si existe una ruta terrestre válida entre dos provincias
-     * @param origen Provincia de origen
-     * @param destino Provincia de destino
+     * Verifica si existe una ruta terrestre válida entre dos ciudades
+     * @param origen Ciudad de origen
+     * @param destino Ciudad de destino
      * @return true si existe una ruta terrestre válida, false si no
      */
     private boolean existeRutaTerrestre(String origen, String destino) {
-        // Normalizar nombres de provincias
-        String origenNormalizado = normalizarNombreProvincia(origen);
-        String destinoNormalizado = normalizarNombreProvincia(destino);
+        // Normalizar nombres de ciudades
+        String origenNormalizado = normalizarNombreCiudad(origen);
+        String destinoNormalizado = normalizarNombreCiudad(destino);
         
-        // Si alguna de las provincias es una isla, no hay ruta terrestre
+        // Si alguna de las ciudades es una isla, no hay ruta terrestre
         if (esIsla(origenNormalizado) || esIsla(destinoNormalizado)) {
             return false;
         }
         
-        // Obtener índices de las provincias
+        // Obtener índices de las ciudades
         int indiceOrigen = -1;
         int indiceDestino = -1;
         
-        for (int i = 0; i < PROVINCIAS.length; i++) {
-            if (PROVINCIAS[i].equalsIgnoreCase(origenNormalizado)) {
+        for (int i = 0; i < CIUDADES.length; i++) {
+            if (CIUDADES[i].equalsIgnoreCase(origenNormalizado)) {
                 indiceOrigen = i;
             }
-            if (PROVINCIAS[i].equalsIgnoreCase(destinoNormalizado)) {
+            if (CIUDADES[i].equalsIgnoreCase(destinoNormalizado)) {
                 indiceDestino = i;
             }
         }
@@ -1355,8 +1300,8 @@ public class JuegoLogistica {
     /**
      * Verifica si un vehículo puede realizar una ruta específica
      * @param vehiculo Vehículo a verificar
-     * @param origen Provincia de origen
-     * @param destino Provincia de destino
+     * @param origen Ciudad de origen
+     * @param destino Ciudad de destino
      * @return true si el vehículo puede realizar la ruta, false si no
      */
     private boolean vehiculoPuedeRealizarRuta(Vehiculo vehiculo, String origen, String destino) {
@@ -1792,6 +1737,7 @@ public class JuegoLogistica {
         String solucion = scanner.nextLine();
 
         System.out.println("\n🛠 Aplicando patrón *Template Method*:");
+       
         System.out.println("   1. Identificando causa: " + incidente);
         System.out.println("   2. Asignando recursos...");
         
@@ -1842,7 +1788,9 @@ public class JuegoLogistica {
                 } else {
                                     pedido.setPago((int)(pedido.getPago() * 0.35));
                 }
-            }
+            } else {
+                                pedido.setPago((int)(pedido.getPago() * 0.35));
+                            }
                             vehiculoAfectado.aplicarDesgaste(); // Desgaste adicional por esperar
                         }
         } else {
