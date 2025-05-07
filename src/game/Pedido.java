@@ -251,4 +251,12 @@ public class Pedido {
             "Entrega: " + getFechaEntrega()
         );
     }
+
+    /**
+     * Obtiene la fecha de entrega como Calendar
+     * @return Calendar con la fecha de entrega
+     */
+    public Calendar getFechaEntregaCalendar() {
+        return fechaEntrega;
+    }
 } 
