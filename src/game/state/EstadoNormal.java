@@ -1,14 +1,10 @@
 package game.state;
 
-import java.io.Serializable;
-
 /**
  * Implementación del estado normal del jugador.
  * Representa el estado base sin modificadores.
  */
-public class EstadoNormal implements EstadoJugador, Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class EstadoNormal implements EstadoJugador {
     @Override
     public void procesarTurno() {
         System.out.println("El jugador está en estado normal");
@@ -38,4 +34,4 @@ public class EstadoNormal implements EstadoJugador, Serializable {
     public double getMultiplicadorDefensa() {
         return 1.0;
     }
-}
+} 

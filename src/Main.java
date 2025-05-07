@@ -1,8 +1,4 @@
-package game;
-
 import java.util.Scanner;
-import java.io.*;
-import java.util.Random;
 
 /**
  * Clase principal que inicia el juego de logística
@@ -81,23 +77,11 @@ public class Main {
                     
                     // Iniciar juego
                     game.JuegoLogistica juego = new game.JuegoLogistica(provincia, dificultad, nombreJugador);
-                    juego.iniciar(false); // Indicar que no es una partida cargada
+                    juego.iniciar();
                     break;
                 case "02":
                 case "2":
-                    System.out.println("\n🎮 CARGAR PARTIDA");
-                    listarPartidasGuardadas();
-                    System.out.print("Ingrese el nombre de la partida a cargar: ");
-                    String nombreJugadorCargar = scanner.nextLine();
-                    game.JuegoLogistica juegoCargado = cargarPartida(nombreJugadorCargar);
-                    if (juegoCargado != null) {
-                        juegoCargado.setScanner(new Scanner(System.in)); // Inicializar el scanner después de cargar la partida
-                        juegoCargado.setRandom(new Random()); // Inicializar el random después de cargar la partida
-                        System.out.println("\n✅ Partida cargada exitosamente.");
-                        juegoCargado.iniciar(true); // Indicar que es una partida cargada
-                    } else {
-                        System.out.println("\n❌ No se pudo cargar la partida.");
-                    }
+                    System.out.println("\n⚠️ Función no implementada: Cargar partida");
                     break;
                 case "03":
                 case "3":
@@ -188,39 +172,4 @@ public class Main {
                 return "medium";
         }
     }
-    
-    // Change visibility to public
-    public static void guardarPartida(game.JuegoLogistica juego) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(juego.getJugador().getNombre() + ".save"))) {
-            oos.writeObject(juego);
-            System.out.println("\n✅ Partida guardada exitosamente.");
-        } catch (IOException e) {
-            System.out.println("\n❌ Error al guardar la partida: " + e.getMessage());
-        }
-    }
-
-    // Add a method to load the game state from a file
-    private static game.JuegoLogistica cargarPartida(String nombreJugador) {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(nombreJugador + ".save"))) {
-            return (game.JuegoLogistica) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("\n❌ Error al cargar la partida: " + e.getMessage());
-        }
-        return null;
-    }
-
-    // Método para listar las partidas guardadas
-    private static void listarPartidasGuardadas() {
-        File directorioActual = new File(".");
-        File[] archivos = directorioActual.listFiles((dir, name) -> name.endsWith(".save"));
-
-        if (archivos != null && archivos.length > 0) {
-            System.out.println("\n📂 Partidas guardadas disponibles:");
-            for (File archivo : archivos) {
-                System.out.println("- " + archivo.getName().replace(".save", ""));
-            }
-        } else {
-            System.out.println("\n❌ No hay partidas guardadas disponibles.");
-        }
-    }
-}
+} 

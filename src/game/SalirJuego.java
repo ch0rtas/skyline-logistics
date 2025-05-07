@@ -1,12 +1,9 @@
 package game;
 
-import java.io.Serializable;
-
 /**
  * Clase que maneja la salida del juego
  */
-public class SalirJuego implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class SalirJuego {
     
     /**
      * Ejecuta la acción de salir del juego
@@ -15,4 +12,4 @@ public class SalirJuego implements Serializable {
         System.out.println("\n👋 ¡Hasta luego!");
         System.exit(0);
     }
-}
+} 
