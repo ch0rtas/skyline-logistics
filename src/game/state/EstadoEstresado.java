@@ -1,10 +1,14 @@
 package game.state;
 
+import java.io.Serializable;
+
 /**
  * Implementación del estado estresado del jugador.
  * En este estado, el jugador hace más daño pero recibe más daño también.
  */
-public class EstadoEstresado implements EstadoJugador {
+public class EstadoEstresado implements EstadoJugador, Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public void procesarTurno() {
         System.out.println("El jugador está estresado y actúa con mayor intensidad");
@@ -34,4 +38,4 @@ public class EstadoEstresado implements EstadoJugador {
     public double getMultiplicadorDefensa() {
         return 0.8; // 20% menos de defensa
     }
-} 
+}
