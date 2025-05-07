@@ -185,29 +185,25 @@ public class Main {
      */
     private static void mostrarObjetivosCampaña() {
         System.out.println("\n=== 🎯 OBJETIVOS DE LA CAMPAÑA 🎯 ===");
-        System.out.println("Para completar la campaña, deberás alcanzar las siguientes estadísticas:");
-        System.out.println("\n📊 OBJETIVOS MÍNIMOS:");
-        System.out.println("• Días jugados: 30");
-        System.out.println("• Envíos exitosos: 50");
+        System.out.println("Para completar la campaña, deberás alcanzar las siguientes estadísticas: en el tiempo señalado.");
+        
+        System.out.println("\n📊 NIVEL FÁCIL:");
+        System.out.println("• Día final: 30");
+        System.out.println("• Envíos exitosos: 100");
         System.out.println("• Satisfacción de clientes: 80%");
         System.out.println("• Beneficios acumulados: 100,000€");
         
-        System.out.println("\n🏆 OBJETIVOS AVANZADOS:");
+        System.out.println("\n🏆 NIVEL MEDIO:");
         System.out.println("• Días jugados: 60");
-        System.out.println("• Envíos exitosos: 100");
+        System.out.println("• Envíos exitosos: 350");
         System.out.println("• Satisfacción de clientes: 90%");
         System.out.println("• Beneficios acumulados: 250,000€");
         
-        System.out.println("\n🌟 OBJETIVOS ÉLITE:");
+        System.out.println("\n🌟 NIVEL DIFÍCIL:");
         System.out.println("• Días jugados: 100");
-        System.out.println("• Envíos exitosos: 200");
+        System.out.println("• Envíos exitosos: 920");
         System.out.println("• Satisfacción de clientes: 95%");
         System.out.println("• Beneficios acumulados: 500,000€");
-        
-        System.out.println("\n⚠️ NOTA: Los objetivos se ajustarán según la dificultad seleccionada.");
-        System.out.println("   - Fácil: 80% de los objetivos");
-        System.out.println("   - Medio: 100% de los objetivos");
-        System.out.println("   - Difícil: 120% de los objetivos");
     }
 
     private static void mostrarHistoricoJugadores() {
