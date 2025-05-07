@@ -218,7 +218,10 @@ public class JuegoLogistica {
             procesarOpcion(scanner.nextLine());
         }
         
-        mostrarGameOver();
+        mostrarEstadisticas();
+        System.out.println("\nPresiona Enter para volver al menú principal...");
+        scanner.nextLine();
+        System.exit(0);
     }
 
     /**
@@ -506,7 +509,7 @@ public class JuegoLogistica {
         System.out.println("04. Ver flota");
         System.out.println("05. Ver estadísticas");
         System.out.println("06. Pasar al siguiente día");
-        System.out.println("99. Salir");
+        System.out.println("99. Finalizar partida");
         System.out.print("\nSeleccione una opción: ");
     }
 
@@ -541,7 +544,10 @@ public class JuegoLogistica {
                 pasarDia();
                 break;
             case "99":
-                SalirJuego.ejecutar();
+                mostrarEstadisticas();
+                System.out.println("\nPresiona Enter para volver al menú principal...");
+                scanner.nextLine();
+                System.exit(0);
                 break;
             default:
                 System.out.println("\n❌ Opción no válida");
@@ -1946,106 +1952,6 @@ public class JuegoLogistica {
         if (!modoJuego.equals("libre")) {
             jugador.recuperarPresupuesto(cantidad);
         }
-    }
-
-    public static void iniciarJuego() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("\n=== 🚛 SKYLINE LOGISTICS 🚛 ===");
-        System.out.println("Bienvenido a tu nueva empresa de logística");
-        
-        // Solicitar nombre del jugador
-        System.out.print("\n📝 Introduce tu nombre: ");
-        String nombreJugador = scanner.nextLine();
-        
-        // Selección del modo de juego
-        System.out.println("\n=== 🎮 MODOS DE JUEGO 🎮 ===");
-        System.out.println("1. Modo Libre");
-        System.out.println("   - Sin restricciones de tiempo ni recursos");
-        System.out.println("   - Balance inicial ilimitado");
-        System.out.println("   - Ideal para experimentar y aprender");
-        System.out.println("\n2. Modo Desafío");
-        System.out.println("   - Gestión de recursos limitados");
-        System.out.println("   - Balance inicial según dificultad");
-        System.out.println("   - Desafío de supervivencia empresarial");
-        
-        String modoJuego;
-        while (true) {
-            System.out.print("\nSelecciona el modo de juego (1-2): ");
-            String opcion = scanner.nextLine();
-            if (opcion.equals("1")) {
-                modoJuego = "libre";
-                break;
-            } else if (opcion.equals("2")) {
-                modoJuego = "desafio";
-                break;
-            } else {
-                System.out.println("❌ Opción no válida. Por favor, selecciona 1 o 2.");
-            }
-        }
-        
-        // Selección de provincia
-        System.out.println("\n=== 📍 SELECCIÓN DE PROVINCIA 📍 ===");
-        System.out.println("Selecciona la provincia donde establecerás tu almacén principal:");
-        System.out.println("1. Madrid");
-        System.out.println("2. Barcelona");
-        System.out.println("3. Valencia");
-        System.out.println("4. Sevilla");
-        System.out.println("5. Bilbao");
-        
-        String provincia = "";
-        while (provincia.isEmpty()) {
-            System.out.print("\nSelecciona una provincia (1-5): ");
-            String opcion = scanner.nextLine();
-            switch (opcion) {
-                case "1": provincia = "Madrid"; break;
-                case "2": provincia = "Barcelona"; break;
-                case "3": provincia = "Valencia"; break;
-                case "4": provincia = "Sevilla"; break;
-                case "5": provincia = "Bilbao"; break;
-                default: System.out.println("❌ Opción no válida. Por favor, selecciona una provincia válida.");
-            }
-        }
-        
-        // Selección de dificultad
-        System.out.println("\n=== 🎯 DIFICULTAD 🎯 ===");
-        System.out.println("Selecciona el nivel de dificultad:");
-        System.out.println("1. Fácil (50.000€ iniciales)");
-        System.out.println("2. Medio (25.000€ iniciales)");
-        System.out.println("3. Difícil (10.000€ iniciales)");
-        
-        String dificultad = "";
-        while (dificultad.isEmpty()) {
-            System.out.print("\nSelecciona la dificultad (1-3): ");
-            String opcion = scanner.nextLine();
-            switch (opcion) {
-                case "1": dificultad = "easy"; break;
-                case "2": dificultad = "medium"; break;
-                case "3": dificultad = "hard"; break;
-                default: System.out.println("❌ Opción no válida. Por favor, selecciona una dificultad válida.");
-            }
-        }
-        
-        // Crear e iniciar el juego
-        JuegoLogistica juego = new JuegoLogistica(provincia, dificultad, nombreJugador, modoJuego);
-        juego.jugar();
-    }
-
-    public void jugar() {
-        System.out.println("\n=== 🎮 INICIANDO PARTIDA 🎮 ===");
-        System.out.println("Modo de juego: " + (modoJuego.equals("libre") ? "Libre" : "Desafío"));
-        System.out.println("Dificultad: " + dificultad);
-        System.out.println("Almacén principal: " + almacenPrincipal);
-        System.out.println("Balance inicial: " + jugador.getPresupuesto() + "€");
-        
-        // Generar pedidos iniciales
-        generarPedidosDia();
-        
-        while (!jugadorDerrotado()) {
-            mostrarMenuPrincipal();
-            procesarOpcion(scanner.nextLine());
-        }
-        
-        mostrarEstadisticas();
     }
 
     /**
