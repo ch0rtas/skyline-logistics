@@ -74,7 +74,7 @@ public class JuegoLogistica {
     };
 
     private List<Vehiculo> vehiculosMercado;
-    private static final String[] TIPOS_CARGA = {"NORMAL", "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL"};
+    private static final String[] TIPOS_CARGA = {"NORMAL", "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL", "PERECEDERO", "ALTO_VALOR", "SERES_VIVOS"};
 
     /**
      * Constructor del juego
@@ -654,9 +654,12 @@ public class JuegoLogistica {
         cargasPorTipo.put("PELIGROSO", new String[]{"Productos Químicos", "Materiales Explosivos", "Residuos Tóxicos", "Combustibles"});
         cargasPorTipo.put("ESCOLTADO", new String[]{"Joyas Valiosas", "Obras de Arte", "Dinero", "Documentos Secretos"});
         cargasPorTipo.put("FRÁGIL", new String[]{"Equipos Médicos", "Electrónicos", "Flores Exóticas", "Instrumentos Musicales", "Antigüedades"});
-        
+        cargasPorTipo.put("PERECEDERO", new String[]{"Frutas Frescas", "Verduras", "Lácteos", "Carnes"});
+        cargasPorTipo.put("ALTO_VALOR", new String[]{"Obras de Arte", "Metales Preciosos", "Electrónica de Alta Gama", "Documentos Confidenciales"});
+        cargasPorTipo.put("SERES_VIVOS", new String[]{"Animales Domésticos", "Ganado", "Aves", "Peces"});
+
         String[] prioridades = {"URGENTE", "NORMAL", "BAJA"};
-        String[] tiposPaquetes = {"NORMAL", "REFRIGERADO", "CONGELADO", "ESCOLTADO", "PELIGROSO", "FRÁGIL"};
+        String[] tiposPaquetes = {"NORMAL", "REFRIGERADO", "CONGELADO", "ESCOLTADO", "PELIGROSO", "FRÁGIL", "PERECEDERO", "ALTO_VALOR", "SERES_VIVOS"};
 
         // Seleccionar tipo de paquete
         String tipoPaquete = tiposPaquetes[random.nextInt(tiposPaquetes.length)];
@@ -694,6 +697,15 @@ public class JuegoLogistica {
                 break;
             case "FRÁGIL":
                 peso = 10 + random.nextInt(490); // 10-500 kg
+                break;
+            case "PERECEDERO":
+                peso = 50 + random.nextInt(450); // 50-500 kg
+                break;
+            case "ALTO_VALOR":
+                peso = 10 + random.nextInt(90); // 10-100 kg
+                break;
+            case "SERES_VIVOS":
+                peso = 100 + random.nextInt(900); // 100-1000 kg
                 break;
             default:
                 peso = 100 + random.nextInt(900);
@@ -741,6 +753,15 @@ public class JuegoLogistica {
             case "FRÁGIL":
                 pagoBase *= 1.4; // 40% más
                 break;
+            case "PERECEDERO":
+                pagoBase *= 1.2; // 20% más
+                break;
+            case "ALTO_VALOR":
+                pagoBase *= 2.0; // 100% más
+                break;
+            case "SERES_VIVOS":
+                pagoBase *= 1.5; // 50% más
+                break;
         }
         
         // Ajustar pago según distancia
@@ -781,6 +802,15 @@ public class JuegoLogistica {
                 diasBase = 2;
                 break;
             case "FRÁGIL":
+                diasBase = 2;
+                break;
+            case "PERECEDERO":
+                diasBase = 1;
+                break;
+            case "ALTO_VALOR":
+                diasBase = 3;
+                break;
+            case "SERES_VIVOS":
                 diasBase = 2;
                 break;
             default:
