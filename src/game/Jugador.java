@@ -4,12 +4,15 @@ import game.state.EstadoJugador;
 import game.state.EstadoNormal;
 import game.state.EstadoEstresado;
 import game.state.EstadoAgotado;
+import java.io.Serializable;
 
 /**
  * Clase que representa al jugador en el juego.
  * Implementa el patrón State para gestionar sus diferentes estados.
  */
-public class Jugador {
+public class Jugador implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private String nombre;
     private int presupuesto;
     private int puntos;
@@ -119,4 +122,4 @@ public class Jugador {
     public boolean estaDerrotado() {
         return presupuesto <= 0;
     }
-} 
+}
