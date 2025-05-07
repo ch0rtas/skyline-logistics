@@ -16,8 +16,8 @@ public class EstadoEstresado implements EstadoJugador {
     }
 
     @Override
-    public void recuperarPresupuesto(int presupuesto) {
-        System.out.println("El jugador estresado recupera " + presupuesto + " de presupuesto");
+    public void recuperarBalance(int balance) {
+        System.out.println("El jugador estresado recupera " + balance + " de balance");
     }
 
     @Override
@@ -34,4 +34,4 @@ public class EstadoEstresado implements EstadoJugador {
     public double getMultiplicadorDefensa() {
         return 0.8; // 20% menos de defensa
     }
-} 
+}

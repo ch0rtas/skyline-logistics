@@ -207,7 +207,7 @@ public class JuegoLogistica {
     private void aplicarImpuestos() {
         int diasImpuestos = calcularDiasImpuestos();
         if (diaActual % diasImpuestos == 0) {
-            int impuestos = (int) (jugador.getPresupuesto() * TASA_IMPUESTOS);
+            int impuestos = (int) (jugador.getBalance() * TASA_IMPUESTOS);
             jugador.gastar(impuestos);
             System.out.println("\n💰 Se han aplicado impuestos del " + (TASA_IMPUESTOS * 100) + "%: -" + impuestos + "€");
         }
@@ -252,7 +252,7 @@ public class JuegoLogistica {
      */
     private void mostrarBienvenida() {
         System.out.println("\n✅ Sistema iniciado en región: " + almacenPrincipal);
-        System.out.println("💰 Balance inicial: $" + jugador.getPresupuesto());
+        System.out.println("💰 Balance inicial: $" + jugador.getBalance());
     }
 
     /**
@@ -428,7 +428,7 @@ public class JuegoLogistica {
         }
 
         System.out.println("\n=== 🔧 REPARACIÓN DE VEHÍCULOS 🔧 ===");
-        System.out.println("Balance actual: " + jugador.getPresupuesto() + "€");
+        System.out.println("Balance actual: " + jugador.getBalance() + "€");
         
         for (int i = 0; i < flota.size(); i++) {
             Vehiculo v = flota.get(i);
@@ -450,7 +450,7 @@ public class JuegoLogistica {
             int indice = Integer.parseInt(opcion) - 1;
             if (indice >= 0 && indice < flota.size()) {
                 Vehiculo vehiculoSeleccionado = flota.get(indice);
-                if (modoJuego.equals("libre") || jugador.getPresupuesto() >= vehiculoSeleccionado.getCosteReparacion()) {
+                if (modoJuego.equals("libre") || jugador.getBalance() >= vehiculoSeleccionado.getCosteReparacion()) {
                     if (!modoJuego.equals("libre")) {
                         jugador.gastar(vehiculoSeleccionado.getCosteReparacion());
                     }
@@ -474,7 +474,7 @@ public class JuegoLogistica {
      */
     private void mostrarMercadoVehiculos() {
         System.out.println("\n=== 🚗 MERCADO DE VEHÍCULOS 🚗 ===");
-        System.out.println("Balance actual: " + jugador.getPresupuesto() + "€");
+        System.out.println("Balance actual: " + jugador.getBalance() + "€");
         
         for (int i = 0; i < vehiculosMercado.size(); i++) {
             Vehiculo v = vehiculosMercado.get(i);
@@ -498,7 +498,7 @@ public class JuegoLogistica {
             int indice = Integer.parseInt(opcion) - 1;
             if (indice >= 0 && indice < vehiculosMercado.size()) {
                 Vehiculo vehiculoSeleccionado = vehiculosMercado.get(indice);
-                if (modoJuego.equals("libre") || jugador.getPresupuesto() >= vehiculoSeleccionado.getPrecio()) {
+                if (modoJuego.equals("libre") || jugador.getBalance() >= vehiculoSeleccionado.getPrecio()) {
                     flota.add(vehiculoSeleccionado);
                     if (!modoJuego.equals("libre")) {
                         jugador.gastar(vehiculoSeleccionado.getPrecio());
@@ -596,7 +596,7 @@ public class JuegoLogistica {
                 modoJuego,
                 jugador.getNombre(),
                 diaActual,
-                jugador.getPresupuesto(),
+                jugador.getBalance(),
                 enviosExitosos,
                 satisfaccionClientes,
                 beneficiosAcumulados,
@@ -1516,7 +1516,7 @@ public class JuegoLogistica {
         int costoTotal = calcularCosteEnvio(vehiculoSeleccionado, almacenPrincipal, pedido.getDestino());
         
         // Verificar balance
-        if (jugador.getPresupuesto() < costoTotal) {
+        if (jugador.getBalance() < costoTotal) {
             System.out.println("❌ Balance insuficiente para realizar el envío");
             return;
         }
@@ -1773,7 +1773,7 @@ public class JuegoLogistica {
                 case "03":
                 case "3":
                     if (costeReparacion > 0) {
-                        if (jugador.getPresupuesto() >= costeReparacion) {
+                        if (jugador.getBalance() >= costeReparacion) {
                             System.out.println("   3. Realizando reparación...");
                             System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaReparacion.getTime()));
                             if (diasRetrasoReparacion > 0) {
@@ -1788,7 +1788,7 @@ public class JuegoLogistica {
                             jugador.gastar(costeReparacion);
                             vehiculoAfectado.reparar(); // Reparar el vehículo
                         } else {
-                            System.out.println("❌ No hay suficiente presupuesto para la reparación");
+                            System.out.println("❌ No hay suficiente balance para la reparación");
                             System.out.println("   3. Esperando resolución...");
             System.out.println("✅ Resuelto: Envío llegará el " + formatoFecha.format(fechaEspera.getTime()));
             if (diasRetrasoEspera > 0) {
@@ -1857,7 +1857,7 @@ public class JuegoLogistica {
         System.out.println("📦 Envíos totales: " + enviosTotales);
         System.out.println("😊 Satisfacción de clientes: " + satisfaccionClientes + "%");
         System.out.println("💵 Beneficios acumulados: " + beneficiosAcumulados + "€");
-        System.out.println("💰 Balance final: " + jugador.getPresupuesto() + "€");
+        System.out.println("💰 Balance final: " + jugador.getBalance() + "€");
         System.out.println("☠️ Días restantes para impuestos: " + (calcularDiasImpuestos() - (diaActual % calcularDiasImpuestos())));
         
         if (modoJuego.equals("libre")) {
@@ -1869,7 +1869,7 @@ public class JuegoLogistica {
                 System.out.println("\n❌ No has alcanzado los objetivos de la campaña");
             }
         } else {
-            if (jugador.getPresupuesto() <= 0) {
+            if (jugador.getBalance() <= 0) {
                 System.out.println("\n❌ GAME OVER - Te has quedado sin dinero");
             } else {
                 System.out.println("\n🎉 ¡Felicidades! Has completado el modo Desafío");
@@ -1967,7 +1967,7 @@ public class JuegoLogistica {
         System.out.println("\n==============================================");
         System.out.println("🎮 GAME OVER");
         System.out.println("==============================================");
-        System.out.println("💰 Balance final: $" + jugador.getPresupuesto());
+        System.out.println("💰 Balance final: $" + jugador.getBalance());
         System.out.println("😊 Satisfacción final: " + satisfaccionClientes + "%");
         System.out.println("🚚 Envíos totales: " + enviosTotales);
         System.out.println("✅ Envíos exitosos: " + enviosExitosos);
@@ -2008,7 +2008,7 @@ public class JuegoLogistica {
                 int ganancia = pagoOriginal - multa;
                 if (exito) {
                     enviosExitosos++;
-                    jugador.recuperarPresupuesto(ganancia);
+                    jugador.recuperarBalance(ganancia);
                     beneficiosAcumulados += ganancia;
                 } else {
                     satisfaccionClientes -= 10;
@@ -2058,7 +2058,7 @@ public class JuegoLogistica {
         if (modoJuego.equals("libre")) {
             return false; // En modo libre nunca se pierde
         }
-        return jugador.getPresupuesto() < 0; // Cambiado de <= 0 a < 0 para que termine cuando sea negativo
+        return jugador.getBalance() < 0; // Cambiado de <= 0 a < 0 para que termine cuando sea negativo
     }
 
     /**
@@ -2077,7 +2077,7 @@ public class JuegoLogistica {
      */
     private void recibirDinero(int cantidad) {
         if (!modoJuego.equals("libre")) {
-            jugador.recuperarPresupuesto(cantidad);
+            jugador.recuperarBalance(cantidad);
         }
     }
 

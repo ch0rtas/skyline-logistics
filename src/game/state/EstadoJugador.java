@@ -11,16 +11,16 @@ public interface EstadoJugador {
     void procesarTurno();
 
     /**
-     * El jugador recibe daño a su presupuesto
+     * El jugador recibe daño a su balance
      * @param danio Cantidad de daño recibido
      */
     void recibirDanio(int danio);
 
     /**
-     * El jugador recupera presupuesto
-     * @param presupuesto Cantidad de presupuesto recuperado
+     * El jugador recupera balance
+     * @param balance Cantidad de balance recuperado
      */
-    void recuperarPresupuesto(int presupuesto);
+    void recuperarBalance(int balance);
 
     /**
      * Obtiene el nombre del estado actual
@@ -39,4 +39,4 @@ public interface EstadoJugador {
      * @return double con el multiplicador
      */
     double getMultiplicadorDefensa();
-} 
+}
