@@ -1481,7 +1481,7 @@ public class JuegoLogistica {
         if (opcion.equals("02") || opcion.equals("2")) {
             System.out.println("\n⚠️ ¿Está seguro de rechazar el pedido #" + idPedido + "?");
             System.out.println("   - Multa por rechazo: $" + calcularMultaRechazo(pedido));
-            System.out.print("   - Confirmar (S/N): ");
+            System.out.print("   - Confirmar (s/N): ");
 
             String confirmacion = scanner.nextLine().toUpperCase();
             if (confirmacion.equals("S")) {
@@ -1938,7 +1938,7 @@ public class JuegoLogistica {
 
         diaActual++;
         fechaActual.add(Calendar.DAY_OF_MONTH, 1); // Añadir un día a la fecha actual
-        
+
         System.out.println("\n==================================================");
         System.out.println("📅 DÍA " + diaActual + " (" + formatoFecha.format(fechaActual.getTime()) + ") | ENTREGA FINAL");
         System.out.println("==================================================");
@@ -1952,24 +1952,11 @@ public class JuegoLogistica {
         // Generar nuevos vehículos en el mercado
         generarVehiculosMercado();
         
-        pedidos.clear();
+        // Generar nuevos pedidos del día
         generarPedidosDia();
 
-        // Mostrar estadísticas solo una vez
+        // Mostrar estadísticas
         mostrarEstadisticas();
-    }
-
-    /**
-     * Muestra la pantalla de fin de juego
-     */
-    private void mostrarGameOver() {
-        System.out.println("\n==============================================");
-        System.out.println("🎮 GAME OVER");
-        System.out.println("==============================================");
-        System.out.println("💰 Balance final: $" + jugador.getBalance());
-        System.out.println("😊 Satisfacción final: " + satisfaccionClientes + "%");
-        System.out.println("🚚 Envíos totales: " + enviosTotales);
-        System.out.println("✅ Envíos exitosos: " + enviosExitosos);
     }
 
     private void procesarPedidosEnCurso() {
@@ -2038,15 +2025,21 @@ public class JuegoLogistica {
         // Eliminar pedidos completados
         pedidosEnCurso.removeAll(pedidosCompletados);
         
-        // Procesar impuestos
-        procesarImpuestos();
-        
-        // Generar nuevos vehículos en el mercado
-        generarVehiculosMercado();
-        
+        // Limpiar pedidos pendientes
         pedidos.clear();
-        generarPedidosDia();
-        mostrarEstadisticas();
+    }
+
+    /**
+     * Muestra la pantalla de fin de juego
+     */
+    private void mostrarGameOver() {
+        System.out.println("\n==============================================");
+        System.out.println("🎮 GAME OVER");
+        System.out.println("==============================================");
+        System.out.println("💰 Balance final: $" + jugador.getBalance());
+        System.out.println("😊 Satisfacción final: " + satisfaccionClientes + "%");
+        System.out.println("🚚 Envíos totales: " + enviosTotales);
+        System.out.println("✅ Envíos exitosos: " + enviosExitosos);
     }
 
     /**
@@ -2157,7 +2150,7 @@ public class JuegoLogistica {
     }
 
     /**
-     * Ajusta la satisfacción del cliente al enviar un pedido.
+     * Ajusta la satisfacción del cliente al enviar un pedido exitosamente.
      */
     private void ajustarSatisfaccionEnvioExitoso() {
         switch (dificultad) {
