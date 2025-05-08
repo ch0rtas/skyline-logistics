@@ -9,7 +9,17 @@ import static game.JuegoLogistica.generarLineaSeparadora;
 
 public class PedidosEnCursoHelper {
     public static void mostrarPedidosEnCurso(List<Pedido> pedidosEnCurso, Calendar fechaActual) {
-        if (pedidosEnCurso.isEmpty()) {
+        if (pedidosEnCurso == null || pedidosEnCurso.isEmpty()) {
+            System.out.println("\n📦 No hay pedidos en curso");
+            return;
+        }
+
+        // Filtrar solo los pedidos que están en curso
+        List<Pedido> pedidosActivos = pedidosEnCurso.stream()
+            .filter(pedido -> pedido.getEstado().equals("EN CURSO"))
+            .toList();
+
+        if (pedidosActivos.isEmpty()) {
             System.out.println("\n📦 No hay pedidos en curso");
             return;
         }
@@ -24,11 +34,7 @@ public class PedidosEnCursoHelper {
         }
 
         // Calcular anchos máximos basados en el contenido
-        for (Pedido pedido : pedidosEnCurso) {
-            Calendar fechaPrevia = Calendar.getInstance();
-            fechaPrevia.setTime(fechaActual.getTime());
-            fechaPrevia.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
-
+        for (Pedido pedido : pedidosActivos) {
             String[] valores = {
                 pedido.getId(),
                 pedido.getCliente(),
@@ -38,8 +44,8 @@ public class PedidosEnCursoHelper {
                 pedido.getDestino(),
                 pedido.getTipoPaquete(),
                 "$" + pedido.getPago(),
-                pedido.getFechaEntrega(),
-                formatoFecha.format(fechaPrevia.getTime())
+                pedido.getFechaEntregaOriginal(),
+                pedido.getFechaEntrega()
             };
 
             for (int i = 0; i < valores.length; i++) {
@@ -55,11 +61,7 @@ public class PedidosEnCursoHelper {
         System.out.println(generarLineaSeparadora(anchos));
 
         // Mostrar datos
-        for (Pedido pedido : pedidosEnCurso) {
-            Calendar fechaPrevia = Calendar.getInstance();
-            fechaPrevia.setTime(fechaActual.getTime());
-            fechaPrevia.add(Calendar.DAY_OF_MONTH, pedido.getDiasRestantes());
-
+        for (Pedido pedido : pedidosActivos) {
             String[] valores = {
                 pedido.getId(),
                 pedido.getCliente(),
@@ -69,8 +71,8 @@ public class PedidosEnCursoHelper {
                 pedido.getDestino(),
                 pedido.getTipoPaquete(),
                 "$" + pedido.getPago(),
-                pedido.getFechaEntrega(),
-                formatoFecha.format(fechaPrevia.getTime())
+                pedido.getFechaEntregaOriginal(),
+                pedido.getFechaEntrega()
             };
             System.out.println(generarFilaTabla(valores, anchos));
         }

@@ -7,18 +7,22 @@ public class PedidoGenerator {
     private Calendar fechaActual;
     private List<Vehiculo> flota;
     private String almacenPrincipal;
-    private String dificultad;
 
     public PedidoGenerator(Calendar fechaActual, List<Vehiculo> flota, String almacenPrincipal, String dificultad) {
         this.random = new Random();
         this.fechaActual = fechaActual;
         this.flota = flota;
         this.almacenPrincipal = almacenPrincipal;
-        this.dificultad = dificultad;
     }
 
     public Pedido generarPedidoAleatorio() {
-        String[] clientes = CityConstants.CIUDADES;
+        String[] clientes = {
+            "Banco Santander", "BBVA", "CaixaBank", "Iberdrola", "Telefónica", 
+            "Repsol", "Inditex", "Mercadona", "El Corte Inglés", "AENA",
+            "Renfe", "Seat", "Naturgy", "Endesa", "Mapfre"
+        };
+        
+        String[] ciudades = CityConstants.CIUDADES;
         
         Map<String, String[]> cargasPorTipo = new HashMap<>();
         cargasPorTipo.put("NORMAL", new String[]{"Materiales Construcción", "Piezas Industriales", "Equipaje VIP", "Material Educativo"});
@@ -37,7 +41,45 @@ public class PedidoGenerator {
         String tipoPaquete = tiposPaquetes[random.nextInt(tiposPaquetes.length)];
         String[] cargasDisponibles = cargasPorTipo.get(tipoPaquete);
         String carga = cargasDisponibles[random.nextInt(cargasDisponibles.length)];
-        String cliente = clientes[random.nextInt(clientes.length)];
+        
+        Map<String, String[]> clientesPorCarga = new HashMap<>();
+        clientesPorCarga.put("Vacunas", new String[]{"Hospital General", "Farmacéutica Pfizer", "Clínica Salud"});
+        clientesPorCarga.put("Medicamentos", new String[]{"Farmacia Central", "Laboratorios Roche", "Distribuidora Médica"});
+        clientesPorCarga.put("Alimentos Frescos", new String[]{"Supermercado Local", "Distribuidora de Alimentos", "Mercado Central"});
+        clientesPorCarga.put("Joyas Valiosas", new String[]{"Joyería El Brillante", "Casa de Subastas", "Banco de Valores"});
+        clientesPorCarga.put("Materiales Construcción", new String[]{"Constructora XYZ", "Ferretería Central", "Distribuidora de Materiales"});
+        clientesPorCarga.put("Piezas Industriales", new String[]{"Fábrica de Motores", "Industria Mecánica", "Proveedor de Equipos"});
+        clientesPorCarga.put("Equipaje VIP", new String[]{"Aeropuerto Internacional", "Agencia de Viajes", "Hotel de Lujo"});
+        clientesPorCarga.put("Material Educativo", new String[]{"Escuela Primaria", "Universidad Nacional", "Editorial Académica"});
+        clientesPorCarga.put("Mariscos Frescos", new String[]{"Restaurante Gourmet", "Mercado de Pescados", "Distribuidora de Mariscos"});
+        clientesPorCarga.put("Electrónicos", new String[]{"Tienda de Electrónica", "Distribuidor Electrónico", "Fabricante de Componentes"});
+        clientesPorCarga.put("Lácteos", new String[]{"Supermercado Local", "Distribuidora de Lácteos", "Fábrica de Quesos"});
+
+        // Seleccionar cliente basado en la carga generada
+        String cliente;
+        if (clientesPorCarga.containsKey(carga)) {
+            String[] clientesRelacionados = clientesPorCarga.get(carga);
+            cliente = clientesRelacionados[random.nextInt(clientesRelacionados.length)];
+        } else {
+            // Si no hay relación definida, seleccionar un cliente aleatorio
+            cliente = clientes[random.nextInt(clientes.length)];
+        }
+
+        // Validar que el cliente y la carga estén relacionados
+        while (!clientesPorCarga.containsKey(carga) || !Arrays.asList(clientesPorCarga.get(carga)).contains(cliente)) {
+            // Regenerar cliente y carga si no están relacionados
+            tipoPaquete = tiposPaquetes[random.nextInt(tiposPaquetes.length)];
+            cargasDisponibles = cargasPorTipo.get(tipoPaquete);
+            carga = cargasDisponibles[random.nextInt(cargasDisponibles.length)];
+
+            if (clientesPorCarga.containsKey(carga)) {
+                String[] clientesRelacionados = clientesPorCarga.get(carga);
+                cliente = clientesRelacionados[random.nextInt(clientesRelacionados.length)];
+            } else {
+                cliente = clientes[random.nextInt(clientes.length)];
+            }
+        }
+        
         String prioridad = prioridades[random.nextInt(prioridades.length)];
         String idPedido = "P" + (100 + random.nextInt(900));
         int peso = calcularPeso(tipoPaquete);
@@ -45,7 +87,7 @@ public class PedidoGenerator {
         String origen = almacenPrincipal;
         String destino;
         do {
-            destino = clientes[random.nextInt(clientes.length)];
+            destino = ciudades[random.nextInt(ciudades.length)];
         } while (destino.equals(origen));
 
         int costeMinimo = calcularCosteMinimo(tipoPaquete, origen, destino);
@@ -93,13 +135,19 @@ public class PedidoGenerator {
     }
 
     private int calcularPagoBase(int costeMinimo, String prioridad) {
-        int pagoBase = (int) (costeMinimo * 1.2);
+        // Ensure payment is at least 20% higher than the minimum cost and multiply by 10
+        int pagoBase = (int) (costeMinimo * 1.2 * 10);
+
+        // Add a random bonus up to 50% of the base payment
         pagoBase += (int) (pagoBase * random.nextDouble() * 0.5);
+
+        // Adjust payment based on priority
         if (prioridad.equals("URGENTE")) {
             pagoBase *= 1.5;
         } else if (prioridad.equals("BAJA")) {
             pagoBase *= 0.8;
         }
+
         return pagoBase;
     }
 

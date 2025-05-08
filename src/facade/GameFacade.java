@@ -1,6 +1,5 @@
 package facade;
 
-import model.*;
 import service.*;
 import ui.*;
 import java.util.Scanner;
@@ -30,9 +29,6 @@ public class GameFacade {
                     iniciarNuevaPartida();
                     break;
                 case "02", "2":
-                    cargarPartida();
-                    break;
-                case "03", "3":
                     mostrarHistoricoJugadores();
                     break;
                 case "98":
@@ -60,10 +56,6 @@ public class GameFacade {
         juego.iniciar();
     }
 
-    private void cargarPartida() {
-        uiManager.mostrarMensaje("Función no implementada: Cargar partida");
-    }
-
     private void mostrarHistoricoJugadores() {
         playerService.mostrarHistoricoJugadores();
     }
@@ -71,4 +63,4 @@ public class GameFacade {
     private void mostrarCreditos() {
         uiManager.mostrarCreditos();
     }
-} 
+}

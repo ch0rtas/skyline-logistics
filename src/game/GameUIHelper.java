@@ -19,10 +19,10 @@ public class GameUIHelper {
         for (Vehiculo vehiculo : flota) {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
-                Calendar fechaEntrega = Calendar.getInstance();
-                fechaEntrega.setTime(fechaActual.getTime());
-                fechaEntrega.add(Calendar.DAY_OF_MONTH, vehiculo.getPedidoAsignado().getDiasRestantes());
-                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaEntrega.getTime());
+                Calendar fechaEntrega = vehiculo.getPedidoAsignado().getFechaEntregaCalendar();
+                Calendar fechaDisponible = (Calendar) fechaEntrega.clone();
+                fechaDisponible.add(Calendar.DAY_OF_MONTH, 1);
+                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaDisponible.getTime());
             } else {
                 estado = "Disponible";
             }
@@ -51,10 +51,10 @@ public class GameUIHelper {
         for (Vehiculo vehiculo : flota) {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
-                Calendar fechaEntrega = Calendar.getInstance();
-                fechaEntrega.setTime(fechaActual.getTime());
-                fechaEntrega.add(Calendar.DAY_OF_MONTH, vehiculo.getPedidoAsignado().getDiasRestantes());
-                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaEntrega.getTime());
+                Calendar fechaEntrega = vehiculo.getPedidoAsignado().getFechaEntregaCalendar();
+                Calendar fechaDisponible = (Calendar) fechaEntrega.clone();
+                fechaDisponible.add(Calendar.DAY_OF_MONTH, 1);
+                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaDisponible.getTime());
             } else {
                 estado = "Disponible";
             }

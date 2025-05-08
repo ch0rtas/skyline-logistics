@@ -20,8 +20,11 @@ public class Pedido {
     private int multaPorDia;
     private String transporteAsignado;
     private Calendar fechaEntrega;
+    private Calendar fechaEntregaOriginal;
     private String tipoPaquete; // NORMAL, REFRIGERADO, CONGELADO, ESCOLTADO, PELIGROSO, FRÁGIL
     private static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
+    private Calendar fechaDisponible;
+    private String estado;
 
     /**
      * Constructor de la clase Pedido
@@ -50,12 +53,13 @@ public class Pedido {
         this.multaPorDia = pago / 5;
         this.transporteAsignado = "No asignado";
         this.fechaEntrega = fechaEntrega;
+        this.fechaEntregaOriginal = (Calendar) fechaEntrega.clone();
         this.tipoPaquete = tipoPaquete;
     }
 
     /**
      * Obtiene el ID del pedido
-     * @return String con el ID
+     * @return String with the ID
      */
     public String getId() {
         return id;
@@ -63,7 +67,7 @@ public class Pedido {
 
     /**
      * Obtiene el nombre del cliente
-     * @return String con el nombre
+     * @return String with the name
      */
     public String getCliente() {
         return cliente;
@@ -71,7 +75,7 @@ public class Pedido {
 
     /**
      * Obtiene el tipo de carga
-     * @return String con la carga
+     * @return String with the load type
      */
     public String getCarga() {
         return carga;
@@ -79,7 +83,7 @@ public class Pedido {
 
     /**
      * Obtiene la prioridad del pedido
-     * @return String con la prioridad
+     * @return String with the priority
      */
     public String getPrioridad() {
         return prioridad;
@@ -87,7 +91,7 @@ public class Pedido {
 
     /**
      * Obtiene el monto ofrecido
-     * @return int con el monto
+     * @return int with the amount
      */
     public int getPago() {
         return pago;
@@ -103,7 +107,7 @@ public class Pedido {
 
     /**
      * Obtiene los días restantes para la entrega
-     * @return int con los días restantes
+     * @return int with the remaining days
      */
     public int getDiasRestantes() {
         return diasRestantes;
@@ -133,7 +137,7 @@ public class Pedido {
 
     /**
      * Obtiene la ciudad de destino
-     * @return String con el destino
+     * @return String with the destination
      */
     public String getDestino() {
         return destino;
@@ -141,7 +145,7 @@ public class Pedido {
 
     /**
      * Obtiene la bonificación por día de adelanto
-     * @return int con la bonificación
+     * @return int with the bonus
      */
     public int getBonificacionPorDia() {
         return bonificacionPorDia;
@@ -149,7 +153,7 @@ public class Pedido {
 
     /**
      * Obtiene la multa por día de retraso
-     * @return int con la multa
+     * @return int with the penalty
      */
     public int getMultaPorDia() {
         return multaPorDia;
@@ -157,7 +161,7 @@ public class Pedido {
 
     /**
      * Obtiene el transporte asignado
-     * @return String con el transporte
+     * @return String with the transport
      */
     public String getTransporteAsignado() {
         return transporteAsignado;
@@ -173,7 +177,7 @@ public class Pedido {
 
     /**
      * Calcula el pago final considerando bonificaciones y multas
-     * @return int con el pago final
+     * @return int with the final amount
      */
     public int calcularPagoFinal() {
         int diasAdelanto = diasEntrega - diasRestantes;
@@ -187,7 +191,7 @@ public class Pedido {
 
     /**
      * Obtiene los días de entrega asignados
-     * @return int con los días de entrega
+     * @return int with the delivery days
      */
     public int getDiasEntrega() {
         return diasEntrega;
@@ -195,25 +199,25 @@ public class Pedido {
 
     /**
      * Obtiene la fecha de entrega
-     * @return String con la fecha formateada
+     * @return String with the formatted date
      */
     public String getFechaEntrega() {
         return formatoFecha.format(fechaEntrega.getTime());
     }
 
     /**
-     * Verifica si el pedido está retrasado respecto a la fecha actual
-     * @param fechaActual Fecha actual del juego
-     * @return true si está retrasado, false si no
+     * Verifies if the order is delayed with respect to the current date
+     * @param fechaActual Current date of the game
+     * @return true if delayed, false if not
      */
     public boolean estaRetrasado(Calendar fechaActual) {
         return fechaActual.after(fechaEntrega);
     }
 
     /**
-     * Calcula los días de retraso
-     * @param fechaActual Fecha actual del juego
-     * @return int con los días de retraso (0 si no hay retraso)
+     * Calculates the delay days
+     * @param fechaActual Current date of the game
+     * @return int with the delay days (0 if no delay)
      */
     public int calcularDiasRetraso(Calendar fechaActual) {
         if (!estaRetrasado(fechaActual)) {
@@ -231,7 +235,7 @@ public class Pedido {
 
     /**
      * Obtiene el peso del pedido
-     * @return int con el peso en kg
+     * @return int with the weight in kg
      */
     public int getPeso() {
         return peso;
@@ -239,15 +243,15 @@ public class Pedido {
 
     /**
      * Obtiene el tipo de paquete
-     * @return String con el tipo de paquete
+     * @return String with the package type
      */
     public String getTipoPaquete() {
         return tipoPaquete;
     }
 
     /**
-     * Devuelve una representación formateada del pedido
-     * @return String con la representación formateada
+     * Returns a formatted representation of the order
+     * @return String with the formatted representation
      */
     public String toStringFormateado() {
         return String.format("%-8s | %-20s | %-15s | %-10s | %-10s | %-15s | %-12s | %-10s | %-10s",
@@ -264,10 +268,38 @@ public class Pedido {
     }
 
     /**
-     * Obtiene la fecha de entrega como Calendar
-     * @return Calendar con la fecha de entrega
+     * Gets the delivery date as Calendar
+     * @return Calendar with the delivery date
      */
     public Calendar getFechaEntregaCalendar() {
         return fechaEntrega;
+    }
+
+    public void setFechaEntrega(Calendar fechaEntrega) {
+        this.fechaEntrega = fechaEntrega;
+    }
+
+    public Calendar getFechaDisponible() {
+        return fechaDisponible;
+    }
+
+    public void setFechaDisponible(Calendar fechaDisponible) {
+        this.fechaDisponible = fechaDisponible;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getFechaEntregaOriginal() {
+        return formatoFecha.format(fechaEntregaOriginal.getTime());
+    }
+
+    public Calendar getFechaEntregaOriginalCalendar() {
+        return fechaEntregaOriginal;
     }
 }

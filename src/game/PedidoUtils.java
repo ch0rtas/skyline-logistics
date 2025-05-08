@@ -1,7 +1,6 @@
 package game;
 
 import java.util.List;
-import java.util.Map;
 
 public class PedidoUtils {
     public static void mostrarPedidosPendientes(List<Pedido> pedidosPendientes) {
@@ -59,6 +58,39 @@ public class PedidoUtils {
                 pedido.getFechaEntrega()
             };
             System.out.println(JuegoLogistica.generarFilaTabla(valores, anchos));
+        }
+    }
+
+    /**
+     * Calcula la multa por rechazar un pedido
+     * @param pedido Pedido a rechazar
+     * @return int con el monto de la multa
+     */
+    public static int calcularMultaRechazo(Pedido pedido) {
+        int multaBase = (int) (pedido.getPago() * 0.5); // 50% del pago como multa base
+        if (pedido.getPrioridad().equals("URGENTE")) {
+            multaBase *= 2; // Doble multa para pedidos urgentes
+        }
+        return multaBase;
+    }
+
+    /**
+     * Calcula la cantidad de pedidos según la dificultad
+     * @param dificultad Nivel de dificultad
+     * @param diaActual Día actual del juego
+     * @return int con la cantidad de pedidos
+     */
+    public static int calcularCantidadPedidos(String dificultad, int diaActual) {
+        int base = 2; // Pedidos base por día
+        switch (dificultad) {
+            case "easy":
+                return base + (diaActual / 3); // Aumenta 1 cada 3 días
+            case "medium":
+                return base + (diaActual / 2); // Aumenta 1 cada 2 días
+            case "hard":
+                return base + diaActual; // Aumenta 1 cada día
+            default:
+                return base;
         }
     }
 }

@@ -1,6 +1,8 @@
 package game;
 
 import java.util.*;
+import static game.VehiculoRutaUtils.vehiculoPuedeRealizarRuta;
+import static game.DistanciaUtils.obtenerDistancia;
 
 public class PedidoManager {
     public static void gestionarPedido(JuegoLogistica juego) {
@@ -8,10 +10,10 @@ public class PedidoManager {
         Jugador jugador = juego.getJugador();
         Scanner scanner = juego.getScanner();
         String almacenPrincipal = juego.getAlmacenPrincipal();
-        Random random = new Random();
         List<Vehiculo> flota = juego.getFlota();
         Map<String, Pedido> pedidos = juego.getPedidos();
         List<Pedido> pedidosEnCurso = juego.getPedidosEnCurso();
+        Calendar fechaActual = juego.getFechaActual();
 
         if (pedidosPendientes.isEmpty()) {
             System.out.println("\n📭 No hay pedidos pendientes para gestionar");
@@ -33,121 +35,116 @@ public class PedidoManager {
         for (Vehiculo v : flota) {
             if (v.estaDisponible() && 
                 v.puedeTransportarTipo(pedido.getTipoPaquete()) &&
-                juego.vehiculoPuedeRealizarRuta(v, almacenPrincipal, pedido.getDestino())) {
+                vehiculoPuedeRealizarRuta(v, almacenPrincipal, pedido.getDestino())) {
                 hayVehiculosDisponibles = true;
                 break;
             }
         }
 
         if (!hayVehiculosDisponibles) {
-            System.out.println("\n❌ No hay vehículos disponibles para realizar esta ruta");
-            System.out.println("   - Origen: " + almacenPrincipal);
-            System.out.println("   - Destino: " + pedido.getDestino());
-            System.out.println("   - Tipo de carga: " + pedido.getTipoPaquete());
-
-            System.out.println("\n¿Qué desea hacer con el pedido #" + idPedido + "?");
-            System.out.println("02. Rechazar (Multa: $" + juego.calcularMultaRechazo(pedido) + ")");
-            System.out.print("\nOpción: ");
+            System.out.println("\n❌ No hay vehículos disponibles para esta ruta");
+            System.out.println("\nOpciones:");
+            System.out.println("1. Cancelar pedido (penalización del 50%)");
+            System.out.println("2. Volver al menú anterior");
+            System.out.print("\nSeleccione una opción: ");
             String opcion = scanner.nextLine();
 
-            if (opcion.equals("02") || opcion.equals("2")) {
-                String confirmacion;
-                do {
-                    System.out.print("¿Confirmar rechazo? (S/N): ");
-                    confirmacion = scanner.nextLine().toUpperCase();
-                } while (!confirmacion.equals("S") && !confirmacion.equals("N"));
+            if (opcion.equals("1")) {
+                System.out.println("\n⚠️ ¿Está seguro de que desea cancelar el pedido?");
+                System.out.println("Se aplicará una penalización del 50% del valor del pedido.");
+                System.out.print("Ingrese 'SI' para confirmar: ");
+                String confirmacion = scanner.nextLine();
 
-                if (confirmacion.equals("S")) {
-                    int multa = juego.calcularMultaRechazo(pedido);
-                    jugador.gastar(multa); // Restar la multa del balance del jugador
-                    juego.incrementarGastosAcumulados(multa); // Añadir la multa a los gastos acumulados
+                if (confirmacion.equalsIgnoreCase("SI")) {
+                    int penalizacion = (int)(pedido.getPago() * 0.5);
+                    jugador.gastar(penalizacion);
                     pedidosPendientes.remove(pedido);
-                    System.out.println("❌ Pedido #" + idPedido + " rechazado");
-                    System.out.println("💰 Multa aplicada: $" + multa);
+                    System.out.println("\n✅ Pedido cancelado");
+                    System.out.println("💸 Penalización aplicada: $" + penalizacion);
                 }
-                return;
-            } else {
-                System.out.println("\n❌ Opción no válida");
-                gestionarPedido(juego);
-                return;
             }
-        }
-
-        System.out.println("\n¿Qué desea hacer con el pedido #" + idPedido + "?");
-        System.out.println("01. Enviar");
-        System.out.println("02. Rechazar (Multa: $" + juego.calcularMultaRechazo(pedido) + ")");
-        System.out.print("\nOpción: ");
-        String opcion = scanner.nextLine();
-
-        if (opcion.equals("02") || opcion.equals("2")) {
-            System.out.println("\n⚠️ ¿Está seguro de rechazar el pedido #" + idPedido + "?");
-            System.out.println("   - Multa por rechazo: $" + juego.calcularMultaRechazo(pedido));
-            System.out.print("   - Confirmar (s/N): ");
-
-            String confirmacion = scanner.nextLine().toUpperCase();
-            if (confirmacion.equals("S")) {
-                int multa = juego.calcularMultaRechazo(pedido);
-                jugador.gastar(multa); // Restar la multa del balance del jugador
-                juego.incrementarGastosAcumulados(multa); // Añadir la multa a los gastos acumulados
-                pedidosPendientes.remove(pedido);
-                System.out.println("❌ Pedido #" + idPedido + " rechazado");
-                System.out.println("💰 Multa aplicada: $" + multa);
-            }
-            return;
-        } else if (!opcion.equals("01") && !opcion.equals("1")) {
-            System.out.println("\n❌ Opción no válida");
-            gestionarPedido(juego);
             return;
         }
 
         // Mostrar vehículos disponibles
         juego.mostrarVehiculosDisponibles(pedido);
-        if (pedidosPendientes.isEmpty()) {
-            return;
-        }
 
-        System.out.print("\nIngrese ID del vehículo a utilizar: ");
-        String idVehiculo = scanner.nextLine().toUpperCase();
+        // Seleccionar vehículo
+        System.out.print("\nIngrese ID del vehículo a asignar: ");
+        String idVehiculo = scanner.nextLine();
 
-        Vehiculo vehiculoSeleccionado = null;
-        for (Vehiculo v : flota) {
-            if (v.getId().equals(idVehiculo)) {
-                vehiculoSeleccionado = v;
-                break;
-            }
-        }
+        Vehiculo vehiculoSeleccionado = flota.stream()
+                .filter(v -> v.getId().equals(idVehiculo))
+                .findFirst()
+                .orElse(null);
 
         if (vehiculoSeleccionado == null) {
-            System.out.println("❌ ID de vehículo no válido");
+            System.out.println("❌ Vehículo no encontrado");
             return;
         }
 
-        // Calcular costo total
-        int costoTotal = juego.calcularCosteEnvio(vehiculoSeleccionado, almacenPrincipal, pedido.getDestino());
-
-        // Verificar balance
-        if (jugador.getBalance() < costoTotal) {
-            System.out.println("❌ Balance insuficiente para realizar el envío");
+        if (!vehiculoSeleccionado.estaDisponible()) {
+            System.out.println("❌ El vehículo no está disponible");
             return;
         }
 
-        // Restar el costo del balance del jugador
-        jugador.gastar(costoTotal);
-        juego.incrementarGastosAcumulados(costoTotal);
+        if (!vehiculoSeleccionado.puedeTransportarTipo(pedido.getTipoPaquete())) {
+            System.out.println("❌ El vehículo no puede transportar este tipo de carga");
+            return;
+        }
 
-        // Asignar vehículo al pedido
+        if (!vehiculoPuedeRealizarRuta(vehiculoSeleccionado, almacenPrincipal, pedido.getDestino())) {
+            System.out.println("❌ El vehículo no puede realizar esta ruta");
+            return;
+        }
+
+        // Recalculate the delivery date based on the selected vehicle's speed and distance
+        int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
+        double horasViaje = (double) distancia / vehiculoSeleccionado.getVelocidad();
+
+        // Adjust travel time based on vehicle type
+        switch (vehiculoSeleccionado.getTipo()) {
+            case "Furgoneta":
+                horasViaje *= 1.2;
+                break;
+            case "Camión":
+                horasViaje *= 1.3;
+                break;
+            case "Barco":
+                horasViaje *= 1.5;
+                break;
+            case "Avión":
+                horasViaje *= 1.1;
+                break;
+        }
+
+        int diasViaje = (int) Math.ceil(horasViaje / 8.0);
+        diasViaje = Math.max(1, diasViaje);
+
+        Calendar fechaEntrega = (Calendar) fechaActual.clone();
+        fechaEntrega.add(Calendar.DAY_OF_MONTH, diasViaje);
+
+        // Set the recalculated delivery date
+        pedido.setFechaEntrega(fechaEntrega);
+
+        // Calcular el costo total del vehículo basado en la distancia y el costo por kilómetro
+        int costoTotalVehiculo = (int) (distancia * vehiculoSeleccionado.getCostoPorKilometro());
+
+        // Descontar el costo total del vehículo del balance del jugador
+        jugador.gastar(costoTotalVehiculo);
+        System.out.println("💰 Se ha descontado el costo del vehículo: $" + costoTotalVehiculo);
+
+        // Asignar pedido al vehículo
         vehiculoSeleccionado.asignarPedido(pedido);
         pedido.setTransporteAsignado(vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId());
+        pedido.setEstado("EN CURSO");
+        pedido.setFechaDisponible(fechaEntrega);
 
-        // Resolver incidente si ocurre
-        if (random.nextBoolean()) {
-            juego.resolverIncidente(pedido);
-        }
-
+        // Mover pedido a la lista de pedidos en curso
         pedidosPendientes.remove(pedido);
         pedidosEnCurso.add(pedido);
-        System.out.println("\n✅ Pedido #" + idPedido + " gestionado exitosamente");
-        System.out.println("   - Vehículo asignado: " + vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId());
-        System.out.println("   - Costo total: $" + costoTotal);
+
+        System.out.println("\n✅ Pedido asignado correctamente");
+        System.out.println("📅 Fecha estimada de entrega: " + JuegoLogistica.formatoFecha.format(fechaEntrega.getTime()));
     }
 }

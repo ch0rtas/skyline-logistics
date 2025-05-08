@@ -40,11 +40,16 @@ public class MercadoVehiculos {
                     continue;
                 }
 
+                // Después de realizar la compra, actualizamos las estadísticas para reflejar el nuevo balance
                 jugador.gastar(vehiculoSeleccionado.getPrecio());
                 flota.add(vehiculoSeleccionado);
                 vehiculosMercado.remove(vehiculoSeleccionado);
 
                 System.out.println("✅ Has comprado el vehículo " + vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId());
+                System.out.println("💰 Balance actualizado: " + jugador.getBalance() + "€");
+
+                // Llamada explícita para mostrar estadísticas actualizadas
+                EstadisticasHelper.mostrarEstadisticas(jugador, 0, 0, 0, 0, 0, 0);
             } catch (NumberFormatException e) {
                 System.out.println("❌ Opción no válida");
             }

@@ -25,13 +25,13 @@ public class PenaltyUtils {
         // Increase based on difficulty
         switch (dificultad.toLowerCase()) {
             case "easy":
-                multa *= 1;
+                multa *= 6; // Quadrupled multiplier for easy difficulty
                 break;
             case "medium":
-                multa *= 1.2;
+                multa *= 8; // Quadrupled multiplier for medium difficulty
                 break;
             case "hard":
-                multa *= 1.5;
+                multa *= 12; // Quadrupled multiplier for hard difficulty
                 break;
         }
 

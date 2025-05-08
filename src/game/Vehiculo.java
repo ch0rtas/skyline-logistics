@@ -1,12 +1,9 @@
 package game;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -216,6 +213,14 @@ public class Vehiculo {
     }
 
     /**
+     * Obtiene el coste por kilómetro del vehículo
+     * @return int con el coste por kilómetro
+     */
+    public int getCostoPorKilometro() {
+        return costePorKm;
+    }
+
+    /**
      * Calcula el tiempo estimado de entrega en horas
      * @param distancia Distancia en kilómetros
      * @return int con las horas estimadas
@@ -266,7 +271,7 @@ public class Vehiculo {
      * Aplica el desgaste por viaje al vehículo
      */
     public void aplicarDesgaste() {
-        salud = Math.max(0, salud - desgastePorViaje);
+        reducirSalud(this.desgastePorViaje);
     }
 
     /**
@@ -332,5 +337,8 @@ public class Vehiculo {
     // Added a method to reduce the health of the vehicle
     public void reducirSalud(int cantidad) {
         this.salud = Math.max(0, this.salud - cantidad);
+        if (this.salud < 10) {
+            System.out.println("⚠️ El vehículo " + this.id + " necesita reparación urgente");
+        }
     }
 }
