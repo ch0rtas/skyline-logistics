@@ -122,7 +122,10 @@ public class Pedido {
         }
     }
 
-    // Added a method to increase the remaining days for delivery
+    /**
+     * Incrementa los días restantes para la entrega
+     * @param dias Número de días a incrementar
+     */
     public void incrementarDiasRestantes(int dias) {
         this.diasRestantes += dias;
     }

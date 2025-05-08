@@ -206,24 +206,16 @@ public class Vehiculo {
 
     /**
      * Obtiene el coste por kilómetro
-     * @return int con el coste
+     * @return int with the cost
      */
     public int getCostePorKm() {
         return costePorKm;
     }
 
     /**
-     * Obtiene el coste por kilómetro del vehículo
-     * @return int con el coste por kilómetro
-     */
-    public int getCostoPorKilometro() {
-        return costePorKm;
-    }
-
-    /**
      * Calcula el tiempo estimado de entrega en horas
      * @param distancia Distancia en kilómetros
-     * @return int con las horas estimadas
+     * @return int with the estimated hours
      */
     public int calcularTiempoEntrega(int distancia) {
         // Considerar que los vehículos no pueden viajar 24 horas seguidas
@@ -237,7 +229,7 @@ public class Vehiculo {
     /**
      * Verifica si el vehículo puede transportar un tipo de paquete específico
      * @param tipoPaquete Tipo de paquete a verificar
-     * @return true si puede transportarlo, false si no
+     * @return true if it can transport it, false if not
      */
     public boolean puedeTransportarTipo(String tipoPaquete) {
         return tiposPaquetesPermitidos.contains(tipoPaquete);
@@ -245,7 +237,7 @@ public class Vehiculo {
 
     /**
      * Obtiene los tipos de paquetes que puede transportar el vehículo
-     * @return Set con los tipos de paquetes permitidos
+     * @return Set with the allowed package types
      */
     public List<String> getTiposPaquetesPermitidos() {
         return tiposPaquetesPermitidos;
@@ -253,7 +245,7 @@ public class Vehiculo {
 
     /**
      * Obtiene la salud actual del vehículo
-     * @return int con el porcentaje de salud (0-100)
+     * @return int with the health percentage (0-100)
      */
     public int getSalud() {
         return salud;
@@ -261,7 +253,7 @@ public class Vehiculo {
 
     /**
      * Obtiene el desgaste por viaje
-     * @return int con el porcentaje de desgaste por viaje
+     * @return int with the health percentage (0-100)
      */
     public int getDesgastePorViaje() {
         return desgastePorViaje;
@@ -276,7 +268,7 @@ public class Vehiculo {
 
     /**
      * Calcula el coste de reparación del vehículo
-     * @return int con el coste de reparación
+     * @return int with the repair cost
      */
     public int calcularCosteReparacion() {
         int costeBase = 0;
@@ -302,7 +294,7 @@ public class Vehiculo {
 
     /**
      * Repara el vehículo
-     * @return int con el coste de la reparación
+     * @return int with the repair cost
      */
     public int reparar() {
         int coste = calcularCosteReparacion();

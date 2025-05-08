@@ -70,7 +70,7 @@ public class PenaltyUtils {
      * @param dificultad The difficulty level.
      * @return The number of days between tax payments.
      */
-    private static int calcularDiasImpuestos(String dificultad) {
+    public static int calcularDiasImpuestos(String dificultad) {
         switch (dificultad.toLowerCase()) {
             case "hard":
                 return 2;

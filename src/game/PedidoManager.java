@@ -128,7 +128,7 @@ public class PedidoManager {
         pedido.setFechaEntrega(fechaEntrega);
 
         // Calcular el costo total del vehículo basado en la distancia y el costo por kilómetro
-        int costoTotalVehiculo = (int) (distancia * vehiculoSeleccionado.getCostoPorKilometro());
+        int costoTotalVehiculo = (int) (distancia * vehiculoSeleccionado.getCostePorKm());
 
         // Descontar el costo total del vehículo del balance del jugador
         jugador.gastar(costoTotalVehiculo);
