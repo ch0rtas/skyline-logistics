@@ -12,7 +12,6 @@ import strategy.implementations.ModoCampania;
 import strategy.implementations.ModoDesafio;
 import strategy.implementations.ModoLibre;
 
-
 /**
  * Clase principal que inicia el juego de logística
  */

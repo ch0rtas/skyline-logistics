@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import strategy.core.ModoJuegoStrategy;
 import strategy.implementations.ModoLibre;
 
-
 /**
  * Clase principal que gestiona el juego de logística
  */
