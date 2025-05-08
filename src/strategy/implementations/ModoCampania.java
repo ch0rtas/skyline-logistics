@@ -4,25 +4,26 @@ import game.Jugador;
 import strategy.core.ModoJuegoStrategy;
 
 /**
- * Modo Campaña: el juego termina cuando se alcanza cierta ganancia.
+ * Estrategia para el modo campaña: hay objetivos a cumplir.
  */
 public class ModoCampania implements ModoJuegoStrategy {
 
-    private final int objetivoGanancia = 100000; // Ganancia objetivo
-
     @Override
     public void iniciarJuego(Jugador jugador) {
-        System.out.println("Modo Campaña iniciado: tu meta es alcanzar " + objetivoGanancia + "€.");
+        System.out.println("🎯 Modo campaña activado: cumple los objetivos antes de que se acabe el tiempo.");
     }
 
     @Override
     public boolean verificarCondicionesFin(Jugador jugador, int diaActual) {
-        // Termina cuando el jugador supera la meta de dinero
-        return jugador.getPresupuesto() >= objetivoGanancia;
+        // El modo campaña no se termina automáticamente desde aquí (lo maneja JuegoLogistica)
+        return false;
     }
 
     @Override
     public void mostrarObjetivos() {
-        System.out.println("Objetivo del modo campaña: gana al menos " + objetivoGanancia + "€.");
+        System.out.println("\n🎯 OBJETIVOS DEL MODO CAMPAÑA (según dificultad):");
+        System.out.println("• Fácil: 30 días, 100 envíos exitosos, 80% satisfacción, 100.000€ beneficios");
+        System.out.println("• Medio: 60 días, 350 envíos exitosos, 90% satisfacción, 250.000€ beneficios");
+        System.out.println("• Difícil: 100 días, 920 envíos exitosos, 95% satisfacción, 500.000€ beneficios");
     }
 }

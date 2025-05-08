@@ -1,9 +1,16 @@
 package game;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,18 +19,10 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Function;
-<<<<<<< HEAD
-import strategy.core.ModoJuegoStrategy;
-
-=======
 import java.util.stream.Collectors;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.IOException;
->>>>>>> 604c34d633b2384eabeed56e88ab3f582a3d5e34
+import strategy.core.ModoJuegoStrategy;
+import strategy.implementations.ModoLibre;
+
 
 /**
  * Clase principal que gestiona el juego de logística
@@ -41,18 +40,15 @@ public class JuegoLogistica {
     private String almacenPrincipal;
     private String ciudad;
     private String dificultad;
-    private String modoJuego;
     private int satisfaccionClientes;
     private int enviosExitosos;
     private int enviosTotales;
     private int beneficiosAcumulados;
-<<<<<<< HEAD
     private ModoJuegoStrategy modoJuego;
-=======
     private int gastosAcumulados = 0;
     private int[] beneficiosPorDia;
     private String fechaInicio;
->>>>>>> 604c34d633b2384eabeed56e88ab3f582a3d5e34
+
     private static final double TASA_IMPUESTOS = 0.45;
     private static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
     private static final String[] CIUDADES = {
@@ -130,11 +126,11 @@ public class JuegoLogistica {
      * @param nombreJugador Nombre del jugador
      * @param modoJuego Modo de juego seleccionado
      */
-    public JuegoLogistica(String ciudad, String dificultad, String nombreJugador, String modoJuego) {
+    public JuegoLogistica(String ciudad, String dificultad, String nombreJugador, ModoJuegoStrategy modoJuego) {
         this.ciudad = ciudad;
         this.almacenPrincipal = normalizarNombreCiudad(ciudad);
         this.dificultad = dificultad.toLowerCase();
-        this.modoJuego = modoJuego.toLowerCase();
+        this.modoJuego = modoJuego;
         this.jugador = new Jugador(nombreJugador, calcularBalanceInicial());
         this.scanner = new Scanner(System.in);
         this.random = new Random();
@@ -143,38 +139,36 @@ public class JuegoLogistica {
         this.pedidosEnCurso = new ArrayList<>();
         this.diaActual = 1;
         this.fechaActual = Calendar.getInstance();
-        this.satisfaccionClientes = 100; // Inicialización por defecto
+        this.satisfaccionClientes = 100;
         inicializarSatisfaccionClientes();
         this.enviosExitosos = 0;
         this.enviosTotales = 0;
         this.beneficiosAcumulados = 0;
-        this.beneficiosPorDia = new int[365]; // Máximo 365 días
-        
-        // Guardar fecha y hora de inicio
+        this.beneficiosPorDia = new int[365];
+        this.modoJuego = modoJuego;
+
         SimpleDateFormat formatoFechaHora = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         this.fechaInicio = formatoFechaHora.format(new Date());
     }
 
     /**
-<<<<<<< HEAD
     * Asigna el modo de juego a utilizar (Strategy Pattern).
     */
     public void setModoJuego(ModoJuegoStrategy modo) {
         this.modoJuego = modo;
-    }      
+    }
+     
 
     /**
      * Calcula el balance inicial según la dificultad
-=======
      * Calcula el balance inicial según la dificultad y modo de juego
->>>>>>> 604c34d633b2384eabeed56e88ab3f582a3d5e34
      * @return int con el balance inicial
      */
     private int calcularBalanceInicial() {
-        if (modoJuego.equals("libre")) {
-            return 999999;
+        if (modoJuego instanceof ModoLibre) {
+        return 999999;
         }
-        
+
         switch (dificultad) {
             case "easy":
                 return 50000;
@@ -261,19 +255,15 @@ public class JuegoLogistica {
         inicializarFlota();
         generarVehiculosMercado();
         generarPedidosDia();
-        
-<<<<<<< HEAD
+
         while (!jugador.estaDerrotado() && !modoJuego.verificarCondicionesFin(jugador, diaActual)) {
-            mostrarMenuPrincipal();
-=======
-        while (!jugadorDerrotado()) {
             mostrarMenuPartida();
->>>>>>> 604c34d633b2384eabeed56e88ab3f582a3d5e34
             procesarOpcion(scanner.nextLine());
         }
-        
+
         mostrarGameOver();
     }
+
 
     /**
      * Muestra la pantalla de bienvenida
@@ -2014,10 +2004,10 @@ public class JuegoLogistica {
         procesarImpuestos();
         
         // Verificar objetivos de campaña
-        if (modoJuego.equals("campaña")) {
-            verificarObjetivosCampaña();
+        if (!(modoJuego instanceof strategy.implementations.ModoCampania)) {
+            return;
         }
-        
+
         // Generar nuevos vehículos en el mercado
         generarVehiculosMercado();
         
@@ -2116,8 +2106,8 @@ public class JuegoLogistica {
      * @return true si el jugador está derrotado, false si no
      */
     private boolean jugadorDerrotado() {
-        if (modoJuego.equals("libre")) {
-            return false; // En modo libre nunca se pierde
+        if (modoJuego instanceof strategy.implementations.ModoLibre) {
+            return false;
         }
         return jugador.getBalance() < 0; // Cambiado de <= 0 a < 0 para que termine cuando sea negativo
     }
@@ -2127,7 +2117,7 @@ public class JuegoLogistica {
      * @param cantidad Cantidad a gastar
      */
     private void gastarDinero(int cantidad) {
-        if (!modoJuego.equals("libre")) {
+        if (!(modoJuego instanceof strategy.implementations.ModoLibre)) {
             jugador.gastar(cantidad);
         }
     }
@@ -2137,8 +2127,8 @@ public class JuegoLogistica {
      * @param cantidad Cantidad a recibir
      */
     private void recibirDinero(int cantidad) {
-        if (!modoJuego.equals("libre")) {
-            jugador.recuperarBalance(cantidad);
+        if (!(modoJuego instanceof strategy.implementations.ModoLibre)) {
+            jugador.gastar(cantidad);
         }
     }
 
@@ -2201,7 +2191,7 @@ public class JuegoLogistica {
      * Ajusta la satisfacción del cliente al inicio del juego según el modo de juego.
      */
     private void inicializarSatisfaccionClientes() {
-        if (modoJuego.equals("libre")) {
+        if (modoJuego instanceof strategy.implementations.ModoLibre) {
             satisfaccionClientes = 100;
         } else {
             satisfaccionClientes = 50;

@@ -1,17 +1,8 @@
-
 import java.util.Scanner;
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import strategy.implementations.ModoLibre;
-import strategy.implementations.ModoDesafio;
+import strategy.core.ModoJuegoStrategy;
 import strategy.implementations.ModoCampania;
+import strategy.implementations.ModoDesafio;
+import strategy.implementations.ModoLibre;
 
 public class Main {
     private static final String[] CIUDADES = {
@@ -40,7 +31,7 @@ public class Main {
             switch (opcion) {
                 case "01":
                 case "1":
-                    iniciarNuevaPartida();
+                    iniciarNuevaPartida(scanner);
                     break;
                 case "02":
                 case "2":
@@ -65,32 +56,15 @@ public class Main {
         scanner.close();
     }
 
-    private static void iniciarNuevaPartida() {
-        Scanner scanner = new Scanner(System.in);
-
+    private static void iniciarNuevaPartida(Scanner scanner) {
         System.out.print("\n👤 Introduce tu nombre: ");
         String nombreJugador = scanner.nextLine();
 
         String ciudad = seleccionarCiudad(scanner);
         String dificultad = seleccionarDificultad(scanner);
-        String modoJuego = seleccionarModoJuego(scanner);
+        ModoJuegoStrategy modoJuego = seleccionarModoJuego(scanner);
 
-        game.JuegoLogistica juego = new game.JuegoLogistica(ciudad, dificultad, nombreJugador);
-
-        switch (modoJuego.toLowerCase()) {
-            case "libre":
-                juego.setModoJuego(new ModoLibre());
-                break;
-            case "campaña":
-                juego.setModoJuego(new ModoCampania());
-                break;
-            case "desafio":
-                juego.setModoJuego(new ModoDesafio());
-                break;
-            default:
-                juego.setModoJuego(new ModoLibre());
-        }
-
+        game.JuegoLogistica juego = new game.JuegoLogistica(ciudad, dificultad, nombreJugador, modoJuego);
         juego.iniciar();
     }
 
@@ -132,26 +106,18 @@ public class Main {
             System.out.print("\nOpción: ");
             opcion = scanner.nextLine();
 
-            if (!opcion.equals("01") && !opcion.equals("1") && !opcion.equals("02") &&
-                !opcion.equals("2") && !opcion.equals("03") && !opcion.equals("3")) {
-                System.out.println("❌ Opción no válida. Por favor, selecciona una opción válida.");
+            switch (opcion) {
+                case "01": case "1": return "easy";
+                case "02": case "2": return "medium";
+                case "03": case "3": return "hard";
+                default:
+                    System.out.println("❌ Opción no válida. Por favor, selecciona una opción válida.");
             }
-        } while (!opcion.equals("01") && !opcion.equals("1") &&
-                 !opcion.equals("02") && !opcion.equals("2") &&
-                 !opcion.equals("03") && !opcion.equals("3"));
-
-        switch (opcion) {
-            case "01": case "1": return "easy";
-            case "02": case "2": return "medium";
-            case "03": case "3": return "hard";
-            default: return "medium";
-        }
+        } while (true);
     }
 
-    private static String seleccionarModoJuego(Scanner scanner) {
-        String modoSeleccionado = null;
-
-        while (modoSeleccionado == null) {
+    private static ModoJuegoStrategy seleccionarModoJuego(Scanner scanner) {
+        while (true) {
             System.out.println("\n🎮 SELECCIONA EL MODO DE JUEGO:");
             System.out.println("01. Modo Libre - Sin restricciones de tiempo ni recursos");
             System.out.println("02. Modo Desafío - Gestión de recursos limitados");
@@ -160,23 +126,13 @@ public class Main {
 
             String opcion = scanner.nextLine();
             switch (opcion) {
-                case "01":
-                case "1":
-                    modoSeleccionado = "libre";
-                    break;
-                case "02":
-                case "2":
-                    modoSeleccionado = "desafio";
-                    break;
-                case "03":
-                case "3":
-                    modoSeleccionado = "campaña";
-                    break;
+                case "01": case "1": return new ModoLibre();
+                case "02": case "2": return new ModoDesafio();
+                case "03": case "3": return new ModoCampania();
                 default:
                     System.out.println("❌ Opción no válida. Por favor, selecciona una opción válida.");
             }
         }
-        return modoSeleccionado;
     }
 
     private static void mostrarHistoricoJugadores() {
@@ -199,3 +155,4 @@ public class Main {
         System.out.println("https://github.com/Luiiss44/skyline-logistics");
     }
 }
+
