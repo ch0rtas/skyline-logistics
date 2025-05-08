@@ -69,6 +69,7 @@ public class VehiculoUtils {
             diasViaje = Math.max(1, diasViaje);
 
             Calendar fechaEntrega = (Calendar) fechaActual.clone();
+            // Ajustar para que la fecha de entrega sea consistente con la selección del jugador
             fechaEntrega.add(Calendar.DAY_OF_MONTH, diasViaje);
 
             // Calcular coste total del envío
@@ -127,6 +128,7 @@ public class VehiculoUtils {
             diasViaje = Math.max(1, diasViaje);
 
             Calendar fechaEntrega = (Calendar) fechaActual.clone();
+            // Ajustar para que la fecha de entrega sea consistente con la selección del jugador
             fechaEntrega.add(Calendar.DAY_OF_MONTH, diasViaje);
 
             // Calcular coste total del envío

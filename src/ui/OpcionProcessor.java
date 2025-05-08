@@ -11,22 +11,18 @@ public class OpcionProcessor {
                 break;
             case "02":
             case "2":
-                juegoLogistica.mostrarPedidosEnCurso();
+                juegoLogistica.gestionarPedido();
                 break;
             case "03":
             case "3":
-                juegoLogistica.gestionarPedido();
+                juegoLogistica.mostrarFlota();
                 break;
             case "04":
             case "4":
-                juegoLogistica.mostrarFlota();
+                juegoLogistica.mostrarEstadisticas();
                 break;
             case "05":
             case "5":
-                juegoLogistica.mostrarEstadisticas();
-                break;
-            case "06":
-            case "6":
                 juegoLogistica.pasarDia();
                 break;
             case "99":

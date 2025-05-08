@@ -271,7 +271,7 @@ public class JuegoLogistica {
     private PedidoProcessor pedidoProcessor;
 
     public void procesarPedidosEnCurso() {
-        pedidoProcessor.procesarPedidosEnCurso();
+        PedidoProcessor.procesarPedidosEnCurso(this);
     }
 
     /**

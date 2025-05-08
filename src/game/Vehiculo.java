@@ -263,7 +263,7 @@ public class Vehiculo {
      * Aplica el desgaste por viaje al vehículo
      */
     public void aplicarDesgaste() {
-        salud = Math.max(0, salud - desgastePorViaje);
+        reducirSalud(this.desgastePorViaje);
     }
 
     /**
@@ -329,5 +329,8 @@ public class Vehiculo {
     // Added a method to reduce the health of the vehicle
     public void reducirSalud(int cantidad) {
         this.salud = Math.max(0, this.salud - cantidad);
+        if (this.salud < 10) {
+            System.out.println("⚠️ El vehículo " + this.id + " necesita reparación urgente");
+        }
     }
 }

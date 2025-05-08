@@ -16,7 +16,13 @@ public class PedidoGenerator {
     }
 
     public Pedido generarPedidoAleatorio() {
-        String[] clientes = CityConstants.CIUDADES;
+        String[] clientes = {
+            "Banco Santander", "BBVA", "CaixaBank", "Iberdrola", "Telefónica", 
+            "Repsol", "Inditex", "Mercadona", "El Corte Inglés", "AENA",
+            "Renfe", "Seat", "Naturgy", "Endesa", "Mapfre"
+        };
+        
+        String[] ciudades = CityConstants.CIUDADES;
         
         Map<String, String[]> cargasPorTipo = new HashMap<>();
         cargasPorTipo.put("NORMAL", new String[]{"Materiales Construcción", "Piezas Industriales", "Equipaje VIP", "Material Educativo"});
@@ -35,7 +41,22 @@ public class PedidoGenerator {
         String tipoPaquete = tiposPaquetes[random.nextInt(tiposPaquetes.length)];
         String[] cargasDisponibles = cargasPorTipo.get(tipoPaquete);
         String carga = cargasDisponibles[random.nextInt(cargasDisponibles.length)];
-        String cliente = clientes[random.nextInt(clientes.length)];
+        
+        Map<String, String[]> clientesPorCarga = new HashMap<>();
+        clientesPorCarga.put("Vacunas", new String[]{"Hospital General", "Farmacéutica Pfizer", "Clínica Salud"});
+        clientesPorCarga.put("Medicamentos", new String[]{"Farmacia Central", "Laboratorios Roche", "Distribuidora Médica"});
+        clientesPorCarga.put("Alimentos Frescos", new String[]{"Supermercado Local", "Distribuidora de Alimentos", "Mercado Central"});
+        clientesPorCarga.put("Joyas Valiosas", new String[]{"Joyería El Brillante", "Casa de Subastas", "Banco de Valores"});
+        // Agregar más relaciones entre cargas y clientes según sea necesario
+
+        String cliente;
+        if (clientesPorCarga.containsKey(carga)) {
+            String[] clientesRelacionados = clientesPorCarga.get(carga);
+            cliente = clientesRelacionados[random.nextInt(clientesRelacionados.length)];
+        } else {
+            cliente = clientes[random.nextInt(clientes.length)];
+        }
+        
         String prioridad = prioridades[random.nextInt(prioridades.length)];
         String idPedido = "P" + (100 + random.nextInt(900));
         int peso = calcularPeso(tipoPaquete);
@@ -43,7 +64,7 @@ public class PedidoGenerator {
         String origen = almacenPrincipal;
         String destino;
         do {
-            destino = clientes[random.nextInt(clientes.length)];
+            destino = ciudades[random.nextInt(ciudades.length)];
         } while (destino.equals(origen));
 
         int costeMinimo = calcularCosteMinimo(tipoPaquete, origen, destino);
