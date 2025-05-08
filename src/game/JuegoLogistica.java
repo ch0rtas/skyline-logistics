@@ -1,18 +1,19 @@
 package game;
 
-import java.util.Scanner;
-import java.util.Random;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Calendar;
 import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.function.Function;
+import strategy.core.ModoJuegoStrategy;
+
 
 /**
  * Clase principal que gestiona el juego de logística
@@ -33,6 +34,7 @@ public class JuegoLogistica {
     private int enviosExitosos;
     private int enviosTotales;
     private int beneficiosAcumulados;
+    private ModoJuegoStrategy modoJuego;
     private static final double TASA_IMPUESTOS = 0.45;
     private static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
     private static final String[] PROVINCIAS = {
@@ -98,6 +100,13 @@ public class JuegoLogistica {
         this.enviosTotales = 0;
         this.beneficiosAcumulados = 0;
     }
+
+    /**
+    * Asigna el modo de juego a utilizar (Strategy Pattern).
+    */
+    public void setModoJuego(ModoJuegoStrategy modo) {
+        this.modoJuego = modo;
+    }      
 
     /**
      * Calcula el balance inicial según la dificultad
@@ -173,11 +182,13 @@ public class JuegoLogistica {
      */
     public void iniciar() {
         mostrarBienvenida();
+        modoJuego.iniciarJuego(jugador);
+        modoJuego.mostrarObjetivos();
         inicializarFlota();
         generarVehiculosMercado();
         generarPedidosDia();
         
-        while (!jugador.estaDerrotado()) {
+        while (!jugador.estaDerrotado() && !modoJuego.verificarCondicionesFin(jugador, diaActual)) {
             mostrarMenuPrincipal();
             procesarOpcion(scanner.nextLine());
         }
