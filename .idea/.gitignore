@@ -8,3 +8,4 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+src/OpenJDK-24/lib/modules

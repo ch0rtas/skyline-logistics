@@ -1,4 +1,13 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+<<<<<<< HEAD
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -7,6 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+=======
+import strategy.core.ModoJuegoStrategy;
+import strategy.implementations.ModoCampania;
+import strategy.implementations.ModoDesafio;
+import strategy.implementations.ModoLibre;
+>>>>>>> ee7bee6c1445dd70ae269174f6b075f396f299ff
 
 /**
  * Clase principal que inicia el juego de logística
@@ -181,6 +196,26 @@ public class Main {
     }
 
     /**
+<<<<<<< HEAD
+=======
+    * Convierte un string como "libre", "desafio", "campaña" en una instancia de estrategia correspondiente.
+    */
+    private static ModoJuegoStrategy obtenerModoJuegoStrategy(String modoJuego) {
+        switch (modoJuego.toLowerCase()) {
+            case "libre":
+                return new ModoLibre();
+            case "desafio":
+                return new ModoDesafio();
+            case "campaña":
+                return new ModoCampania();
+            default:
+                System.out.println("⚠️ Modo no reconocido, usando Modo Libre por defecto.");
+                return new ModoLibre();
+        }
+    }
+
+    /**
+>>>>>>> ee7bee6c1445dd70ae269174f6b075f396f299ff
      * Muestra los objetivos del Modo Campaña según la dificultad
      */
     private static void mostrarObjetivosCampaña() {
@@ -390,7 +425,12 @@ public class Main {
         String modoJuego = seleccionarModoJuego(scanner);
         
         // Iniciar juego
+<<<<<<< HEAD
         game.JuegoLogistica juego = new game.JuegoLogistica(ciudad, dificultad, nombreJugador, modoJuego);
+=======
+        ModoJuegoStrategy modo = obtenerModoJuegoStrategy(modoJuego);
+        game.JuegoLogistica juego = new game.JuegoLogistica(ciudad, dificultad, nombreJugador, modo);
+>>>>>>> ee7bee6c1445dd70ae269174f6b075f396f299ff
         juego.iniciar();
     }
 
