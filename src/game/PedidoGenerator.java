@@ -91,13 +91,19 @@ public class PedidoGenerator {
     }
 
     private int calcularPagoBase(int costeMinimo, String prioridad) {
-        int pagoBase = (int) (costeMinimo * 1.2);
+        // Ensure payment is at least 20% higher than the minimum cost and multiply by 10
+        int pagoBase = (int) (costeMinimo * 1.2 * 10);
+
+        // Add a random bonus up to 50% of the base payment
         pagoBase += (int) (pagoBase * random.nextDouble() * 0.5);
+
+        // Adjust payment based on priority
         if (prioridad.equals("URGENTE")) {
             pagoBase *= 1.5;
         } else if (prioridad.equals("BAJA")) {
             pagoBase *= 0.8;
         }
+
         return pagoBase;
     }
 

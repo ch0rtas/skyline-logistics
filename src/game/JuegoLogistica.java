@@ -88,7 +88,7 @@ public class JuegoLogistica {
         this.pedidoGenerator = new PedidoGenerator(this.fechaActual, this.flota, this.almacenPrincipal, this.dificultad);
         
         // Inicializar pedidoProcessor en el constructor
-        this.pedidoProcessor = new PedidoProcessor(this.pedidosEnCurso, this.fechaActual, this.flota, this.jugador, this.enviosExitosos, this.enviosTotales, this.beneficiosAcumulados, this.satisfaccionClientes, this.random);
+        this.pedidoProcessor = new PedidoProcessor(this.pedidosEnCurso, this.fechaActual, this.flota, this.jugador, this.enviosExitosos, this.enviosTotales, this.beneficiosAcumulados, this.satisfaccionClientes, this.random, this.dificultad); // Added dificultad parameter
         this.incidentHandler = new IncidentHandler(this.flota, this.random);
     }
     

@@ -15,8 +15,9 @@ public class PedidoProcessor {
     private int beneficiosAcumulados;
     private int satisfaccionClientes;
     private Random random;
+    private String dificultad; // Added dificultad field
 
-    public PedidoProcessor(List<Pedido> pedidosEnCurso, Calendar fechaActual, List<Vehiculo> flota, Jugador jugador, int enviosExitosos, int enviosTotales, int beneficiosAcumulados, int satisfaccionClientes, Random random) {
+    public PedidoProcessor(List<Pedido> pedidosEnCurso, Calendar fechaActual, List<Vehiculo> flota, Jugador jugador, int enviosExitosos, int enviosTotales, int beneficiosAcumulados, int satisfaccionClientes, Random random, String dificultad) {
         this.pedidosEnCurso = pedidosEnCurso;
         this.fechaActual = fechaActual;
         this.flota = flota;
@@ -26,6 +27,7 @@ public class PedidoProcessor {
         this.beneficiosAcumulados = beneficiosAcumulados;
         this.satisfaccionClientes = satisfaccionClientes;
         this.random = random;
+        this.dificultad = dificultad; // Initialize dificultad
     }
 
     private void procesarPedidoCompletado(Pedido pedido, int pagoOriginal, int multa, int ganancia, boolean exito, String mensaje) {
@@ -50,7 +52,15 @@ public class PedidoProcessor {
 
         if (vehiculo != null) {
             vehiculo.asignarPedido(null);
-            vehiculo.aplicarDesgaste();
+
+            // Reduce health based on the wear percentage
+            int desgaste = vehiculo.getDesgastePorViaje();
+            vehiculo.reducirSalud(desgaste);
+
+            // Set availability to one day after delivery
+            Calendar fechaDisponible = (Calendar) pedido.getFechaEntregaCalendar().clone();
+            fechaDisponible.add(Calendar.DAY_OF_MONTH, 1);
+            pedido.setFechaDisponible(fechaDisponible);
         }
 
         enviosTotales++;
@@ -81,7 +91,7 @@ public class PedidoProcessor {
                 } else {
                     int diasAdelanto = pedido.getDiasEntrega() - pedido.getDiasRestantes();
                     if (diasAdelanto > 0) {
-                        ganancia = pagoOriginal + (diasAdelanto * pedido.getBonificacionPorDia());
+                        ganancia = pagoOriginal + (int) (diasAdelanto * pedido.getBonificacionPorDia() * (dificultad.equals("hard") ? 1.5 : 1.2)); // Explicit cast to int
                         mensaje = "✅ Envío completado con " + diasAdelanto + " días de adelanto";
                     } else {
                         mensaje = "✅ Envío completado a tiempo";

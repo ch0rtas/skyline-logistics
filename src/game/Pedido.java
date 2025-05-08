@@ -22,6 +22,7 @@ public class Pedido {
     private Calendar fechaEntrega;
     private String tipoPaquete; // NORMAL, REFRIGERADO, CONGELADO, ESCOLTADO, PELIGROSO, FRÁGIL
     private static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
+    private Calendar fechaDisponible;
 
     /**
      * Constructor de la clase Pedido
@@ -269,5 +270,13 @@ public class Pedido {
      */
     public Calendar getFechaEntregaCalendar() {
         return fechaEntrega;
+    }
+
+    public Calendar getFechaDisponible() {
+        return fechaDisponible;
+    }
+
+    public void setFechaDisponible(Calendar fechaDisponible) {
+        this.fechaDisponible = fechaDisponible;
     }
 }
