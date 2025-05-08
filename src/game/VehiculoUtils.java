@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 import static game.CityConstants.*;
+import static game.DistanciaUtils.obtenerDistancia;
 
 public class VehiculoUtils {
     public static void mostrarVehiculosDisponibles(Pedido pedido, List<Vehiculo> flota, Calendar fechaActual, String almacenPrincipal) {
@@ -40,7 +41,7 @@ public class VehiculoUtils {
         // Calcular anchos máximos basados en el contenido
         for (Vehiculo vehiculo : vehiculosDisponibles) {
             // Calcular tiempo de entrega basado en la velocidad y distancia
-            int distancia = JuegoLogistica.obtenerDistancia(almacenPrincipal, pedido.getDestino());
+            int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
 
             // Calcular horas de viaje basadas en la velocidad real del vehículo
             double horasViaje = (double) distancia / vehiculo.getVelocidad();
@@ -71,7 +72,7 @@ public class VehiculoUtils {
             fechaEntrega.add(Calendar.DAY_OF_MONTH, diasViaje);
 
             // Calcular coste total del envío
-            int costeTotal = JuegoLogistica.calcularCosteEnvio(vehiculo, almacenPrincipal, pedido.getDestino());
+            int costeTotal = calcularCosteEnvio(vehiculo, almacenPrincipal, pedido.getDestino());
 
             String[] valores = {
                 vehiculo.getTipo(),
@@ -98,7 +99,7 @@ public class VehiculoUtils {
         // Mostrar datos
         for (Vehiculo vehiculo : vehiculosDisponibles) {
             // Calcular tiempo de entrega basado en la velocidad y distancia
-            int distancia = JuegoLogistica.obtenerDistancia(almacenPrincipal, pedido.getDestino());
+            int distancia = obtenerDistancia(almacenPrincipal, pedido.getDestino());
 
             // Calcular horas de viaje basadas en la velocidad real del vehículo
             double horasViaje = (double) distancia / vehiculo.getVelocidad();
@@ -129,7 +130,7 @@ public class VehiculoUtils {
             fechaEntrega.add(Calendar.DAY_OF_MONTH, diasViaje);
 
             // Calcular coste total del envío
-            int costeTotal = JuegoLogistica.calcularCosteEnvio(vehiculo, almacenPrincipal, pedido.getDestino());
+            int costeTotal = calcularCosteEnvio(vehiculo, almacenPrincipal, pedido.getDestino());
 
             String[] valores = {
                 vehiculo.getTipo(),
@@ -145,5 +146,38 @@ public class VehiculoUtils {
             };
             System.out.println(JuegoLogistica.generarFilaTabla(valores, anchos));
         }
+    }
+
+    public static int calcularCosteEnvio(Vehiculo vehiculo, String origen, String destino) {
+        int distancia = obtenerDistancia(origen, destino);
+        int costeBase = vehiculo.getCostePorKm() * distancia;
+
+        // Ajustes específicos para barcos
+        if (vehiculo.getTipo().equals("Barco")) {
+            costeBase *= 1.5; // 50% más caro que la ruta terrestre equivalente
+
+            if (esIsla(origen) && esIsla(destino)) {
+                costeBase *= 1.3; // 30% más caro entre islas
+            } else if (esIsla(origen) || esIsla(destino)) {
+                costeBase *= 1.2; // 20% más caro entre isla y costa
+            }
+        }
+
+        // Ajustes específicos para aviones
+        if (vehiculo.getTipo().equals("Avión")) {
+            costeBase *= 2.0; // 100% más caro que la ruta terrestre equivalente
+
+            if (esIsla(origen) && esIsla(destino)) {
+                costeBase *= 1.5; // 50% más caro entre islas
+            } else if (esIsla(origen) || esIsla(destino)) {
+                costeBase *= 1.3; // 30% más caro entre isla y costa
+            }
+        }
+
+        return costeBase;
+    }
+
+    public static boolean esIsla(String ciudad) {
+        return Arrays.asList(ISLAS).contains(ciudad);
     }
 }

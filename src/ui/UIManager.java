@@ -14,8 +14,7 @@ public class UIManager {
         System.out.println("🎮 MENÚ PRINCIPAL");
         System.out.println("==============================================");
         System.out.println("01. Nueva partida");
-        System.out.println("02. Cargar partida");
-        System.out.println("03. Ver histórico de jugadores");
+        System.out.println("02. Ver histórico de jugadores");
         System.out.println("98. Créditos");
         System.out.println("99. Salir del juego");
         System.out.print("\nSeleccione una opción: ");

@@ -1,7 +1,5 @@
 package game;
 
-import game.Jugador;
-
 public class DerrotaHandler {
     public static void verificarDerrota(Jugador jugador, int balance, Runnable guardarEstadisticas) {
         if (balance <= 0) {

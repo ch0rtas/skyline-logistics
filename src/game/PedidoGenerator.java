@@ -7,14 +7,12 @@ public class PedidoGenerator {
     private Calendar fechaActual;
     private List<Vehiculo> flota;
     private String almacenPrincipal;
-    private String dificultad;
 
     public PedidoGenerator(Calendar fechaActual, List<Vehiculo> flota, String almacenPrincipal, String dificultad) {
         this.random = new Random();
         this.fechaActual = fechaActual;
         this.flota = flota;
         this.almacenPrincipal = almacenPrincipal;
-        this.dificultad = dificultad;
     }
 
     public Pedido generarPedidoAleatorio() {

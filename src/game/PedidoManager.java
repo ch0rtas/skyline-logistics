@@ -1,6 +1,8 @@
 package game;
 
 import java.util.*;
+import static game.VehiculoUtils.calcularCosteEnvio;
+import static game.VehiculoRutaUtils.vehiculoPuedeRealizarRuta;
 
 public class PedidoManager {
     public static void gestionarPedido(JuegoLogistica juego) {
@@ -33,7 +35,7 @@ public class PedidoManager {
         for (Vehiculo v : flota) {
             if (v.estaDisponible() && 
                 v.puedeTransportarTipo(pedido.getTipoPaquete()) &&
-                juego.vehiculoPuedeRealizarRuta(v, almacenPrincipal, pedido.getDestino())) {
+                vehiculoPuedeRealizarRuta(v, almacenPrincipal, pedido.getDestino())) {
                 hayVehiculosDisponibles = true;
                 break;
             }
@@ -123,7 +125,7 @@ public class PedidoManager {
         }
 
         // Calcular costo total
-        int costoTotal = juego.calcularCosteEnvio(vehiculoSeleccionado, almacenPrincipal, pedido.getDestino());
+        int costoTotal = calcularCosteEnvio(vehiculoSeleccionado, almacenPrincipal, pedido.getDestino());
 
         // Verificar balance
         if (jugador.getBalance() < costoTotal) {
