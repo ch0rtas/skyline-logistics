@@ -118,6 +118,11 @@ public class Pedido {
         }
     }
 
+    // Added a method to increase the remaining days for delivery
+    public void incrementarDiasRestantes(int dias) {
+        this.diasRestantes += dias;
+    }
+
     /**
      * Establece los días restantes para la entrega
      * @param diasRestantes Nuevo número de días restantes
@@ -218,6 +223,12 @@ public class Pedido {
         return (int) (diff / (1000 * 60 * 60 * 24));
     }
 
+    // Overloaded method to calculate days of delay between two dates
+    public static int calcularDiasRetraso(Calendar fechaInicio, Calendar fechaFin) {
+        long diff = fechaFin.getTimeInMillis() - fechaInicio.getTimeInMillis();
+        return (int) (diff / (1000 * 60 * 60 * 24));
+    }
+
     /**
      * Obtiene el peso del pedido
      * @return int con el peso en kg
@@ -259,4 +270,4 @@ public class Pedido {
     public Calendar getFechaEntregaCalendar() {
         return fechaEntrega;
     }
-} 
+}

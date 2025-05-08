@@ -328,4 +328,9 @@ public class Vehiculo {
     private int calcularPrecio() {
         return (capacidad * 2) + (velocidad * 10) + (costePorKm * 100) + (tiposPaquetesPermitidos.size() * 1000);
     }
-} 
+
+    // Added a method to reduce the health of the vehicle
+    public void reducirSalud(int cantidad) {
+        this.salud = Math.max(0, this.salud - cantidad);
+    }
+}
