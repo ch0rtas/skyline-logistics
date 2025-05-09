@@ -23,20 +23,19 @@ public class PlayerService {
 
             while ((linea = br.readLine()) != null) {
                 String[] datos = linea.split("\\|");
-                if (datos.length == 11) {
+                if (datos.length == 10) {
                     String modo = datos[0];
                     String nombre = datos[1];
                     int dias = Integer.parseInt(datos[2]);
                     int dinero = Integer.parseInt(datos[3]);
                     int envios = Integer.parseInt(datos[4]);
                     int satisfaccion = Integer.parseInt(datos[5]);
-                    int beneficios = Integer.parseInt(datos[6]);
-                    String fechaInicio = datos[7];
-                    String fechaFin = datos[8];
-                    String dificultad = datos[9];
-                    String ciudad = datos[10];
+                    String fechaInicio = datos[6];
+                    String fechaFin = datos[7];
+                    String dificultad = datos[8];
+                    String ciudad = datos[9];
 
-                    JugadorHistorico jugador = new JugadorHistorico(nombre, dias, dinero, envios, satisfaccion, beneficios, fechaInicio, fechaFin, dificultad, ciudad);
+                    JugadorHistorico jugador = new JugadorHistorico(nombre, dias, dinero, envios, satisfaccion, fechaInicio, fechaFin, dificultad, ciudad);
                     jugadoresPorModo.computeIfAbsent(modo, k -> new ArrayList<>()).add(jugador);
                 }
             }
@@ -81,7 +80,6 @@ public class PlayerService {
                 System.out.println("💰 Balance final: " + j.dinero + "€");
                 System.out.println("📦 Envíos exitosos: " + j.envios);
                 System.out.println("😊 Satisfacción: " + j.satisfaccion + "%");
-                System.out.println("💵 Beneficios: " + j.beneficios + "€");
                 System.out.println("⏰ Duración: " + j.fechaInicio + " → " + j.fechaFin);
                 System.out.println("-".repeat(50));
             }

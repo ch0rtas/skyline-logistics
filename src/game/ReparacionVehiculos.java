@@ -2,10 +2,11 @@ package game;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import decorator.IVehiculo;
 
 public class ReparacionVehiculos {
     public static void repararVehiculo(JuegoLogistica juego) {
-        List<Vehiculo> vehiculosReparables = juego.getFlota().stream()
+        List<IVehiculo> vehiculosReparables = juego.getFlota().stream()
             .filter(v -> v.getSalud() < 100 && v.getPedidoAsignado() == null)
             .collect(Collectors.toList());
 
@@ -18,7 +19,7 @@ public class ReparacionVehiculos {
         System.out.println("Balance actual: " + juego.getJugador().getBalance() + "€");
 
         for (int i = 0; i < vehiculosReparables.size(); i++) {
-            Vehiculo v = vehiculosReparables.get(i);
+            IVehiculo v = vehiculosReparables.get(i);
             System.out.printf("\n%02d. %s\n", i + 1, v.getNombre());
             System.out.println("   Salud: " + v.getSalud() + "%");
             System.out.println("   Coste de reparación: " + v.getCosteReparacion() + "€");
@@ -34,25 +35,27 @@ public class ReparacionVehiculos {
         }
 
         try {
-            int indice = Integer.parseInt(opcion) - 1;
-            if (indice >= 0 && indice < vehiculosReparables.size()) {
-                Vehiculo vehiculoSeleccionado = vehiculosReparables.get(indice);
-                if (juego.getModoJuego().equals("libre") || juego.getJugador().getBalance() >= vehiculoSeleccionado.getCosteReparacion()) {
-                    if (!juego.getModoJuego().equals("libre")) {
-                        juego.getJugador().gastar(vehiculoSeleccionado.getCosteReparacion());
-                    }
-                    vehiculoSeleccionado.reparar();
-                    System.out.println("\n✅ Has reparado el " + vehiculoSeleccionado.getNombre());
-                } else {
-                    System.out.println("\n❌ No tienes suficiente dinero para reparar este vehículo");
-                }
-            } else {
-                System.out.println("\n❌ Opción no válida");
+            int indice = Integer.parseInt(opcion);
+            if (indice < 1 || indice > vehiculosReparables.size()) {
+                System.out.println("❌ Opción no válida");
+                return;
             }
-        } catch (NumberFormatException e) {
-            System.out.println("\n❌ Por favor, introduce un número válido");
-        }
 
-        repararVehiculo(juego);
+            IVehiculo vehiculoSeleccionado = vehiculosReparables.get(indice - 1);
+            int costeReparacion = vehiculoSeleccionado.getCosteReparacion();
+
+            if (juego.getJugador().getBalance() < costeReparacion) {
+                System.out.println("❌ No tienes suficiente balance para reparar este vehículo");
+                return;
+            }
+
+            juego.getJugador().gastar(costeReparacion);
+            vehiculoSeleccionado.reparar();
+
+            System.out.println("✅ Has reparado el vehículo " + vehiculoSeleccionado.getNombre());
+            System.out.println("💰 Balance actualizado: " + juego.getJugador().getBalance() + "€");
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Opción no válida");
+        }
     }
 }

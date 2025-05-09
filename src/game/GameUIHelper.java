@@ -1,9 +1,11 @@
 package game;
 
 import java.util.*;
+import decorator.IVehiculo;
+import template.AbstractImpuestosProcessor;
 
 public class GameUIHelper {
-    public static void mostrarFlota(List<Vehiculo> flota, Scanner scanner, Calendar fechaActual, String almacenPrincipal, JuegoLogistica juego) {
+    public static void mostrarFlota(List<IVehiculo> flota, Scanner scanner, Calendar fechaActual, String almacenPrincipal, JuegoLogistica juego) {
         System.out.println("\n🚗 FLOTA DE VEHÍCULOS:");
 
         // Calcular anchos máximos para cada columna
@@ -16,13 +18,11 @@ public class GameUIHelper {
         }
 
         // Calcular anchos máximos basados en el contenido
-        for (Vehiculo vehiculo : flota) {
+        for (IVehiculo vehiculo : flota) {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
                 Calendar fechaEntrega = vehiculo.getPedidoAsignado().getFechaEntregaCalendar();
-                Calendar fechaDisponible = (Calendar) fechaEntrega.clone();
-                fechaDisponible.add(Calendar.DAY_OF_MONTH, 1);
-                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaDisponible.getTime());
+                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaEntrega.getTime());
             } else {
                 estado = "Disponible";
             }
@@ -48,13 +48,11 @@ public class GameUIHelper {
         System.out.println(JuegoLogistica.generarLineaSeparadora(anchos));
 
         // Mostrar datos
-        for (Vehiculo vehiculo : flota) {
+        for (IVehiculo vehiculo : flota) {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
                 Calendar fechaEntrega = vehiculo.getPedidoAsignado().getFechaEntregaCalendar();
-                Calendar fechaDisponible = (Calendar) fechaEntrega.clone();
-                fechaDisponible.add(Calendar.DAY_OF_MONTH, 1);
-                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaDisponible.getTime());
+                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaEntrega.getTime());
             } else {
                 estado = "Disponible";
             }
@@ -88,7 +86,8 @@ public class GameUIHelper {
                 break;
             case "03":
             case "3":
-                MercadoVehiculos.mostrarMercadoVehiculos(juego.getVehiculosMercado(), juego.getJugador(), juego.getFlota(), scanner);
+                MercadoVehiculos.mostrarMercadoVehiculos(juego.getVehiculosMercado(), juego.getJugador(), 
+                    juego.getFlota(), scanner, juego.getDificultad(), juego.getImpuestosProcessor());
                 break;
             default:
                 System.out.println("\n❌ Opción no válida");

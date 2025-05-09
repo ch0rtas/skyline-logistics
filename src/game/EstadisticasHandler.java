@@ -13,21 +13,14 @@ public class EstadisticasHandler {
             FileWriter fw = new FileWriter("historico_jugadores.txt", true);
             BufferedWriter bw = new BufferedWriter(fw);
 
-            // Calcular beneficios acumulados
-            int beneficiosAcumulados = 0;
-            for (int i = 0; i < diaActual; i++) {
-                beneficiosAcumulados += beneficiosPorDia[i];
-            }
-
-            // Formato: modoJuego|nombreJugador|dias|dinero|enviosExitosos|satisfaccion|beneficios|fechaInicio|fechaFin|dificultad|ciudad
-            String linea = String.format("%s|%s|%d|%d|%d|%d|%d|%s|%s|%s|%s",
+            // Formato: modoJuego|nombreJugador|dias|dinero|enviosExitosos|satisfaccion|fechaInicio|fechaFin|dificultad|ciudad
+            String linea = String.format("%s|%s|%d|%d|%d|%d|%s|%s|%s|%s",
                 modoJuego,
                 jugador.getNombre(),
                 diaActual,
                 jugador.getBalance(),
                 enviosExitosos,
                 satisfaccionClientes,
-                beneficiosAcumulados,
                 fechaInicio,
                 new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()),
                 dificultad,

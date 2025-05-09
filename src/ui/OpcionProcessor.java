@@ -1,6 +1,7 @@
 package ui;
 
 import game.JuegoLogistica;
+import game.PedidoManager;
 
 public class OpcionProcessor {
     public static void procesarOpcion(String opcion, JuegoLogistica juegoLogistica) {
@@ -11,7 +12,7 @@ public class OpcionProcessor {
                 break;
             case "02":
             case "2":
-                juegoLogistica.gestionarPedido();
+                PedidoManager.gestionarPedido(juegoLogistica);
                 break;
             case "03":
             case "3":

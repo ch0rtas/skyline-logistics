@@ -2,12 +2,13 @@ package game;
 
 import java.util.List;
 import java.util.Random;
+import decorator.IVehiculo;
 
 public class IncidentResolver {
-    private List<Vehiculo> flota;
+    private List<IVehiculo> flota;
     private Random random;
 
-    public IncidentResolver(List<Vehiculo> flota, Random random) {
+    public IncidentResolver(List<IVehiculo> flota, Random random) {
         this.flota = flota;
         this.random = random;
     }
@@ -15,7 +16,7 @@ public class IncidentResolver {
     public void resolverIncidente(Pedido pedido) {
         System.out.println("⚠️ Se ha producido un incidente con el pedido " + pedido.getId());
 
-        Vehiculo vehiculo = flota.stream()
+        IVehiculo vehiculo = flota.stream()
             .filter(v -> v.getId().equals(pedido.getTransporteAsignado().split(" ")[1]))
             .findFirst()
             .orElse(null);

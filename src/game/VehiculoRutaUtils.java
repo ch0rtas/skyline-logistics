@@ -1,5 +1,6 @@
 package game;
 
+import decorator.IVehiculo;
 import java.util.Arrays;
 
 public class VehiculoRutaUtils {
@@ -10,7 +11,7 @@ public class VehiculoRutaUtils {
      * @param destino Ciudad de destino
      * @return true si el vehículo puede realizar la ruta, false si no
      */
-    public static boolean vehiculoPuedeRealizarRuta(Vehiculo vehiculo, String origen, String destino) {
+    public static boolean vehiculoPuedeRealizarRuta(IVehiculo vehiculo, String origen, String destino) {
         switch (vehiculo.getTipo()) {
             case "Furgoneta":
             case "Camión":

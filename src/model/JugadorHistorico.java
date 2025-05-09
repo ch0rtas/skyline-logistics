@@ -6,20 +6,18 @@ public class JugadorHistorico {
     public final int dinero;
     public final int envios;
     public final int satisfaccion;
-    public final int beneficios;
     public final String fechaInicio;
     public final String fechaFin;
     public final String dificultad;
     public final String ciudad;
 
-    public JugadorHistorico(String nombre, int dias, int dinero, int envios, int satisfaccion, int beneficios, 
+    public JugadorHistorico(String nombre, int dias, int dinero, int envios, int satisfaccion, 
                           String fechaInicio, String fechaFin, String dificultad, String ciudad) {
         this.nombre = nombre;
         this.dias = dias;
         this.dinero = dinero;
         this.envios = envios;
         this.satisfaccion = satisfaccion;
-        this.beneficios = beneficios;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.dificultad = dificultad;

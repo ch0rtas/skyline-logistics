@@ -1,10 +1,14 @@
 package game;
 
+import decorator.IVehiculo;
+import decorator.VehiculoMejorado;
+import decorator.VehiculoResistente;
+import decorator.VehiculoEficiente;
 import java.util.*;
 
 public class VehiculoGenerator {
-    public static List<Vehiculo> generarVehiculosMercado(String[] tiposCarga) {
-        List<Vehiculo> vehiculosMercado = new ArrayList<>();
+    public static List<IVehiculo> generarVehiculosMercado(String[] tiposCarga) {
+        List<IVehiculo> vehiculosMercado = new ArrayList<>();
         Random random = new Random();
         Set<String> idsUsados = new HashSet<>();
 
@@ -32,7 +36,21 @@ public class VehiculoGenerator {
                 tiposPermitidos.add(tipoCarga);
             }
 
-            vehiculosMercado.add(new Vehiculo(tipo, id, tiposPermitidos.toArray(new String[0])));
+            // Crear vehículo base
+            IVehiculo vehiculoBase = new Vehiculo(tipo, id, tiposPermitidos.toArray(new String[0]));
+            
+            // Aplicar decoradores aleatorios
+            if (random.nextBoolean()) {
+                vehiculoBase = new VehiculoMejorado(vehiculoBase);
+            }
+            if (random.nextBoolean()) {
+                vehiculoBase = new VehiculoResistente(vehiculoBase);
+            }
+            if (random.nextBoolean()) {
+                vehiculoBase = new VehiculoEficiente(vehiculoBase);
+            }
+
+            vehiculosMercado.add(vehiculoBase);
         }
 
         return vehiculosMercado;

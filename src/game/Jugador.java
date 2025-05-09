@@ -36,6 +36,14 @@ public class Jugador {
     }
 
     /**
+     * Incrementa el balance del jugador.
+     * @param cantidad Cantidad a incrementar
+     */
+    public void incrementarBalance(int cantidad) {
+        this.balance += cantidad;
+    }
+
+    /**
      * Obtiene el nombre del jugador
      * @return String con el nombre
      */

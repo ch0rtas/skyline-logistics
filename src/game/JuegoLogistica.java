@@ -6,6 +6,8 @@ import static util.GameSetupUtils.inicializarFlota;
 import static game.CampanaObjetivos.OBJETIVOS_CAMPANA;
 import static game.SatisfaccionClientesUtils.inicializarSatisfaccionClientes;
 import static game.CiudadUtils.normalizarNombreCiudad;
+import template.AbstractImpuestosProcessor;
+import template.ImpuestosProcessorConcreto;
 
 import java.util.Scanner;
 import java.util.Random;
@@ -19,6 +21,10 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import ui.MenuUI;
 import ui.BienvenidaUI;
+import ui.OpcionProcessor;
+import game.EstadisticasHelper;
+import game.GameRules;
+import decorator.IVehiculo;
 
 /**
  * Clase principal que gestiona el juego de logística
@@ -30,7 +36,7 @@ public class JuegoLogistica {
     private Map<String, Pedido> pedidos;
     private List<Pedido> pedidosPendientes;
     private List<Pedido> pedidosEnCurso;
-    private List<Vehiculo> flota;
+    private List<IVehiculo> flota;
     private int diaActual;
     private Calendar fechaActual;
     private String almacenPrincipal;
@@ -40,6 +46,7 @@ public class JuegoLogistica {
     private int satisfaccionClientes;
     private int enviosExitosos;
     private int enviosTotales;
+    private int enviosFallidos;
     private int beneficiosAcumulados;
     private int gastosAcumulados = 0;
     private int[] beneficiosPorDia;
@@ -47,10 +54,11 @@ public class JuegoLogistica {
     public static final double TASA_IMPUESTOS = 0.45;
     public static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
 
-    private List<Vehiculo> vehiculosMercado;
+    private List<IVehiculo> vehiculosMercado;
     private PedidoGenerator pedidoGenerator;
     private static final String[] TIPOS_CARGA = {"NORMAL", "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL", "PERECEDERO", "ALTO_VALOR", "SERES_VIVOS"};
     private IncidentHandler incidentHandler;
+    private AbstractImpuestosProcessor impuestosProcessor;
 
     /**
      * Constructor del juego
@@ -75,6 +83,7 @@ public class JuegoLogistica {
         this.satisfaccionClientes = inicializarSatisfaccionClientes(modoJuego); // Inicialización por defecto
         this.enviosExitosos = 0;
         this.enviosTotales = 0;
+        this.enviosFallidos = 0;
         this.beneficiosAcumulados = 0;
         this.beneficiosPorDia = new int[365]; // Máximo 365 días
         
@@ -88,8 +97,11 @@ public class JuegoLogistica {
         this.pedidoGenerator = new PedidoGenerator(this.fechaActual, this.flota, this.almacenPrincipal, this.dificultad);
         
         // Inicializar pedidoProcessor en el constructor
-        this.pedidoProcessor = new PedidoProcessor(this.pedidosEnCurso, this.fechaActual, this.flota, this.jugador, this.enviosExitosos, this.enviosTotales, this.beneficiosAcumulados, this.satisfaccionClientes, this.random, this.dificultad); // Added dificultad parameter
+        int[] estadisticas = new int[]{this.enviosExitosos, this.enviosFallidos, this.beneficiosAcumulados, this.satisfaccionClientes};
+        this.pedidoProcessor = new PedidoProcessor(this.pedidosEnCurso, this.fechaActual, this.flota, 
+            this.jugador, estadisticas, this.random, this.dificultad, this);
         this.incidentHandler = new IncidentHandler(this.flota, this.random);
+        this.impuestosProcessor = new ImpuestosProcessorConcreto();
     }
     
     /**
@@ -164,7 +176,7 @@ public class JuegoLogistica {
      * Genera los pedidos del día según la dificultad
      */
     public void generarPedidosDia() {
-        PedidoGeneratorHelper.generarPedidosDia(dificultad, diaActual, pedidosPendientes, pedidos, pedidoGenerator);
+        pedidoGenerator.getPedidoStrategy().generarPedidos(dificultad, diaActual, pedidosPendientes, pedidos, fechaActual);
     }
 
     /**
@@ -226,13 +238,6 @@ public class JuegoLogistica {
     }
 
     /**
-     * Permite gestionar un pedido
-     */
-    public void gestionarPedido() {
-        PedidoManager.gestionarPedido(this);
-    }
-
-    /**
      * Resuelve un incidente para un pedido
      * @param pedido Pedido afectado
      */
@@ -244,14 +249,16 @@ public class JuegoLogistica {
      * Muestra las estadísticas actuales del juego
      */
     public void mostrarEstadisticas() {
-        EstadisticasHelper.mostrarEstadisticas(jugador, diaActual, beneficiosAcumulados, gastosAcumulados, enviosTotales, enviosExitosos, satisfaccionClientes);
+        EstadisticasHelper.mostrarEstadisticas(jugador, diaActual, beneficiosAcumulados, 
+            gastosAcumulados, enviosTotales, enviosExitosos, satisfaccionClientes, 
+            dificultad, impuestosProcessor);
     }
 
     /**
      * Procesa el pago de impuestos
      */
     public void procesarImpuestos() {
-        ImpuestosProcessor.procesarImpuestos(jugador, dificultad, diaActual);
+        impuestosProcessor.procesarImpuestos(jugador, dificultad, diaActual);
     }
 
     /**
@@ -271,7 +278,42 @@ public class JuegoLogistica {
     private PedidoProcessor pedidoProcessor;
 
     public void procesarPedidosEnCurso() {
-        PedidoProcessor.procesarPedidosEnCurso(this);
+        pedidoProcessor.procesarPedidos();
+    }
+
+    /**
+     * Updates customer satisfaction based on the ratio of successful and total deliveries.
+     */
+    public void actualizarSatisfaccionClientes() {
+        if (enviosTotales > 0) {
+            double ratio = (double) enviosExitosos / enviosTotales;
+            this.satisfaccionClientes = (int) (ratio * 100);
+            
+            // Ajustar la satisfacción basada en pedidos rechazados
+            if (enviosFallidos > 0) {
+                this.satisfaccionClientes = Math.max(0, this.satisfaccionClientes - (enviosFallidos * 10));
+            }
+        } else {
+            this.satisfaccionClientes = 50; // Valor inicial por defecto
+        }
+    }
+
+    /**
+     * Incrementa el contador de envíos exitosos
+     */
+    public void incrementarEnviosExitosos() {
+        this.enviosExitosos++;
+        this.enviosTotales++;
+        actualizarSatisfaccionClientes();
+    }
+
+    /**
+     * Incrementa el contador de envíos fallidos
+     */
+    public void incrementarEnviosFallidos() {
+        this.enviosFallidos++;
+        this.enviosTotales++;
+        actualizarSatisfaccionClientes();
     }
 
     /**
@@ -309,7 +351,7 @@ public class JuegoLogistica {
         return scanner;
     }
 
-    public List<Vehiculo> getFlota() {
+    public List<IVehiculo> getFlota() {
         return flota;
     }
 
@@ -345,7 +387,23 @@ public class JuegoLogistica {
         gastosAcumulados += cantidad;
     }
 
-    public List<Vehiculo> getVehiculosMercado() {
+    public List<IVehiculo> getVehiculosMercado() {
         return vehiculosMercado;
+    }
+
+    /**
+     * Muestra el mercado de vehículos
+     */
+    public void mostrarMercadoVehiculos() {
+        MercadoVehiculos.mostrarMercadoVehiculos(vehiculosMercado, jugador, flota, scanner, 
+            dificultad, impuestosProcessor);
+    }
+
+    public String getDificultad() {
+        return dificultad;
+    }
+
+    public AbstractImpuestosProcessor getImpuestosProcessor() {
+        return impuestosProcessor;
     }
 }

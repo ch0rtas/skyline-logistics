@@ -7,8 +7,6 @@ import game.Jugador;
  */
 public class BalanceUtils {
 
-    private static final double TASA_IMPUESTOS = 0.45;
-
     /**
      * Calculates the initial balance based on difficulty and game mode.
      *
@@ -30,41 +28,6 @@ public class BalanceUtils {
                 return 10000;
             default:
                 return 25000;
-        }
-    }
-
-    /**
-     * Applies taxes to the player's balance based on the difficulty level.
-     *
-     * @param jugador The player whose balance will be taxed.
-     * @param dificultad The difficulty level.
-     * @param diaActual The current day in the game.
-     */
-    public static void aplicarImpuestos(Jugador jugador, String dificultad, int diaActual) {
-        int diasImpuestos = calcularDiasImpuestos(dificultad);
-        if (diaActual % diasImpuestos == 0) {
-            int impuestos = (int) (jugador.getBalance() * TASA_IMPUESTOS);
-            jugador.gastar(impuestos);
-            System.out.println("\n💰 Se han aplicado impuestos del " + (TASA_IMPUESTOS * 100) + "%: -" + impuestos + "€");
-        }
-    }
-
-    /**
-     * Calculates the number of days between tax payments based on difficulty.
-     *
-     * @param dificultad The difficulty level.
-     * @return The number of days between tax payments.
-     */
-    private static int calcularDiasImpuestos(String dificultad) {
-        switch (dificultad.toLowerCase()) {
-            case "hard":
-                return 2;
-            case "medium":
-                return 4;
-            case "easy":
-                return 6;
-            default:
-                return 6; // Default to the easiest level
         }
     }
 }

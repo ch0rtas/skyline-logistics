@@ -1,18 +1,34 @@
 package game;
 
 import java.util.*;
+import strategy.PedidoStrategy;
+import strategy.PedidoFacilStrategy;
+import strategy.PedidoDificilStrategy;
+import decorator.IVehiculo;
 
 public class PedidoGenerator {
     private Random random;
     private Calendar fechaActual;
-    private List<Vehiculo> flota;
+    private List<IVehiculo> flota;
     private String almacenPrincipal;
+    private String dificultad;
+    private PedidoStrategy pedidoStrategy;
 
-    public PedidoGenerator(Calendar fechaActual, List<Vehiculo> flota, String almacenPrincipal, String dificultad) {
+    public PedidoGenerator(Calendar fechaActual, List<IVehiculo> flota, String almacenPrincipal, String dificultad) {
         this.random = new Random();
         this.fechaActual = fechaActual;
         this.flota = flota;
         this.almacenPrincipal = almacenPrincipal;
+        this.dificultad = dificultad;
+        this.pedidoStrategy = crearEstrategia(dificultad);
+    }
+
+    private PedidoStrategy crearEstrategia(String dificultad) {
+        if (dificultad.equalsIgnoreCase("facil")) {
+            return new PedidoFacilStrategy(this);
+        } else {
+            return new PedidoDificilStrategy(this);
+        }
     }
 
     public Pedido generarPedidoAleatorio() {
@@ -47,7 +63,13 @@ public class PedidoGenerator {
         clientesPorCarga.put("Medicamentos", new String[]{"Farmacia Central", "Laboratorios Roche", "Distribuidora Médica"});
         clientesPorCarga.put("Alimentos Frescos", new String[]{"Supermercado Local", "Distribuidora de Alimentos", "Mercado Central"});
         clientesPorCarga.put("Joyas Valiosas", new String[]{"Joyería El Brillante", "Casa de Subastas", "Banco de Valores"});
-        // Agregar más relaciones entre cargas y clientes según sea necesario
+        clientesPorCarga.put("Materiales Construcción", new String[]{"Constructora XYZ", "Ferretería Central", "Distribuidora de Materiales"});
+        clientesPorCarga.put("Piezas Industriales", new String[]{"Fábrica de Motores", "Industria Mecánica", "Proveedor de Equipos"});
+        clientesPorCarga.put("Equipaje VIP", new String[]{"Aeropuerto Internacional", "Agencia de Viajes", "Hotel de Lujo"});
+        clientesPorCarga.put("Material Educativo", new String[]{"Escuela Primaria", "Universidad Nacional", "Editorial Académica"});
+        clientesPorCarga.put("Mariscos Frescos", new String[]{"Restaurante Gourmet", "Mercado de Pescados", "Distribuidora de Mariscos"});
+        clientesPorCarga.put("Electrónicos", new String[]{"Tienda de Electrónica", "Distribuidor Electrónico", "Fabricante de Componentes"});
+        clientesPorCarga.put("Lácteos", new String[]{"Supermercado Local", "Distribuidora de Lácteos", "Fábrica de Quesos"});
 
         String cliente;
         if (clientesPorCarga.containsKey(carga)) {
@@ -55,6 +77,19 @@ public class PedidoGenerator {
             cliente = clientesRelacionados[random.nextInt(clientesRelacionados.length)];
         } else {
             cliente = clientes[random.nextInt(clientes.length)];
+        }
+
+        while (!clientesPorCarga.containsKey(carga) || !Arrays.asList(clientesPorCarga.get(carga)).contains(cliente)) {
+            tipoPaquete = tiposPaquetes[random.nextInt(tiposPaquetes.length)];
+            cargasDisponibles = cargasPorTipo.get(tipoPaquete);
+            carga = cargasDisponibles[random.nextInt(cargasDisponibles.length)];
+
+            if (clientesPorCarga.containsKey(carga)) {
+                String[] clientesRelacionados = clientesPorCarga.get(carga);
+                cliente = clientesRelacionados[random.nextInt(clientesRelacionados.length)];
+            } else {
+                cliente = clientes[random.nextInt(clientes.length)];
+            }
         }
         
         String prioridad = prioridades[random.nextInt(prioridades.length)];
@@ -101,7 +136,7 @@ public class PedidoGenerator {
 
     private int calcularCosteMinimo(String tipoPaquete, String origen, String destino) {
         int costeMinimo = Integer.MAX_VALUE;
-        for (Vehiculo v : flota) {
+        for (IVehiculo v : flota) {
             if (v.estaDisponible() && v.puedeTransportarTipo(tipoPaquete)) {
                 int distancia = 100; // Placeholder for distance calculation
                 int costeViaje = distancia * v.getCostePorKm();
@@ -112,13 +147,9 @@ public class PedidoGenerator {
     }
 
     private int calcularPagoBase(int costeMinimo, String prioridad) {
-        // Ensure payment is at least 20% higher than the minimum cost and multiply by 10
         int pagoBase = (int) (costeMinimo * 1.2 * 10);
-
-        // Add a random bonus up to 50% of the base payment
         pagoBase += (int) (pagoBase * random.nextDouble() * 0.5);
 
-        // Adjust payment based on priority
         if (prioridad.equals("URGENTE")) {
             pagoBase *= 1.5;
         } else if (prioridad.equals("BAJA")) {
@@ -169,5 +200,13 @@ public class PedidoGenerator {
         }
         fechaEntrega.add(Calendar.DAY_OF_MONTH, diasBase);
         return fechaEntrega;
+    }
+
+    public void setPedidoStrategy(PedidoStrategy pedidoStrategy) {
+        this.pedidoStrategy = pedidoStrategy;
+    }
+
+    public PedidoStrategy getPedidoStrategy() {
+        return pedidoStrategy;
     }
 }
