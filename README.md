@@ -17,7 +17,7 @@ Skyline Logistics es una simulación de una plataforma integral de gestión log�
 javac -d bin src/**/*.java
 
 # Ejecutar la aplicación
-java -cp bin App --difficulty medium
+java -cp bin Main --difficulty medium
 ```
 
 ## 🎮 Uso de Menús
@@ -40,15 +40,64 @@ java -cp bin App --difficulty medium
 
 ```
 src/
-├── controller/                    // Lógica de orquestación CLI
-├── domain/                        // Lógica de negocio y entidades
-├── strategy/                      // Patrón Strategy
-├── decorator/                     // Patrón Decorator
-├── state/                         // Patrón State
 ├── factory/                       // Patrón Abstract Factory
-├── incidente/                     // Patrón Template Method
-├── util/                          // Utilidades y Singleton
-└── App.java                       // Clase principal
+│   ├── AbstractVehiculoFactory.java
+│   ├── VehiculoFactory.java
+│   ├── VehiculoFactoryProvider.java
+│   ├── FurgonetaFactory.java
+│   ├── CamionFactory.java
+│   ├── BarcoFactory.java
+│   └── AvionFactory.java
+├── game/                         // Lógica principal del juego
+│   ├── PedidoGenerator.java
+│   ├── Jugador.java
+│   ├── Pedido.java
+│   ├── Almacen.java
+│   ├── Ruta.java
+│   └── Evento.java
+├── model/                        // Modelos de datos
+│   ├── TipoCarga.java
+│   ├── Ubicacion.java
+│   └── Estadisticas.java
+├── template/                     // Patrón Template Method
+│   ├── ProcesadorPedido.java
+│   ├── ProcesadorPedidoBase.java
+│   └── ProcesadorPedidoUrgente.java
+├── singleton/                    // Patrón Singleton
+│   ├── GestorRecursos.java
+│   └── ConfiguracionGlobal.java
+├── util/                         // Utilidades
+│   ├── CalculadoraCostos.java
+│   ├── ValidadorPedidos.java
+│   └── Logger.java
+├── service/                      // Servicios
+│   ├── PedidoService.java
+│   ├── VehiculoService.java
+│   └── AlmacenService.java
+├── facade/                       // Patrón Facade
+│   ├── GestorLogistica.java
+│   └── InterfazUsuario.java
+├── strategy/                     // Patrón Strategy
+│   ├── ProcesamientoPedidoStrategy.java
+│   ├── PedidoFacilStrategy.java
+│   └── PedidoDificilStrategy.java
+├── state/                        // Patrón State
+│   ├── EstadoPedido.java
+│   ├── EnProceso.java
+│   ├── EnTransito.java
+│   ├── Retrasado.java
+│   └── Entregado.java
+├── decorator/                    // Patrón Decorator
+│   ├── IVehiculo.java
+│   ├── VehiculoDecorator.java
+│   ├── VehiculoMejorado.java
+│   ├── VehiculoResistente.java
+│   └── VehiculoEficiente.java
+├── ui/                           // Interfaz de usuario
+│   ├── MenuPrincipal.java
+│   ├── MenuTurno.java
+│   └── VisualizadorEstadisticas.java
+└── Main.java                     // Punto de entrada
 ```
 
 ## 🔄 Flujo de Turnos
@@ -68,10 +117,22 @@ src/
 
 ## 🛠️ Patrones de Diseño Implementados
 
-1. Strategy - Planificación de rutas y modos de transporte
-2. Decorator - Servicios adicionales para envíos
-3. State - Gestión del ciclo de vida de pedidos
-4. Abstract Factory - Creación de objetos regionales
-5. Singleton - Gestión de cálculos financieros
-6. Template Method - Resolución de incidentes
-7. Facade - Interfaz simplificada del sistema 
+1. **Abstract Factory** - Creación de vehículos y almacenes
+   - `VehiculoFactory` y `AbstractVehiculoFactory`
+   - Fábricas concretas para cada tipo de vehículo
+
+2. **Decorator** - Mejoras de vehículos
+   - `IVehiculo` y `VehiculoDecorator`
+   - Decoradores para diferentes mejoras
+
+3. **Strategy** - Procesamiento de pedidos
+   - `ProcesamientoPedidoStrategy`
+   - Estrategias para diferentes niveles de dificultad
+
+4. **State** - Estados de pedidos y vehículos
+
+5. **Singleton** - Gestión de recursos globales
+
+6. **Template Method** - Procesos estandarizados
+
+7. **Facade** - Interfaz simplificada del sistema 

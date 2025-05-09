@@ -12,147 +12,143 @@ Skyline Logistics es una simulación de una plataforma integral, **completamente
 
 ## 🧩 Patrones de Diseño Implementados
 
-A continuación se describen los siete patrones de diseño integrados en Skyline Logistics, cada uno con su objetivo, funcionamiento conceptual y valor añadido al sistema.
+### 1️⃣ Abstract Factory
 
-### 1️⃣ Strategy
+**Objetivo:** Crear familias de vehículos y almacenes de manera consistente y extensible.
 
-**Objetivo:** Permitir la selección dinámica de diferentes métodos de planificación de rutas y modos de transporte según la urgencia, el coste y las condiciones externas.
+**Implementación:**
+```java
+public interface VehiculoFactory {
+    IVehiculo crearVehiculoBase(String id, String[] tiposPermitidos);
+    IVehiculo crearVehiculoMejorado(String id, String[] tiposPermitidos);
+    IVehiculo crearVehiculoResistente(String id, String[] tiposPermitidos);
+    IVehiculo crearVehiculoEficiente(String id, String[] tiposPermitidos);
+}
+```
 
-**Explicación:** Se define una familia de algoritmos de envío (rápido, económico y alternativo en caso de bloqueo terrestre). El sistema decide en tiempo de ejecución cuál aplicar según la prioridad asignada al pedido y las restricciones actuales. Gracias a este patrón, agregar nuevos métodos de envío (por ejemplo, drones o ferrocarril) no requiere modificar la lógica central.
-
-**Valor Añadido:** Flexible adaptabilidad a nuevas estrategias y simplificación de la lógica de planificación.
+**Valor Añadido:** Permite crear diferentes tipos de vehículos (Furgoneta, Camión, Barco, Avión) con sus características específicas.
 
 ### 2️⃣ Decorator
 
-**Objetivo:** Añadir servicios opcionales a los envíos (seguro, refrigeración, prioridad urgente) de modo transparente y combinable.
+**Objetivo:** Añadir capacidades a los vehículos de forma dinámica y flexible.
 
-**Explicación:** Se parte de un envío base y, sin modificar su implementación original, se le «decoran» capas que ajustan el coste y el tiempo estimado de entrega. Cada servicio extra se encapsula en un componente independiente que se acopla al envío inicial, permitiendo combinaciones ilimitadas.
+**Implementación:**
+```java
+public abstract class VehiculoDecorator implements IVehiculo {
+    protected IVehiculo vehiculo;
+    
+    public VehiculoDecorator(IVehiculo vehiculo) {
+        this.vehiculo = vehiculo;
+    }
+    // Implementación de métodos delegados al vehículo base
+}
+```
 
-**Valor Añadido:** Composición dinámica de servicios, evitando proliferación de subclases y manteniendo un núcleo de envío limpio.
+**Valor Añadido:** Permite mejorar vehículos con características adicionales sin modificar la clase base.
 
-### 3️⃣ State
+### 3️⃣ Strategy
 
-**Objetivo:** Gestionar el ciclo de vida de un pedido a través de estados (en proceso, en tránsito, retrasado, entregado) que determinan su comportamiento ante eventos.
+**Objetivo:** Implementar diferentes estrategias de procesamiento de pedidos según la dificultad.
 
-**Explicación:** El pedido mantiene una referencia a su estado actual, delegando en él la manera de reaccionar a sucesos como averías, huelgas o confirmación de entrega. Cada estado encapsula las transiciones y las acciones permitidas, evitando condicionales dispersos.
+**Implementación:**
+```java
+public interface ProcesamientoPedidoStrategy {
+    void procesarPedido(Pedido pedido, List<IVehiculo> flota, 
+                       Calendar fechaActual, String almacenPrincipal, 
+                       Jugador jugador, int[] estadisticas);
+}
+```
 
-**Valor Añadido:** Claridad en la gestión de estados y facilidad para incorporar nuevas fases o eventos en el flujo de pedidos.
+**Valor Añadido:** Facilita la implementación de diferentes niveles de dificultad en el juego.
 
-### 4️⃣ Abstract Factory
+### 4️⃣ State
 
-**Objetivo:** Crear familias de objetos relacionados (vehículos y almacenes) específicas de cada región geográfica sin acoplar el código cliente a clases concretas.
+**Objetivo:** Gestionar los estados de los pedidos y vehículos.
 
-**Explicación:** Se define una interfaz de fábrica genérica para producir los distintos tipos de vehículos y almacenes, y se implementan fábricas concretas para cada región con sus particularidades (normativa EURO-6, tracción 4x4, sistemas de seguridad, etc.).
-
-**Valor Añadido:** Escalabilidad geográfica, permitiendo incorporar nuevos mercados sin alterar la estructura del sistema.
+**Valor Añadido:** Manejo claro y extensible de los diferentes estados del sistema.
 
 ### 5️⃣ Singleton
 
-**Objetivo:** Garantizar una única instancia del componente responsable de los cálculos financieros (`CalculadorCostos`), accesible globalmente.
+**Objetivo:** Garantizar una única instancia de recursos globales.
 
-**Explicación:** El patrón asegura que todas las partes de la aplicación usen la misma lógica y datos centralizados para computar costes y márgenes, evitando discrepancias y redundancias.
-
-**Valor Añadido:** Consistencia en los resultados de cálculo y reducción de sobrecarga de instanciación.
+**Valor Añadido:** Control centralizado de recursos compartidos.
 
 ### 6️⃣ Template Method
 
-**Objetivo:** Estandarizar el proceso de resolución de incidentes logísticos (averías, huelgas) definiendo un esqueleto de pasos y permitiendo especializaciones en pasos concretos.
+**Objetivo:** Estandarizar procesos comunes.
 
-**Explicación:** El flujo general (identificar causa, asignar recursos, evaluar si está resuelto, aplicar contingencia, notificar) está fijado, pero cada tipo de incidente provee su propia lógica para los pasos específicos.
-
-**Valor Añadido:** Coherencia en el tratamiento de incidentes y fácil incorporación de nuevos tipos con procesos personalizados.
+**Valor Añadido:** Reutilización de código y consistencia en operaciones similares.
 
 ### 7️⃣ Facade
 
-**Objetivo:** Ofrecer una interfaz simplificada (`GestorCentralLogistica`) que unifica y oculta la complejidad de múltiples subsistemas.
+**Objetivo:** Simplificar la interfaz del sistema.
 
-**Explicación:** Mediante métodos de alto nivel, el cliente interactúa con las operaciones principales sin preocuparse por la inicialización de estrategias, decoración de envíos o cambio de estados. La fachada coordina internamente las llamadas a los demás componentes.
-
-**Valor Añadido:** Reducción de dependencias directas y mejora de la experiencia de uso de la consola.
+**Valor Añadido:** Facilita el uso del sistema para los clientes.
 
 ---
 
 ## 📂 Estructura de Paquetes
 
-```plaintext
+```
 src/
-├── controller/                    // Lógica de orquestación CLI
-│   ├── facade/                    // Fachada principal del sistema
-│   │   └── GestorCentralLogistica.java
-│   └── commands/                  // Manejadores de comandos
-│       ├── PlanificarEnvioCommand.java
-│       ├── ResolverIncidenteCommand.java
-│       ├── ConsultarInformeCommand.java
-│       └── HelpCommand.java
-│
-├── domain/                        // Lógica de negocio y entidades
-│   ├── model/                     // Entidades y objetos de valor
-│   │   ├── pedido/                // Estado y comportamiento del pedido
-│   │   │   ├── Pedido.java
-│   │   │   ├── EstadoPedido.java
-│   │   │   ├── estados/           // Implementaciones del patrón State
-│   │   │   └── events/            // Definición de eventos
-│   │   ├── envio/                 // Estructura de envíos y servicios
-│   │   ├── flota/                 // Vehículos y características
-│   │   ├── almacen/               // Almacenes y configuración
-│   │   └── cliente/               // Información de clientes
-│   ├── service/                   // Casos de uso y lógica intermedia
-│   │   ├── EnvioService.java
-│   │   ├── IncidenteService.java
-│   │   └── ReporteService.java
-│   └── repository/                // Persistencia simulada
-│       ├── PedidoRepository.java
-│       └── ConfiguracionRepository.java
-│
-├── strategy/                      // Pattern Strategy
-│   ├── context/                   // Gestión de estrategia activa
-│   │   └── EnvioContext.java
-│   └── implementations/           // Algoritmos concretos
-│       ├── rapido/                // Transporte aéreo prioritario
-│       ├── economico/             // Transporte marítimo económico
-│       └── bloqueo/               // Alternativas por bloqueo
-│
-├── decorator/                     // Pattern Decorator
-│   ├── base/                      // Componente base
-│   │   └── Envio.java
-│   └── decorators/                // Servicios complementarios
-│       ├── seguro/                // Seguro contra daños
-│       ├── refrigeracion/         // Cadena de frío
-│       └── urgente/               // Prioridad y despacho rápido
-│
-├── state/                         // Pattern State
-│   ├── core/                      // Interfaz del estado
-│   │   └── EstadoPedido.java
-│   └── states/                    // Implementaciones
-│       ├── EnProceso.java
-│       ├── EnTransito.java
-│       ├── Retrasado.java
-│       └── Entregado.java
-│
-├── factory/                       // Pattern Abstract Factory
-│   ├── abstract/                  // Interfaces genéricas
-│   │   └── LogisticaFactory.java
-│   └── concrete/                  // Fábricas por región
-│       ├── europa/                // EuropaFactory + productos EURO6
-│       └── sudamerica/            // SudamericaFactory + vehículos 4x4
-│
-├── incidente/                     // Pattern Template Method
-│   ├── core/                      // Definición del método plantilla
-│   │   └── IncidenteLogistico.java
-│   └── tipos/                     // Clases de incidentes
-│       ├── AveriaCamion.java
-│       └── HuelgaTransporte.java
-│
-├── util/                          // Pattern Singleton y utilidades
-│   ├── calculators/               // Cálculos de costes
-│   │   └── CalculadorCostos.java
-│   └── logging/                   // Registro de eventos
-│       └── LogManager.java
-│
-├── config/                        // Configuración
-│   └── application.properties     // Parámetros de simulación
-│
-└── App.java                       // Clase principal de arranque
+├── factory/                       // Patrón Abstract Factory
+│   ├── AbstractVehiculoFactory.java
+│   ├── VehiculoFactory.java
+│   ├── VehiculoFactoryProvider.java
+│   ├── FurgonetaFactory.java
+│   ├── CamionFactory.java
+│   ├── BarcoFactory.java
+│   └── AvionFactory.java
+├── game/                         // Lógica principal del juego
+│   ├── PedidoGenerator.java
+│   ├── Jugador.java
+│   ├── Pedido.java
+│   ├── Almacen.java
+│   ├── Ruta.java
+│   └── Evento.java
+├── model/                        // Modelos de datos
+│   ├── TipoCarga.java
+│   ├── Ubicacion.java
+│   └── Estadisticas.java
+├── template/                     // Patrón Template Method
+│   ├── ProcesadorPedido.java
+│   ├── ProcesadorPedidoBase.java
+│   └── ProcesadorPedidoUrgente.java
+├── singleton/                    // Patrón Singleton
+│   ├── GestorRecursos.java
+│   └── ConfiguracionGlobal.java
+├── util/                         // Utilidades
+│   ├── CalculadoraCostos.java
+│   ├── ValidadorPedidos.java
+│   └── Logger.java
+├── service/                      // Servicios
+│   ├── PedidoService.java
+│   ├── VehiculoService.java
+│   └── AlmacenService.java
+├── facade/                       // Patrón Facade
+│   ├── GestorLogistica.java
+│   └── InterfazUsuario.java
+├── strategy/                     // Patrón Strategy
+│   ├── ProcesamientoPedidoStrategy.java
+│   ├── PedidoFacilStrategy.java
+│   └── PedidoDificilStrategy.java
+├── state/                        // Patrón State
+│   ├── EstadoPedido.java
+│   ├── EnProceso.java
+│   ├── EnTransito.java
+│   ├── Retrasado.java
+│   └── Entregado.java
+├── decorator/                    // Patrón Decorator
+│   ├── IVehiculo.java
+│   ├── VehiculoDecorator.java
+│   ├── VehiculoMejorado.java
+│   ├── VehiculoResistente.java
+│   └── VehiculoEficiente.java
+├── ui/                           // Interfaz de usuario
+│   ├── MenuPrincipal.java
+│   ├── MenuTurno.java
+│   └── VisualizadorEstadisticas.java
+└── Main.java                     // Punto de entrada
 ```
 
 ---
@@ -160,15 +156,15 @@ src/
 ## 🔄 Dinámica del Sistema
 
 ### 1. **Inicialización** 🚀
-   - Selección de región (fábrica)
-   - Creación de flota y almacenes
-   - Configuración de parámetros iniciales (presupuesto, dificultad)
+   - Creación de la flota inicial
+   - Configuración de parámetros del juego
+   - Inicialización del generador de pedidos
 
 ### 2. **Ciclo de Operación** 📆
-   - Cada día laboral es un "turno" donde ocurren eventos aleatorios
-   - Gestión de pedidos entrantes con diferentes prioridades
-   - Asignación de recursos (vehículos, personal) a envíos
-   - Resolución de incidentes que surgen durante las operaciones
+   - Generación de pedidos según la dificultad
+   - Asignación de vehículos
+   - Procesamiento de eventos
+   - Actualización de estadísticas
 
 ### 3. **Comandos Disponibles** ⌨️
    - `enviar [origen] [destino] [prioridad]` - Crear nuevo envío
@@ -216,11 +212,11 @@ src/
 
 ## 💡 Ventajas Clave
 
-- **Modularidad**: Cada patrón encapsula una parte específica del sistema, facilitando mantenimiento y extensión
+- **Modularidad**: Cada patrón encapsula una parte específica del sistema
 - **Reusabilidad**: Componentes como estrategias y decoradores son altamente reutilizables
-- **Flexibilidad**: Fácil adaptación a nuevos requisitos o escenarios logísticos
-- **Escalabilidad**: Estructura preparada para crecer en complejidad sin refactorizaciones mayores
-- **Mantenibilidad**: Separación clara de responsabilidades y bajo acoplamiento
+- **Flexibilidad**: Fácil adaptación a nuevos requisitos
+- **Escalabilidad**: Estructura preparada para crecer
+- **Mantenibilidad**: Separación clara de responsabilidades
 
 ---
 
@@ -235,5 +231,5 @@ src/
 javac -d bin src/**/*.java
 
 # Ejecutar
-java -cp bin App --difficulty medium
+java -cp bin Main --difficulty medium
 ```
