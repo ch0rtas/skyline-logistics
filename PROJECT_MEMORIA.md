@@ -247,43 +247,108 @@ El proyecto está estructurado siguiendo una arquitectura modular y escalable, u
 
 El patrón Template Method se ha implementado como una solución fundamental para estandarizar procesos y comportamientos comunes en diferentes partes del juego, permitiendo la personalización de pasos específicos mientras se mantiene una estructura base consistente.
 
-![Template Method](UMLs/template.png)
+<p align="center">
+  <a href="https://github.com/ch0rtas/skyline-logistics/blob/main/UMLs/template.png">
+    <img src="https://github.com/ch0rtas/skyline-logistics/raw/main/UMLs/template.png" alt="Template Method" width="600"/>
+  </a>
+</p>
+<p align="center"><i>Diagrama UML del Patrón Template Method</i></p>
 
 #### Patrón Strategy
 
 El patrón Strategy se ha implementado para encapsular diferentes algoritmos y comportamientos, permitiendo que estos sean intercambiables en tiempo de ejecución. Este patrón es fundamental para manejar la variabilidad en los comportamientos del juego.
 
-![Strategy](UMLs/strategy.png)
+<p align="center">
+  <a href="https://github.com/ch0rtas/skyline-logistics/blob/main/UMLs/strategy.png">
+    <img src="https://github.com/ch0rtas/skyline-logistics/raw/main/UMLs/strategy.png" alt="Strategy" width="600"/>
+  </a>
+</p>
+<p align="center"><i>Diagrama UML del Patrón Strategy</i></p>
 
 #### Patrón State
 
 El patrón State se ha implementado para manejar los diferentes estados en los que pueden encontrarse las entidades del juego, permitiendo que su comportamiento cambie según el estado actual.
 
-![State](UMLs/state.png)
+<p align="center">
+  <a href="https://github.com/ch0rtas/skyline-logistics/blob/main/UMLs/state.png">
+    <img src="https://github.com/ch0rtas/skyline-logistics/raw/main/UMLs/state.png" alt="State" width="600"/>
+  </a>
+</p>
+<p align="center"><i>Diagrama UML del Patrón State</i></p>
 
 #### Patrón Singleton
 
 El patrón Singleton se ha implementado para garantizar que ciertos servicios y gestores críticos del juego tengan una única instancia global, asegurando un acceso centralizado y controlado a recursos compartidos.
 
-![Singleton](UMLs/singleton.png)
+<p align="center">
+  <a href="https://github.com/ch0rtas/skyline-logistics/blob/main/UMLs/singleton.png">
+    <img src="https://github.com/ch0rtas/skyline-logistics/raw/main/UMLs/singleton.png" alt="Singleton" width="600"/>
+  </a>
+</p>
+<p align="center"><i>Diagrama UML del Patrón Singleton</i></p>
 
 #### Patrón Factory
 
 El patrón Factory se ha implementado para proporcionar una interfaz que permita crear familias de objetos relacionados sin especificar sus clases concretas.
 
-![Factory](UMLs/factory.png)
+<p align="center">
+  <a href="https://github.com/ch0rtas/skyline-logistics/blob/main/UMLs/factory.png">
+    <img src="https://github.com/ch0rtas/skyline-logistics/raw/main/UMLs/factory.png" alt="Factory" width="600"/>
+  </a>
+</p>
+<p align="center"><i>Diagrama UML del Patrón Factory</i></p>
 
 #### Patrón Facade
 
 El patrón Facade se ha implementado para proporcionar una interfaz simplificada a subsistemas complejos del juego, ocultando la complejidad de las interacciones entre diferentes componentes.
 
-![Facade](UMLs/facade.png)
+<p align="center">
+  <a href="https://github.com/ch0rtas/skyline-logistics/blob/main/UMLs/facade.png">
+    <img src="https://github.com/ch0rtas/skyline-logistics/raw/main/UMLs/facade.png" alt="Facade" width="600"/>
+  </a>
+</p>
+<p align="center"><i>Diagrama UML del Patrón Facade</i></p>
 
 #### Patrón Decorator
 
 El patrón Decorator se ha implementado para permitir la adición dinámica de comportamientos y funcionalidades a los objetos del juego sin modificar su estructura base.
 
-![Decorator](UMLs/decorator.png)
+<p align="center">
+  <a href="https://github.com/ch0rtas/skyline-logistics/blob/main/UMLs/decorator.png">
+    <img src="https://github.com/ch0rtas/skyline-logistics/raw/main/UMLs/decorator.png" alt="Decorator" width="600"/>
+  </a>
+</p>
+<p align="center"><i>Diagrama UML del Patrón Decorator</i></p>
+
+---
+
+### UML Completo del Código
+
+A continuación se muestra el diagrama UML completo del código fuente del proyecto Skyline Logistics. Este diagrama representa la arquitectura global del sistema y la relación entre sus componentes principales.
+
+<p align="center">
+  <a href="https://github.com/ch0rtas/skyline-logistics/blob/main/UMLs/src.png">
+    <img src="https://github.com/ch0rtas/skyline-logistics/raw/main/UMLs/src.png" alt="UML Completo" width="800"/>
+  </a>
+</p>
+<p align="center"><i>Diagrama UML completo del código fuente de Skyline Logistics</i></p>
+
+#### Descripción
+
+Este diagrama UML muestra la estructura completa del proyecto, incluyendo todas las clases, interfaces, y las relaciones entre ellas. La arquitectura está diseñada siguiendo diversos patrones de diseño para garantizar una estructura modular, extensible y mantenible.
+
+Entre los patrones implementados se encuentran:
+- Template Method
+- Strategy
+- State
+- Singleton
+- Factory
+- Facade
+- Decorator
+
+Estos patrones trabajan en conjunto para crear un sistema robusto que gestiona la logística de manera eficiente y escalable.
+
+---
 
 ### Estructura del Código
 
