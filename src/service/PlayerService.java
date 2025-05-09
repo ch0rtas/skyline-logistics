@@ -23,7 +23,7 @@ public class PlayerService {
 
             while ((linea = br.readLine()) != null) {
                 String[] datos = linea.split("\\|");
-                if (datos.length == 11) {
+                if (datos.length == 10) {
                     String modo = datos[0];
                     String nombre = datos[1];
                     int dias = Integer.parseInt(datos[2]);
