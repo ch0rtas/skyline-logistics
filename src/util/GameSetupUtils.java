@@ -1,6 +1,7 @@
 package util;
 
 import game.Vehiculo;
+import decorator.IVehiculo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -22,8 +23,8 @@ public class GameSetupUtils {
      * @param dificultad The difficulty level.
      * @return A list of vehicles.
      */
-    public static List<Vehiculo> inicializarFlota(String dificultad) {
-        List<Vehiculo> flota = new ArrayList<>();
+    public static List<IVehiculo> inicializarFlota(String dificultad) {
+        List<IVehiculo> flota = new ArrayList<>();
         Random random = new Random();
 
         // Helper function to generate random cargo types

@@ -1,5 +1,6 @@
 package game;
 
+import decorator.IVehiculo;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Map;
@@ -8,9 +9,9 @@ import java.util.List;
 import java.util.Calendar;
 
 /**
- * Clase que representa un vehículo en la flota
+ * Clase base que representa un vehículo en la flota
  */
-public class Vehiculo {
+public class Vehiculo implements IVehiculo {
     private String tipo;
     private String id;
     private Pedido pedidoAsignado;
@@ -152,6 +153,7 @@ public class Vehiculo {
      * Obtiene el tipo de vehículo
      * @return String with the type
      */
+    @Override
     public String getTipo() {
         return tipo;
     }
@@ -160,6 +162,7 @@ public class Vehiculo {
      * Obtiene el ID del vehículo
      * @return String with the ID
      */
+    @Override
     public String getId() {
         return id;
     }
@@ -168,6 +171,7 @@ public class Vehiculo {
      * Obtiene el pedido asignado
      * @return Pedido assigned or null if none
      */
+    @Override
     public Pedido getPedidoAsignado() {
         return pedidoAsignado;
     }
@@ -176,6 +180,7 @@ public class Vehiculo {
      * Assigns a pedido to the vehicle
      * @param pedido Pedido to assign
      */
+    @Override
     public void asignarPedido(Pedido pedido) {
         this.pedidoAsignado = pedido;
         if (pedido != null) {
@@ -191,6 +196,7 @@ public class Vehiculo {
      * Verifies if the vehicle is available
      * @return true if it is available, false if not
      */
+    @Override
     public boolean estaDisponible() {
         if (pedidoAsignado != null) {
             return false;
@@ -206,6 +212,7 @@ public class Vehiculo {
      * Gets the vehicle's capacity
      * @return int with the capacity
      */
+    @Override
     public int getCapacidad() {
         return capacidad;
     }
@@ -214,6 +221,7 @@ public class Vehiculo {
      * Gets the vehicle's speed
      * @return int with the speed
      */
+    @Override
     public int getVelocidad() {
         return velocidad;
     }
@@ -222,6 +230,7 @@ public class Vehiculo {
      * Gets the cost per kilometer
      * @return int with the cost
      */
+    @Override
     public int getCostePorKm() {
         return costePorKm;
     }
@@ -231,6 +240,7 @@ public class Vehiculo {
      * @param distancia Distancia in kilometers
      * @return int with the estimated hours
      */
+    @Override
     public int calcularTiempoEntrega(int distancia) {
         // Consider that vehicles cannot travel for 24 hours straight
         // We assume they travel for 8 hours a day
@@ -245,6 +255,7 @@ public class Vehiculo {
      * @param tipoPaquete Type of package to verify
      * @return true if it can transport it, false if not
      */
+    @Override
     public boolean puedeTransportarTipo(String tipoPaquete) {
         return tiposPaquetesPermitidos.contains(tipoPaquete);
     }
@@ -253,6 +264,7 @@ public class Vehiculo {
      * Gets the types of packages that the vehicle can transport
      * @return Set with the allowed package types
      */
+    @Override
     public List<String> getTiposPaquetesPermitidos() {
         return tiposPaquetesPermitidos;
     }
@@ -261,6 +273,7 @@ public class Vehiculo {
      * Gets the current health of the vehicle
      * @return int with the health percentage (0-100)
      */
+    @Override
     public int getSalud() {
         return salud;
     }
@@ -268,6 +281,7 @@ public class Vehiculo {
     /**
      * Gets the health percentage (0-100)
      */
+    @Override
     public int getDesgastePorViaje() {
         return desgastePorViaje;
     }
@@ -275,6 +289,7 @@ public class Vehiculo {
     /**
      * Applies the health percentage (0-100)
      */
+    @Override
     public void aplicarDesgaste() {
         reducirSalud(this.desgastePorViaje);
     }
@@ -283,6 +298,7 @@ public class Vehiculo {
      * Calculates the repair cost of the vehicle
      * @return int with the repair cost
      */
+    @Override
     public int calcularCosteReparacion() {
         int costeBase = 0;
         switch (tipo.toLowerCase()) {
@@ -309,24 +325,29 @@ public class Vehiculo {
      * Repairs the vehicle
      * @return int with the repair cost
      */
+    @Override
     public int reparar() {
         int coste = calcularCosteReparacion();
         salud = 100;
         return coste;
     }
 
+    @Override
     public String getNombre() {
         return tipo + " " + id;
     }
 
+    @Override
     public int getCosteReparacion() {
         return (100 - salud) * 100; // 100€ for each point of lost health
     }
 
+    @Override
     public int getConsumo() {
         return consumo;
     }
 
+    @Override
     public int getPrecio() {
         return precio;
     }
@@ -340,10 +361,11 @@ public class Vehiculo {
     }
 
     // Added a method to reduce the health of the vehicle
+    @Override
     public void reducirSalud(int cantidad) {
         this.salud = Math.max(0, this.salud - cantidad);
         if (this.salud < 10) {
-            System.out.println("⚠️ The vehicle " + this.id + " needs urgent repair");
+            System.out.println("⚠️ El vehículo " + this.id + " necesita reparación urgente");
         }
     }
 
@@ -351,6 +373,7 @@ public class Vehiculo {
      * Gets the estimated arrival date of the vehicle
      * @return Calendar with the estimated arrival date, or null if no pedido assigned
      */
+    @Override
     public Calendar getFechaEstimadaLlegada() {
         return fechaEstimadaLlegada;
     }
@@ -359,6 +382,7 @@ public class Vehiculo {
      * Gets the availability date of the vehicle
      * @return Calendar with the availability date, or null if no date set
      */
+    @Override
     public Calendar getFechaDisponibilidad() {
         return fechaDisponibilidad;
     }
@@ -367,6 +391,7 @@ public class Vehiculo {
      * Sets the availability date of the vehicle
      * @param fechaDisponibilidad Calendar with the availability date
      */
+    @Override
     public void setFechaDisponibilidad(Calendar fechaDisponibilidad) {
         this.fechaDisponibilidad = fechaDisponibilidad;
     }

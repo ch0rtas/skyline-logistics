@@ -3,6 +3,7 @@ package game;
 import strategy.ProcesamientoPedidoStrategy;
 import strategy.ProcesamientoNormalStrategy;
 import strategy.ProcesamientoUrgenteStrategy;
+import decorator.IVehiculo;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.Random;
 public class PedidoProcessor {
     private List<Pedido> pedidosEnCurso;
     private Calendar fechaActual;
-    private List<Vehiculo> flota;
+    private List<IVehiculo> flota;
     private Jugador jugador;
     private int[] estadisticas;
     private Random random;
@@ -19,7 +20,7 @@ public class PedidoProcessor {
     private JuegoLogistica juego;
     private ProcesamientoPedidoStrategy estrategiaProcesamiento;
 
-    public PedidoProcessor(List<Pedido> pedidosEnCurso, Calendar fechaActual, List<Vehiculo> flota, 
+    public PedidoProcessor(List<Pedido> pedidosEnCurso, Calendar fechaActual, List<IVehiculo> flota, 
                           Jugador jugador, int[] estadisticas, Random random, String dificultad, JuegoLogistica juego) {
         this.pedidosEnCurso = pedidosEnCurso;
         this.fechaActual = fechaActual;
@@ -79,7 +80,7 @@ public class PedidoProcessor {
         }
 
         String idVehiculo = pedido.getTransporteAsignado().split(" ")[1];
-        Vehiculo vehiculo = flota.stream()
+        IVehiculo vehiculo = flota.stream()
                 .filter(v -> v.getId().equals(idVehiculo))
                 .findFirst()
                 .orElse(null);

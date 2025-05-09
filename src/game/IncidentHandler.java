@@ -2,12 +2,13 @@ package game;
 
 import java.util.List;
 import java.util.Random;
+import decorator.IVehiculo;
 
 public class IncidentHandler {
-    private List<Vehiculo> flota;
+    private List<IVehiculo> flota;
     private Random random;
 
-    public IncidentHandler(List<Vehiculo> flota, Random random) {
+    public IncidentHandler(List<IVehiculo> flota, Random random) {
         this.flota = flota;
         this.random = random;
     }

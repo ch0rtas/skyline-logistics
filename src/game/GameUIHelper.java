@@ -1,9 +1,10 @@
 package game;
 
 import java.util.*;
+import decorator.IVehiculo;
 
 public class GameUIHelper {
-    public static void mostrarFlota(List<Vehiculo> flota, Scanner scanner, Calendar fechaActual, String almacenPrincipal, JuegoLogistica juego) {
+    public static void mostrarFlota(List<IVehiculo> flota, Scanner scanner, Calendar fechaActual, String almacenPrincipal, JuegoLogistica juego) {
         System.out.println("\n🚗 FLOTA DE VEHÍCULOS:");
 
         // Calcular anchos máximos para cada columna
@@ -16,7 +17,7 @@ public class GameUIHelper {
         }
 
         // Calcular anchos máximos basados en el contenido
-        for (Vehiculo vehiculo : flota) {
+        for (IVehiculo vehiculo : flota) {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
                 Calendar fechaEntrega = vehiculo.getPedidoAsignado().getFechaEntregaCalendar();
@@ -48,7 +49,7 @@ public class GameUIHelper {
         System.out.println(JuegoLogistica.generarLineaSeparadora(anchos));
 
         // Mostrar datos
-        for (Vehiculo vehiculo : flota) {
+        for (IVehiculo vehiculo : flota) {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
                 Calendar fechaEntrega = vehiculo.getPedidoAsignado().getFechaEntregaCalendar();

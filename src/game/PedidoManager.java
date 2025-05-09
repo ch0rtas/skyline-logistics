@@ -3,6 +3,7 @@ package game;
 import java.util.*;
 import static game.VehiculoRutaUtils.vehiculoPuedeRealizarRuta;
 import static game.DistanciaUtils.obtenerDistancia;
+import decorator.IVehiculo;
 
 public class PedidoManager {
     public static void gestionarPedido(JuegoLogistica juego) {
@@ -10,7 +11,7 @@ public class PedidoManager {
         Jugador jugador = juego.getJugador();
         Scanner scanner = juego.getScanner();
         String almacenPrincipal = juego.getAlmacenPrincipal();
-        List<Vehiculo> flota = juego.getFlota();
+        List<IVehiculo> flota = juego.getFlota();
         Map<String, Pedido> pedidos = juego.getPedidos();
         List<Pedido> pedidosEnCurso = juego.getPedidosEnCurso();
         Calendar fechaActual = juego.getFechaActual();
@@ -32,7 +33,7 @@ public class PedidoManager {
 
         // Verificar si hay vehículos disponibles para esta ruta
         boolean hayVehiculosDisponibles = false;
-        for (Vehiculo v : flota) {
+        for (IVehiculo v : flota) {
             if (v.estaDisponible() && 
                 v.puedeTransportarTipo(pedido.getTipoPaquete()) &&
                 vehiculoPuedeRealizarRuta(v, almacenPrincipal, pedido.getDestino())) {
@@ -74,7 +75,7 @@ public class PedidoManager {
         System.out.print("\nIngrese ID del vehículo a asignar: ");
         String idVehiculo = scanner.nextLine();
 
-        Vehiculo vehiculoSeleccionado = flota.stream()
+        IVehiculo vehiculoSeleccionado = flota.stream()
                 .filter(v -> v.getId().equals(idVehiculo))
                 .findFirst()
                 .orElse(null);

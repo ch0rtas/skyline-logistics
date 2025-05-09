@@ -1,9 +1,9 @@
 package strategy;
 
 import game.Pedido;
-import game.Vehiculo;
 import game.Jugador;
 import game.JuegoLogistica;
+import decorator.IVehiculo;
 import java.util.List;
 import java.util.Calendar;
 
@@ -15,11 +15,11 @@ public class ProcesamientoNormalStrategy implements ProcesamientoPedidoStrategy 
     }
 
     @Override
-    public void procesarPedido(Pedido pedido, List<Vehiculo> flota, Calendar fechaActual, 
+    public void procesarPedido(Pedido pedido, List<IVehiculo> flota, Calendar fechaActual, 
                               String almacenPrincipal, Jugador jugador, int[] estadisticas) {
         if (pedido.getEstado().equals("EN_CURSO")) {
             // Obtener el vehículo asignado al pedido
-            Vehiculo vehiculo = flota.stream()
+            IVehiculo vehiculo = flota.stream()
                 .filter(v -> v.getPedidoAsignado() != null && v.getPedidoAsignado().getId().equals(pedido.getId()))
                 .findFirst()
                 .orElse(null);

@@ -2,15 +2,16 @@ package game;
 
 import java.util.List;
 import java.util.Scanner;
+import decorator.IVehiculo;
 
 public class MercadoVehiculos {
-    public static void mostrarMercadoVehiculos(List<Vehiculo> vehiculosMercado, Jugador jugador, List<Vehiculo> flota, Scanner scanner) {
+    public static void mostrarMercadoVehiculos(List<IVehiculo> vehiculosMercado, Jugador jugador, List<IVehiculo> flota, Scanner scanner) {
         while (true) {
             System.out.println("\n=== 🚗 MERCADO DE VEHÍCULOS 🚗 ===");
             System.out.println("Balance actual: " + jugador.getBalance() + "€\n");
 
             for (int i = 0; i < vehiculosMercado.size(); i++) {
-                Vehiculo vehiculo = vehiculosMercado.get(i);
+                IVehiculo vehiculo = vehiculosMercado.get(i);
                 String indice = String.format("%02d", i + 1);
                 System.out.println(indice + ". " + vehiculo.getTipo() + " " + vehiculo.getId());
                 System.out.println("   Capacidad: " + vehiculo.getCapacidad() + " kg");
@@ -34,7 +35,7 @@ public class MercadoVehiculos {
                     continue;
                 }
 
-                Vehiculo vehiculoSeleccionado = vehiculosMercado.get(indice - 1);
+                IVehiculo vehiculoSeleccionado = vehiculosMercado.get(indice - 1);
                 if (jugador.getBalance() < vehiculoSeleccionado.getPrecio()) {
                     System.out.println("❌ No tienes suficiente balance para comprar este vehículo");
                     continue;

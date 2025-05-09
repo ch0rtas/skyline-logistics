@@ -4,16 +4,17 @@ import java.util.*;
 import strategy.PedidoStrategy;
 import strategy.PedidoFacilStrategy;
 import strategy.PedidoDificilStrategy;
+import decorator.IVehiculo;
 
 public class PedidoGenerator {
     private Random random;
     private Calendar fechaActual;
-    private List<Vehiculo> flota;
+    private List<IVehiculo> flota;
     private String almacenPrincipal;
     private String dificultad;
     private PedidoStrategy pedidoStrategy;
 
-    public PedidoGenerator(Calendar fechaActual, List<Vehiculo> flota, String almacenPrincipal, String dificultad) {
+    public PedidoGenerator(Calendar fechaActual, List<IVehiculo> flota, String almacenPrincipal, String dificultad) {
         this.random = new Random();
         this.fechaActual = fechaActual;
         this.flota = flota;
@@ -135,7 +136,7 @@ public class PedidoGenerator {
 
     private int calcularCosteMinimo(String tipoPaquete, String origen, String destino) {
         int costeMinimo = Integer.MAX_VALUE;
-        for (Vehiculo v : flota) {
+        for (IVehiculo v : flota) {
             if (v.estaDisponible() && v.puedeTransportarTipo(tipoPaquete)) {
                 int distancia = 100; // Placeholder for distance calculation
                 int costeViaje = distancia * v.getCostePorKm();

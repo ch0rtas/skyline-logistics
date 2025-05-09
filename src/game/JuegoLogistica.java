@@ -23,6 +23,7 @@ import ui.OpcionProcessor;
 import game.EstadisticasHelper;
 import game.ImpuestosProcessor;
 import game.GameRules;
+import decorator.IVehiculo;
 
 /**
  * Clase principal que gestiona el juego de logística
@@ -34,7 +35,7 @@ public class JuegoLogistica {
     private Map<String, Pedido> pedidos;
     private List<Pedido> pedidosPendientes;
     private List<Pedido> pedidosEnCurso;
-    private List<Vehiculo> flota;
+    private List<IVehiculo> flota;
     private int diaActual;
     private Calendar fechaActual;
     private String almacenPrincipal;
@@ -52,7 +53,7 @@ public class JuegoLogistica {
     public static final double TASA_IMPUESTOS = 0.45;
     public static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
 
-    private List<Vehiculo> vehiculosMercado;
+    private List<IVehiculo> vehiculosMercado;
     private PedidoGenerator pedidoGenerator;
     private static final String[] TIPOS_CARGA = {"NORMAL", "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL", "PERECEDERO", "ALTO_VALOR", "SERES_VIVOS"};
     private IncidentHandler incidentHandler;
@@ -352,7 +353,7 @@ public class JuegoLogistica {
         return scanner;
     }
 
-    public List<Vehiculo> getFlota() {
+    public List<IVehiculo> getFlota() {
         return flota;
     }
 
@@ -388,7 +389,7 @@ public class JuegoLogistica {
         gastosAcumulados += cantidad;
     }
 
-    public List<Vehiculo> getVehiculosMercado() {
+    public List<IVehiculo> getVehiculosMercado() {
         return vehiculosMercado;
     }
 }
