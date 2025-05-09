@@ -3,12 +3,7 @@ package template;
 public class ImpuestosProcessorProgresivo extends AbstractImpuestosProcessor {
     @Override
     protected boolean debeAplicarImpuestos(int diaActual, String dificultad) {
-        int diasImpuestos = switch (dificultad.toLowerCase()) {
-            case "hard" -> 3;
-            case "medium" -> 5;
-            case "easy" -> 7;
-            default -> 7;
-        };
+        int diasImpuestos = getDiasEntreImpuestos(dificultad);
         return diaActual % diasImpuestos == 0;
     }
 
@@ -25,5 +20,15 @@ public class ImpuestosProcessorProgresivo extends AbstractImpuestosProcessor {
     @Override
     protected void mostrarMensajeImpuestos(int impuestos) {
         System.out.println("\n💰 Se han aplicado impuestos progresivos: -" + impuestos + "€");
+    }
+
+    @Override
+    protected int getDiasEntreImpuestos(String dificultad) {
+        return switch (dificultad.toLowerCase()) {
+            case "hard" -> 3;
+            case "medium" -> 5;
+            case "easy" -> 7;
+            default -> 7;
+        };
     }
 } 

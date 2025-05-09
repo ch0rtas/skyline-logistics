@@ -3,9 +3,12 @@ package game;
 import java.util.List;
 import java.util.Scanner;
 import decorator.IVehiculo;
+import template.AbstractImpuestosProcessor;
 
 public class MercadoVehiculos {
-    public static void mostrarMercadoVehiculos(List<IVehiculo> vehiculosMercado, Jugador jugador, List<IVehiculo> flota, Scanner scanner) {
+    public static void mostrarMercadoVehiculos(List<IVehiculo> vehiculosMercado, Jugador jugador, 
+            List<IVehiculo> flota, Scanner scanner, String dificultad, 
+            AbstractImpuestosProcessor impuestosProcessor) {
         while (true) {
             System.out.println("\n=== 🚗 MERCADO DE VEHÍCULOS 🚗 ===");
             System.out.println("Balance actual: " + jugador.getBalance() + "€\n");
@@ -50,7 +53,8 @@ public class MercadoVehiculos {
                 System.out.println("💰 Balance actualizado: " + jugador.getBalance() + "€");
 
                 // Llamada explícita para mostrar estadísticas actualizadas
-                EstadisticasHelper.mostrarEstadisticas(jugador, 0, 0, 0, 0, 0, 0);
+                EstadisticasHelper.mostrarEstadisticas(jugador, 0, 0, vehiculoSeleccionado.getPrecio(), 0, 0, 0, 
+                    dificultad, impuestosProcessor);
             } catch (NumberFormatException e) {
                 System.out.println("❌ Opción no válida");
             }

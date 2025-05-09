@@ -249,7 +249,9 @@ public class JuegoLogistica {
      * Muestra las estadísticas actuales del juego
      */
     public void mostrarEstadisticas() {
-        EstadisticasHelper.mostrarEstadisticas(jugador, diaActual, beneficiosAcumulados, gastosAcumulados, enviosTotales, enviosExitosos, satisfaccionClientes);
+        EstadisticasHelper.mostrarEstadisticas(jugador, diaActual, beneficiosAcumulados, 
+            gastosAcumulados, enviosTotales, enviosExitosos, satisfaccionClientes, 
+            dificultad, impuestosProcessor);
     }
 
     /**
@@ -387,5 +389,21 @@ public class JuegoLogistica {
 
     public List<IVehiculo> getVehiculosMercado() {
         return vehiculosMercado;
+    }
+
+    /**
+     * Muestra el mercado de vehículos
+     */
+    public void mostrarMercadoVehiculos() {
+        MercadoVehiculos.mostrarMercadoVehiculos(vehiculosMercado, jugador, flota, scanner, 
+            dificultad, impuestosProcessor);
+    }
+
+    public String getDificultad() {
+        return dificultad;
+    }
+
+    public AbstractImpuestosProcessor getImpuestosProcessor() {
+        return impuestosProcessor;
     }
 }

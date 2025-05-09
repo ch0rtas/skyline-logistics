@@ -13,10 +13,17 @@ public abstract class AbstractImpuestosProcessor {
         }
     }
 
+    // Método para obtener días restantes para el próximo pago de impuestos
+    public final int getDiasRestantesImpuestos(int diaActual, String dificultad) {
+        int diasImpuestos = getDiasEntreImpuestos(dificultad);
+        return diasImpuestos - (diaActual % diasImpuestos);
+    }
+
     // Métodos primitivos que las subclases deben implementar
     protected abstract boolean debeAplicarImpuestos(int diaActual, String dificultad);
     protected abstract double calcularPorcentajeImpuestos(String dificultad);
     protected abstract void mostrarMensajeImpuestos(int impuestos);
+    protected abstract int getDiasEntreImpuestos(String dificultad);
 
     // Método hook que puede ser sobrescrito por las subclases
     protected void aplicarImpuestos(Jugador jugador, int impuestos) {

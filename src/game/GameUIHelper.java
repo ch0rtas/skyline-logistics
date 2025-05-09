@@ -2,6 +2,7 @@ package game;
 
 import java.util.*;
 import decorator.IVehiculo;
+import template.AbstractImpuestosProcessor;
 
 public class GameUIHelper {
     public static void mostrarFlota(List<IVehiculo> flota, Scanner scanner, Calendar fechaActual, String almacenPrincipal, JuegoLogistica juego) {
@@ -85,7 +86,8 @@ public class GameUIHelper {
                 break;
             case "03":
             case "3":
-                MercadoVehiculos.mostrarMercadoVehiculos(juego.getVehiculosMercado(), juego.getJugador(), juego.getFlota(), scanner);
+                MercadoVehiculos.mostrarMercadoVehiculos(juego.getVehiculosMercado(), juego.getJugador(), 
+                    juego.getFlota(), scanner, juego.getDificultad(), juego.getImpuestosProcessor());
                 break;
             default:
                 System.out.println("\n❌ Opción no válida");
