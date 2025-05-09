@@ -1,7 +1,8 @@
 package util;
 
-import game.Vehiculo;
 import decorator.IVehiculo;
+import factory.VehiculoFactory;
+import factory.VehiculoFactoryProvider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -45,31 +46,46 @@ public class GameSetupUtils {
         switch (dificultad.toLowerCase()) {
             case "easy":
                 // 3 vans, 2 trucks, 2 ships, 2 planes
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                VehiculoFactory furgonetaFactory = VehiculoFactoryProvider.getFactory("Furgoneta");
+                VehiculoFactory camionFactory = VehiculoFactoryProvider.getFactory("Camión");
+                VehiculoFactory barcoFactory = VehiculoFactoryProvider.getFactory("Barco");
+                VehiculoFactory avionFactory = VehiculoFactoryProvider.getFactory("Avión");
+
+                flota.add(furgonetaFactory.crearVehiculoBase("F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(furgonetaFactory.crearVehiculoBase("F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(furgonetaFactory.crearVehiculoBase("F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(camionFactory.crearVehiculoBase("C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(camionFactory.crearVehiculoBase("C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(barcoFactory.crearVehiculoBase("B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(barcoFactory.crearVehiculoBase("B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(avionFactory.crearVehiculoBase("A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(avionFactory.crearVehiculoBase("A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
                 break;
             case "medium":
                 // 2 vans, 2 trucks, 1 ship, 1 plane
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                furgonetaFactory = VehiculoFactoryProvider.getFactory("Furgoneta");
+                camionFactory = VehiculoFactoryProvider.getFactory("Camión");
+                barcoFactory = VehiculoFactoryProvider.getFactory("Barco");
+                avionFactory = VehiculoFactoryProvider.getFactory("Avión");
+
+                flota.add(furgonetaFactory.crearVehiculoBase("F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(furgonetaFactory.crearVehiculoBase("F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(camionFactory.crearVehiculoBase("C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(camionFactory.crearVehiculoBase("C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(barcoFactory.crearVehiculoBase("B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(avionFactory.crearVehiculoBase("A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
                 break;
             case "hard":
                 // 1 van, 1 truck, 1 ship, 1 plane
-                flota.add(new Vehiculo("Furgoneta", "F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Camión", "C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Barco", "B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
-                flota.add(new Vehiculo("Avión", "A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                furgonetaFactory = VehiculoFactoryProvider.getFactory("Furgoneta");
+                camionFactory = VehiculoFactoryProvider.getFactory("Camión");
+                barcoFactory = VehiculoFactoryProvider.getFactory("Barco");
+                avionFactory = VehiculoFactoryProvider.getFactory("Avión");
+
+                flota.add(furgonetaFactory.crearVehiculoBase("F" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(camionFactory.crearVehiculoBase("C" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(barcoFactory.crearVehiculoBase("B" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
+                flota.add(avionFactory.crearVehiculoBase("A" + String.format("%02d", random.nextInt(100)), generarTiposCarga.apply(3)));
                 break;
         }
 
