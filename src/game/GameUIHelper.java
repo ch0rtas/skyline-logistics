@@ -21,9 +21,7 @@ public class GameUIHelper {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
                 Calendar fechaEntrega = vehiculo.getPedidoAsignado().getFechaEntregaCalendar();
-                Calendar fechaDisponible = (Calendar) fechaEntrega.clone();
-                fechaDisponible.add(Calendar.DAY_OF_MONTH, -1);
-                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaDisponible.getTime());
+                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaEntrega.getTime());
             } else {
                 estado = "Disponible";
             }
@@ -53,9 +51,7 @@ public class GameUIHelper {
             String estado;
             if (vehiculo.getPedidoAsignado() != null) {
                 Calendar fechaEntrega = vehiculo.getPedidoAsignado().getFechaEntregaCalendar();
-                Calendar fechaDisponible = (Calendar) fechaEntrega.clone();
-                fechaDisponible.add(Calendar.DAY_OF_MONTH, -1);
-                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaDisponible.getTime());
+                estado = "Ocupado (" + vehiculo.getPedidoAsignado().getId() + ") hasta " + JuegoLogistica.formatoFecha.format(fechaEntrega.getTime());
             } else {
                 estado = "Disponible";
             }

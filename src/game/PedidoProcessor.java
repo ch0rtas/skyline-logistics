@@ -4,6 +4,9 @@ import strategy.ProcesamientoPedidoStrategy;
 import strategy.ProcesamientoNormalStrategy;
 import strategy.ProcesamientoUrgenteStrategy;
 import decorator.IVehiculo;
+import state.PedidoEnProcesoState;
+import state.PedidoCompletadoState;
+import state.PedidoCanceladoState;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -45,11 +48,12 @@ public class PedidoProcessor {
         List<Pedido> pedidosCompletados = new ArrayList<>();
         
         for (Pedido pedido : pedidosEnCurso) {
-            if (pedido.getEstado().equals("EN_CURSO")) {
+            if (pedido.getEstado() instanceof PedidoEnProcesoState) {
                 estrategiaProcesamiento.procesarPedido(pedido, flota, fechaActual, 
                     juego.getAlmacenPrincipal(), jugador, estadisticas);
                 
-                if (pedido.getEstado().equals("ENTREGADO") || pedido.getEstado().equals("FALLIDO")) {
+                if (pedido.getEstado() instanceof PedidoCompletadoState || 
+                    pedido.getEstado() instanceof PedidoCanceladoState) {
                     pedidosCompletados.add(pedido);
                 }
             }
@@ -61,56 +65,5 @@ public class PedidoProcessor {
 
     public void setProcesamientoStrategy(ProcesamientoPedidoStrategy strategy) {
         this.estrategiaProcesamiento = strategy;
-    }
-
-    private void procesarPedidoCompletado(Pedido pedido, int pagoOriginal, int multa, int ganancia, boolean exito, String mensaje, JuegoLogistica juego) {
-        // Actualizar estadísticas
-        estadisticas[1]++;
-        if (exito) {
-            estadisticas[0]++;
-        } else {
-            // Ensure 'Envíos fallidos' does not go below zero
-            estadisticas[3] = Math.max(0, estadisticas[3] - 2);
-        }
-
-        // Mostrar mensaje de completado
-        System.out.println("\n" + mensaje);
-        if (multa > 0) {
-            System.out.println("💸 Multa aplicada: $" + multa);
-        }
-
-        String idVehiculo = pedido.getTransporteAsignado().split(" ")[1];
-        IVehiculo vehiculo = flota.stream()
-                .filter(v -> v.getId().equals(idVehiculo))
-                .findFirst()
-                .orElse(null);
-
-        if (vehiculo != null) {
-            // Aplicar desgaste al vehículo
-            vehiculo.aplicarDesgaste();
-
-            // Descontar el costo del vehículo asignado del balance del jugador
-            int costoTotal = vehiculo.getPrecio();
-            jugador.gastar(costoTotal);
-            System.out.println("💰 Se ha descontado el costo del vehículo: $" + costoTotal);
-
-            // Procesar el pago solo cuando se alcanza la fecha de entrega
-            Calendar fechaActual = juego.getFechaActual();
-            Calendar fechaEntrega = pedido.getFechaEntregaCalendar();
-
-            if (!fechaActual.before(fechaEntrega)) {
-                if (multa > 0) {
-                    jugador.gastar(multa);
-                }
-                jugador.recuperarBalance(ganancia);
-                estadisticas[2] += ganancia;
-
-                System.out.println("💰 Pago recibido: $" + ganancia);
-
-                // Liberar el vehículo inmediatamente
-                vehiculo.asignarPedido(null);
-                System.out.println("🚗 Vehículo " + vehiculo.getId() + " liberado y disponible");
-            }
-        }
     }
 }

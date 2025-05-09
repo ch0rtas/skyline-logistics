@@ -4,6 +4,9 @@ import game.Pedido;
 import game.Jugador;
 import game.JuegoLogistica;
 import decorator.IVehiculo;
+import state.PedidoCanceladoState;
+import state.PedidoCompletadoState;
+import state.PedidoEnProcesoState;
 import java.util.List;
 import java.util.Calendar;
 
@@ -17,7 +20,7 @@ public class ProcesamientoUrgenteStrategy implements ProcesamientoPedidoStrategy
     @Override
     public void procesarPedido(Pedido pedido, List<IVehiculo> flota, Calendar fechaActual, 
                               String almacenPrincipal, Jugador jugador, int[] estadisticas) {
-        if (pedido.getEstado().equals("EN_CURSO")) {
+        if (pedido.getEstado() instanceof PedidoEnProcesoState) {
             // Obtener el vehículo asignado al pedido
             IVehiculo vehiculo = flota.stream()
                 .filter(v -> v.getPedidoAsignado() != null && v.getPedidoAsignado().getId().equals(pedido.getId()))
@@ -45,14 +48,14 @@ public class ProcesamientoUrgenteStrategy implements ProcesamientoPedidoStrategy
                         pagoFinal -= penalizacion;
                         System.out.println("\n⚠️ Pedido urgente entregado con " + diasRetraso + " días de retraso");
                         System.out.println("💸 Penalización aplicada: $" + penalizacion);
-                        pedido.setEstado("FALLIDO");
+                        pedido.setEstado(new PedidoCanceladoState());
                         juego.incrementarEnviosFallidos();
                     } else {
                         int bonificacion = (int) (pagoBase * 0.2); // 20% de bonificación por entrega a tiempo
                         pagoFinal += bonificacion;
                         System.out.println("\n✅ Pedido urgente entregado a tiempo");
                         System.out.println("💰 Bonificación aplicada: $" + bonificacion);
-                        pedido.setEstado("ENTREGADO");
+                        pedido.setEstado(new PedidoCompletadoState());
                         juego.incrementarEnviosExitosos();
                     }
 

@@ -2,6 +2,8 @@ package game;
 
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
+import state.PedidoState;
+import state.PedidoPendienteState;
 
 /**
  * Clase que representa un pedido en el juego
@@ -24,7 +26,7 @@ public class Pedido {
     private String tipoPaquete; // NORMAL, REFRIGERADO, CONGELADO, ESCOLTADO, PELIGROSO, FRÁGIL
     private static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
     private Calendar fechaDisponible;
-    private String estado;
+    private PedidoState estado;
     private String origen;
 
     /**
@@ -56,6 +58,7 @@ public class Pedido {
         this.fechaEntrega = fechaEntrega;
         this.fechaEntregaOriginal = (Calendar) fechaEntrega.clone();
         this.tipoPaquete = tipoPaquete;
+        this.estado = new PedidoPendienteState();
     }
 
     /**
@@ -291,12 +294,44 @@ public class Pedido {
         this.fechaDisponible = fechaDisponible;
     }
 
-    public String getEstado() {
+    /**
+     * Obtiene el estado actual del pedido
+     * @return PedidoState con el estado actual
+     */
+    public PedidoState getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    /**
+     * Establece el estado del pedido
+     * @param estado Nuevo estado
+     */
+    public void setEstado(PedidoState estado) {
         this.estado = estado;
+    }
+
+    /**
+     * Procesa el pedido según su estado actual
+     * @param juego Instancia del juego
+     */
+    public void procesarPedido(JuegoLogistica juego) {
+        estado.procesarPedido(this, juego);
+    }
+
+    /**
+     * Cancela el pedido según su estado actual
+     * @param juego Instancia del juego
+     */
+    public void cancelarPedido(JuegoLogistica juego) {
+        estado.cancelarPedido(this, juego);
+    }
+
+    /**
+     * Completa el pedido según su estado actual
+     * @param juego Instancia del juego
+     */
+    public void completarPedido(JuegoLogistica juego) {
+        estado.completarPedido(this, juego);
     }
 
     public String getFechaEntregaOriginal() {
@@ -305,16 +340,6 @@ public class Pedido {
 
     public Calendar getFechaEntregaOriginalCalendar() {
         return fechaEntregaOriginal;
-    }
-
-    public void actualizarEstado(Calendar fechaActual) {
-        if (estado.equals("EN_CURSO")) {
-            if (!fechaActual.before(fechaEntrega)) {
-                estado = "ENTREGADO";
-            } else if (fechaActual.after(fechaEntrega)) {
-                estado = "FALLIDO";
-            }
-        }
     }
 
     public int getBeneficio() {

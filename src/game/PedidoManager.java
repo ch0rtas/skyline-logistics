@@ -4,6 +4,7 @@ import java.util.*;
 import static game.VehiculoRutaUtils.vehiculoPuedeRealizarRuta;
 import static game.DistanciaUtils.obtenerDistancia;
 import decorator.IVehiculo;
+import state.PedidoEnProcesoState;
 
 public class PedidoManager {
     public static void gestionarPedido(JuegoLogistica juego) {
@@ -57,12 +58,7 @@ public class PedidoManager {
                 String confirmacion = scanner.nextLine();
 
                 if (confirmacion.equalsIgnoreCase("SI")) {
-                    int penalizacion = (int)(pedido.getPago() * 0.5);
-                    jugador.gastar(penalizacion);
-                    pedidosPendientes.remove(pedido);
-                    juego.incrementarEnviosFallidos();
-                    System.out.println("\n✅ Pedido cancelado");
-                    System.out.println("💸 Penalización aplicada: $" + penalizacion);
+                    pedido.cancelarPedido(juego);
                 }
             }
             return;
@@ -139,12 +135,14 @@ public class PedidoManager {
         // Asignar pedido al vehículo
         vehiculoSeleccionado.asignarPedido(pedido);
         pedido.setTransporteAsignado(vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId());
-        pedido.setEstado("EN_CURSO");
         pedido.setFechaDisponible(fechaEntrega);
 
-        // Mover pedido a la lista de pedidos en curso
+        // Mover el pedido a la lista de pedidos en curso antes de cambiar su estado
         pedidosPendientes.remove(pedido);
         pedidosEnCurso.add(pedido);
+
+        // Cambiar el estado del pedido a EN_PROCESO
+        pedido.setEstado(new PedidoEnProcesoState());
 
         System.out.println("\n✅ Pedido asignado correctamente");
         System.out.println("📅 Fecha estimada de entrega: " + JuegoLogistica.formatoFecha.format(fechaEntrega.getTime()));

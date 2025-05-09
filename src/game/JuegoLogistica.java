@@ -235,13 +235,6 @@ public class JuegoLogistica {
     }
 
     /**
-     * Permite gestionar un pedido
-     */
-    public void gestionarPedido() {
-        PedidoManager.gestionarPedido(this);
-    }
-
-    /**
      * Resuelve un incidente para un pedido
      * @param pedido Pedido afectado
      */
