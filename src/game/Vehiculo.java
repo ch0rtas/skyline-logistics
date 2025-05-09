@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Calendar;
 
 /**
  * Clase que representa un vehículo en la flota
@@ -22,6 +23,8 @@ public class Vehiculo {
     private int desgastePorViaje; // Porcentaje de desgaste por viaje
     private int consumo;
     private int precio;
+    private Calendar fechaEstimadaLlegada;
+    private Calendar fechaDisponibilidad;
     
     private static final Map<String, Map<String, int[]>> RANGOS_VEHICULOS = new HashMap<>();
     
@@ -147,7 +150,7 @@ public class Vehiculo {
 
     /**
      * Obtiene el tipo de vehículo
-     * @return String con el tipo
+     * @return String with the type
      */
     public String getTipo() {
         return tipo;
@@ -155,7 +158,7 @@ public class Vehiculo {
 
     /**
      * Obtiene el ID del vehículo
-     * @return String con el ID
+     * @return String with the ID
      */
     public String getId() {
         return id;
@@ -163,49 +166,60 @@ public class Vehiculo {
 
     /**
      * Obtiene el pedido asignado
-     * @return Pedido asignado o null si no tiene
+     * @return Pedido assigned or null if none
      */
     public Pedido getPedidoAsignado() {
         return pedidoAsignado;
     }
 
     /**
-     * Asigna un pedido al vehículo
-     * @param pedido Pedido a asignar
+     * Assigns a pedido to the vehicle
+     * @param pedido Pedido to assign
      */
     public void asignarPedido(Pedido pedido) {
         this.pedidoAsignado = pedido;
         if (pedido != null) {
             pedido.setTransporteAsignado(tipo + " " + id);
+            // Calculate and set the estimated arrival date
+            this.fechaEstimadaLlegada = pedido.getFechaEntregaCalendar();
+        } else {
+            this.fechaEstimadaLlegada = null;
         }
     }
 
     /**
-     * Verifica si el vehículo está disponible
-     * @return true si está disponible, false si no
+     * Verifies if the vehicle is available
+     * @return true if it is available, false if not
      */
     public boolean estaDisponible() {
-        return pedidoAsignado == null;
+        if (pedidoAsignado != null) {
+            return false;
+        }
+        if (fechaDisponibilidad != null) {
+            Calendar fechaActual = Calendar.getInstance();
+            return !fechaActual.before(fechaDisponibilidad);
+        }
+        return true;
     }
 
     /**
-     * Obtiene la capacidad del vehículo
-     * @return int con la capacidad
+     * Gets the vehicle's capacity
+     * @return int with the capacity
      */
     public int getCapacidad() {
         return capacidad;
     }
 
     /**
-     * Obtiene la velocidad del vehículo
-     * @return int con la velocidad
+     * Gets the vehicle's speed
+     * @return int with the speed
      */
     public int getVelocidad() {
         return velocidad;
     }
 
     /**
-     * Obtiene el coste por kilómetro
+     * Gets the cost per kilometer
      * @return int with the cost
      */
     public int getCostePorKm() {
@@ -213,22 +227,22 @@ public class Vehiculo {
     }
 
     /**
-     * Calcula el tiempo estimado de entrega en horas
-     * @param distancia Distancia en kilómetros
+     * Calculates the estimated delivery time in hours
+     * @param distancia Distancia in kilometers
      * @return int with the estimated hours
      */
     public int calcularTiempoEntrega(int distancia) {
-        // Considerar que los vehículos no pueden viajar 24 horas seguidas
-        // Asumimos que viajan 8 horas al día
+        // Consider that vehicles cannot travel for 24 hours straight
+        // We assume they travel for 8 hours a day
         double horasViaje = (double) distancia / velocidad;
-        // Añadir un 20% de tiempo extra por paradas, descansos, etc.
+        // Add a 20% extra time for stops, rest, etc.
         horasViaje *= 1.2;
         return (int) Math.ceil(horasViaje);
     }
 
     /**
-     * Verifica si el vehículo puede transportar un tipo de paquete específico
-     * @param tipoPaquete Tipo de paquete a verificar
+     * Verifies if the vehicle can transport a specific package type
+     * @param tipoPaquete Type of package to verify
      * @return true if it can transport it, false if not
      */
     public boolean puedeTransportarTipo(String tipoPaquete) {
@@ -236,7 +250,7 @@ public class Vehiculo {
     }
 
     /**
-     * Obtiene los tipos de paquetes que puede transportar el vehículo
+     * Gets the types of packages that the vehicle can transport
      * @return Set with the allowed package types
      */
     public List<String> getTiposPaquetesPermitidos() {
@@ -244,7 +258,7 @@ public class Vehiculo {
     }
 
     /**
-     * Obtiene la salud actual del vehículo
+     * Gets the current health of the vehicle
      * @return int with the health percentage (0-100)
      */
     public int getSalud() {
@@ -252,22 +266,21 @@ public class Vehiculo {
     }
 
     /**
-     * Obtiene el desgaste por viaje
-     * @return int with the health percentage (0-100)
+     * Gets the health percentage (0-100)
      */
     public int getDesgastePorViaje() {
         return desgastePorViaje;
     }
 
     /**
-     * Aplica el desgaste por viaje al vehículo
+     * Applies the health percentage (0-100)
      */
     public void aplicarDesgaste() {
         reducirSalud(this.desgastePorViaje);
     }
 
     /**
-     * Calcula el coste de reparación del vehículo
+     * Calculates the repair cost of the vehicle
      * @return int with the repair cost
      */
     public int calcularCosteReparacion() {
@@ -287,13 +300,13 @@ public class Vehiculo {
                 break;
         }
         
-        // El coste aumenta según el daño que tenga
+        // The cost increases according to the damage the vehicle has
         int porcentajeDano = 100 - salud;
         return costeBase + (costeBase * porcentajeDano / 100);
     }
 
     /**
-     * Repara el vehículo
+     * Repairs the vehicle
      * @return int with the repair cost
      */
     public int reparar() {
@@ -307,7 +320,7 @@ public class Vehiculo {
     }
 
     public int getCosteReparacion() {
-        return (100 - salud) * 100; // 100€ por cada punto de salud perdido
+        return (100 - salud) * 100; // 100€ for each point of lost health
     }
 
     public int getConsumo() {
@@ -319,7 +332,7 @@ public class Vehiculo {
     }
 
     private int calcularConsumo() {
-        return (capacidad / 100) + (velocidad / 10); // Consumo base basado en capacidad y velocidad
+        return (capacidad / 100) + (velocidad / 10); // Consumption based on capacity and speed
     }
 
     private int calcularPrecio() {
@@ -330,7 +343,31 @@ public class Vehiculo {
     public void reducirSalud(int cantidad) {
         this.salud = Math.max(0, this.salud - cantidad);
         if (this.salud < 10) {
-            System.out.println("⚠️ El vehículo " + this.id + " necesita reparación urgente");
+            System.out.println("⚠️ The vehicle " + this.id + " needs urgent repair");
         }
+    }
+
+    /**
+     * Gets the estimated arrival date of the vehicle
+     * @return Calendar with the estimated arrival date, or null if no pedido assigned
+     */
+    public Calendar getFechaEstimadaLlegada() {
+        return fechaEstimadaLlegada;
+    }
+
+    /**
+     * Gets the availability date of the vehicle
+     * @return Calendar with the availability date, or null if no date set
+     */
+    public Calendar getFechaDisponibilidad() {
+        return fechaDisponibilidad;
+    }
+
+    /**
+     * Sets the availability date of the vehicle
+     * @param fechaDisponibilidad Calendar with the availability date
+     */
+    public void setFechaDisponibilidad(Calendar fechaDisponibilidad) {
+        this.fechaDisponibilidad = fechaDisponibilidad;
     }
 }

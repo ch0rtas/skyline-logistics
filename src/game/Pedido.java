@@ -25,6 +25,7 @@ public class Pedido {
     private static final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yy");
     private Calendar fechaDisponible;
     private String estado;
+    private String origen;
 
     /**
      * Constructor de la clase Pedido
@@ -304,5 +305,23 @@ public class Pedido {
 
     public Calendar getFechaEntregaOriginalCalendar() {
         return fechaEntregaOriginal;
+    }
+
+    public void actualizarEstado(Calendar fechaActual) {
+        if (estado.equals("EN_CURSO")) {
+            if (!fechaActual.before(fechaEntrega)) {
+                estado = "ENTREGADO";
+            } else if (fechaActual.after(fechaEntrega)) {
+                estado = "FALLIDO";
+            }
+        }
+    }
+
+    public int getBeneficio() {
+        return pago;
+    }
+
+    public String getOrigen() {
+        return origen;
     }
 }

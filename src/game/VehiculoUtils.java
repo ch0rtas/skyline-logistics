@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import static game.CityConstants.*;
 import static game.DistanciaUtils.obtenerDistancia;
+import static game.VehiculoRutaUtils.vehiculoPuedeRealizarRuta;
 
 public class VehiculoUtils {
     public static void mostrarVehiculosDisponibles(Pedido pedido, List<Vehiculo> flota, Calendar fechaActual, String almacenPrincipal) {
@@ -13,19 +14,18 @@ public class VehiculoUtils {
 
         // Filtrar vehículos disponibles
         List<Vehiculo> vehiculosDisponibles = flota.stream()
-            .filter(v -> v.estaDisponible() && v.puedeTransportarTipo(pedido.getTipoPaquete()) && v.getSalud() >= 10)
             .filter(v -> {
-                // Si es un barco, verificar que tanto origen como destino sean marítimos
-                if (v.getTipo().equals("Barco")) {
-                    return Arrays.asList(CIUDADES_MARITIMAS).contains(almacenPrincipal) && 
-                           Arrays.asList(CIUDADES_MARITIMAS).contains(pedido.getDestino());
+                // Verificar si el vehículo está disponible según su fecha de disponibilidad
+                if (v.getFechaDisponibilidad() != null && fechaActual.before(v.getFechaDisponibilidad())) {
+                    return false;
                 }
-                return true;
+                return v.estaDisponible() && v.puedeTransportarTipo(pedido.getTipoPaquete()) && v.getSalud() >= 10;
             })
+            .filter(v -> vehiculoPuedeRealizarRuta(v, almacenPrincipal, pedido.getDestino()))
             .collect(Collectors.toList());
 
         if (vehiculosDisponibles.isEmpty()) {
-            System.out.println("\n❌ No hay vehículos disponibles para este tipo de carga");
+            System.out.println("\n❌ No hay vehículos disponibles para esta ruta");
             return;
         }
 

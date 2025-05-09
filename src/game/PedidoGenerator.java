@@ -1,18 +1,33 @@
 package game;
 
 import java.util.*;
+import strategy.PedidoStrategy;
+import strategy.PedidoFacilStrategy;
+import strategy.PedidoDificilStrategy;
 
 public class PedidoGenerator {
     private Random random;
     private Calendar fechaActual;
     private List<Vehiculo> flota;
     private String almacenPrincipal;
+    private String dificultad;
+    private PedidoStrategy pedidoStrategy;
 
     public PedidoGenerator(Calendar fechaActual, List<Vehiculo> flota, String almacenPrincipal, String dificultad) {
         this.random = new Random();
         this.fechaActual = fechaActual;
         this.flota = flota;
         this.almacenPrincipal = almacenPrincipal;
+        this.dificultad = dificultad;
+        this.pedidoStrategy = crearEstrategia(dificultad);
+    }
+
+    private PedidoStrategy crearEstrategia(String dificultad) {
+        if (dificultad.equalsIgnoreCase("facil")) {
+            return new PedidoFacilStrategy(this);
+        } else {
+            return new PedidoDificilStrategy(this);
+        }
     }
 
     public Pedido generarPedidoAleatorio() {
@@ -55,19 +70,15 @@ public class PedidoGenerator {
         clientesPorCarga.put("Electrónicos", new String[]{"Tienda de Electrónica", "Distribuidor Electrónico", "Fabricante de Componentes"});
         clientesPorCarga.put("Lácteos", new String[]{"Supermercado Local", "Distribuidora de Lácteos", "Fábrica de Quesos"});
 
-        // Seleccionar cliente basado en la carga generada
         String cliente;
         if (clientesPorCarga.containsKey(carga)) {
             String[] clientesRelacionados = clientesPorCarga.get(carga);
             cliente = clientesRelacionados[random.nextInt(clientesRelacionados.length)];
         } else {
-            // Si no hay relación definida, seleccionar un cliente aleatorio
             cliente = clientes[random.nextInt(clientes.length)];
         }
 
-        // Validar que el cliente y la carga estén relacionados
         while (!clientesPorCarga.containsKey(carga) || !Arrays.asList(clientesPorCarga.get(carga)).contains(cliente)) {
-            // Regenerar cliente y carga si no están relacionados
             tipoPaquete = tiposPaquetes[random.nextInt(tiposPaquetes.length)];
             cargasDisponibles = cargasPorTipo.get(tipoPaquete);
             carga = cargasDisponibles[random.nextInt(cargasDisponibles.length)];
@@ -135,13 +146,9 @@ public class PedidoGenerator {
     }
 
     private int calcularPagoBase(int costeMinimo, String prioridad) {
-        // Ensure payment is at least 20% higher than the minimum cost and multiply by 10
         int pagoBase = (int) (costeMinimo * 1.2 * 10);
-
-        // Add a random bonus up to 50% of the base payment
         pagoBase += (int) (pagoBase * random.nextDouble() * 0.5);
 
-        // Adjust payment based on priority
         if (prioridad.equals("URGENTE")) {
             pagoBase *= 1.5;
         } else if (prioridad.equals("BAJA")) {
@@ -192,5 +199,13 @@ public class PedidoGenerator {
         }
         fechaEntrega.add(Calendar.DAY_OF_MONTH, diasBase);
         return fechaEntrega;
+    }
+
+    public void setPedidoStrategy(PedidoStrategy pedidoStrategy) {
+        this.pedidoStrategy = pedidoStrategy;
+    }
+
+    public PedidoStrategy getPedidoStrategy() {
+        return pedidoStrategy;
     }
 }

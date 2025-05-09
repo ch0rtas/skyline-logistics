@@ -59,6 +59,7 @@ public class PedidoManager {
                     int penalizacion = (int)(pedido.getPago() * 0.5);
                     jugador.gastar(penalizacion);
                     pedidosPendientes.remove(pedido);
+                    juego.incrementarEnviosFallidos();
                     System.out.println("\n✅ Pedido cancelado");
                     System.out.println("💸 Penalización aplicada: $" + penalizacion);
                 }
@@ -137,7 +138,7 @@ public class PedidoManager {
         // Asignar pedido al vehículo
         vehiculoSeleccionado.asignarPedido(pedido);
         pedido.setTransporteAsignado(vehiculoSeleccionado.getTipo() + " " + vehiculoSeleccionado.getId());
-        pedido.setEstado("EN CURSO");
+        pedido.setEstado("EN_CURSO");
         pedido.setFechaDisponible(fechaEntrega);
 
         // Mover pedido a la lista de pedidos en curso

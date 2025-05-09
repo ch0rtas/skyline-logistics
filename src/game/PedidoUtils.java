@@ -81,16 +81,19 @@ public class PedidoUtils {
      * @return int con la cantidad de pedidos
      */
     public static int calcularCantidadPedidos(String dificultad, int diaActual) {
-        int base = 2; // Pedidos base por día
+        int base;
         switch (dificultad) {
             case "easy":
-                return base + (diaActual / 3); // Aumenta 1 cada 3 días
+                base = 2;
+                return base + (diaActual / 5); // Aumenta 1 cada 5 días
             case "medium":
-                return base + (diaActual / 2); // Aumenta 1 cada 2 días
+                base = 3;
+                return base + (diaActual / 3); // Aumenta 1 cada 3 días
             case "hard":
-                return base + diaActual; // Aumenta 1 cada día
+                base = 4;
+                return base + (diaActual / 2); // Aumenta 1 cada 2 días
             default:
-                return base;
+                return 1;
         }
     }
 }

@@ -44,6 +44,7 @@ public class JuegoLogistica {
     private int satisfaccionClientes;
     private int enviosExitosos;
     private int enviosTotales;
+    private int enviosFallidos;
     private int beneficiosAcumulados;
     private int gastosAcumulados = 0;
     private int[] beneficiosPorDia;
@@ -79,6 +80,7 @@ public class JuegoLogistica {
         this.satisfaccionClientes = inicializarSatisfaccionClientes(modoJuego); // Inicialización por defecto
         this.enviosExitosos = 0;
         this.enviosTotales = 0;
+        this.enviosFallidos = 0;
         this.beneficiosAcumulados = 0;
         this.beneficiosPorDia = new int[365]; // Máximo 365 días
         
@@ -92,7 +94,9 @@ public class JuegoLogistica {
         this.pedidoGenerator = new PedidoGenerator(this.fechaActual, this.flota, this.almacenPrincipal, this.dificultad);
         
         // Inicializar pedidoProcessor en el constructor
-        this.pedidoProcessor = new PedidoProcessor(this.pedidosEnCurso, this.fechaActual, this.flota, this.jugador, this.enviosExitosos, this.enviosTotales, this.beneficiosAcumulados, this.satisfaccionClientes, this.random, this.dificultad); // Added dificultad parameter
+        int[] estadisticas = new int[]{this.enviosExitosos, this.enviosFallidos, this.beneficiosAcumulados, this.satisfaccionClientes};
+        this.pedidoProcessor = new PedidoProcessor(this.pedidosEnCurso, this.fechaActual, this.flota, 
+            this.jugador, estadisticas, this.random, this.dificultad, this);
         this.incidentHandler = new IncidentHandler(this.flota, this.random);
     }
     
@@ -168,7 +172,7 @@ public class JuegoLogistica {
      * Genera los pedidos del día según la dificultad
      */
     public void generarPedidosDia() {
-        PedidoGeneratorHelper.generarPedidosDia(dificultad, diaActual, pedidosPendientes, pedidos, pedidoGenerator);
+        pedidoGenerator.getPedidoStrategy().generarPedidos(dificultad, diaActual, pedidosPendientes, pedidos, fechaActual);
     }
 
     /**
@@ -275,7 +279,7 @@ public class JuegoLogistica {
     private PedidoProcessor pedidoProcessor;
 
     public void procesarPedidosEnCurso() {
-        PedidoProcessor.procesarPedidosEnCurso(this);
+        pedidoProcessor.procesarPedidos();
     }
 
     /**
@@ -283,9 +287,15 @@ public class JuegoLogistica {
      */
     public void actualizarSatisfaccionClientes() {
         if (enviosTotales > 0) {
-            this.satisfaccionClientes = (int) ((double) enviosExitosos / enviosTotales * 100);
+            double ratio = (double) enviosExitosos / enviosTotales;
+            this.satisfaccionClientes = (int) (ratio * 100);
+            
+            // Ajustar la satisfacción basada en pedidos rechazados
+            if (enviosFallidos > 0) {
+                this.satisfaccionClientes = Math.max(0, this.satisfaccionClientes - (enviosFallidos * 10));
+            }
         } else {
-            this.satisfaccionClientes = 0; // Default to 0 if no deliveries have been made.
+            this.satisfaccionClientes = 50; // Valor inicial por defecto
         }
     }
 
@@ -302,6 +312,7 @@ public class JuegoLogistica {
      * Incrementa el contador de envíos fallidos
      */
     public void incrementarEnviosFallidos() {
+        this.enviosFallidos++;
         this.enviosTotales++;
         actualizarSatisfaccionClientes();
     }
