@@ -194,6 +194,7 @@ public class UIManager {
         System.out.println("• Luis Marquina | GitHub: @Luiiss44");
         System.out.println("• Manuel Martinez | GitHub: @ch0rtas");
         System.out.println("• Miguel Toran");
+        System.out.println("==============================================");
         System.out.println("\nRepositorio del proyecto:");
         System.out.println("01. https://github.com/Luiiss44/skyline-logistics");
         System.out.println("02. https://github.com/ch0rtas/skyline-logistics [Fork]");
