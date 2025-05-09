@@ -1,0 +1,304 @@
+# Skyline Logistics - Memoria del Proyecto
+
+## Introducción
+Skyline Logistics es un juego de simulación logística que pone al jugador al frente de una empresa de transporte y distribución. El objetivo principal es gestionar eficientemente una flota de vehículos para realizar entregas y expandir el negocio, todo mientras se mantiene un balance entre la rentabilidad y la satisfacción del cliente.
+
+El juego se desarrolla en un mundo abierto con múltiples ciudades interconectadas, cada una con sus propias características económicas, geográficas y de demanda. El jugador comenzará con una pequeña empresa local y deberá expandirse gradualmente hasta convertirse en un gigante logístico internacional.
+
+## Objetivo del Juego
+El jugador debe convertirse en el líder del mercado logístico, gestionando una red de distribución que conecta diferentes ciudades y puntos de entrega. Para lograrlo, deberá:
+- Realizar entregas a tiempo y en perfectas condiciones
+- Gestionar eficientemente los recursos económicos
+- Mantener y mejorar la flota de vehículos
+- Expandir el negocio a nuevas rutas y territorios
+- Mantener una buena reputación con los clientes
+- Adaptarse a las condiciones del mercado y la competencia
+- Gestionar crisis y eventos inesperados
+- Optimizar rutas y recursos para maximizar beneficios
+
+## Sistema de Envíos
+
+### Vehículos Disponibles
+El juego ofrece una amplia variedad de vehículos, cada uno con características específicas:
+
+#### Furgonetas
+- Furgonetas pequeñas (hasta 1.5 toneladas)
+  * Ideal para entregas urbanas
+  * Bajo consumo de combustible
+  * Fácil maniobrabilidad
+  * Capacidad limitada
+- Furgonetas medianas (hasta 3.5 toneladas)
+  * Balance entre capacidad y eficiencia
+  * Versatilidad en rutas urbanas e interurbanas
+  * Requiere permisos específicos
+
+#### Camiones
+- Camiones rígidos (hasta 12 toneladas)
+  * Versátiles para rutas medias
+  * Buena capacidad de carga
+  * Equilibrio entre consumo y rendimiento
+- Camiones articulados (hasta 26 toneladas)
+  * Alta capacidad de carga
+  * Eficientes en largas distancias
+  * Requieren experiencia del conductor
+
+#### Tráileres
+- Tráileres estándar
+  * Máxima capacidad de carga
+  * Optimizados para autopistas
+  * Requieren infraestructura específica
+- Tráileres especializados
+  * Refrigerados para productos perecederos
+  * Cisternas para líquidos
+  * Portacontenedores
+  * Plataformas para cargas especiales
+
+### Gestión de Vehículos
+
+#### Sistema de Desgaste
+- Desgaste por kilómetro recorrido
+- Desgaste por tipo de carga
+- Desgaste por condiciones climáticas
+- Desgaste por estilo de conducción
+- Efectos del desgaste:
+  * Mayor consumo de combustible
+  * Mayor probabilidad de averías
+  * Reducción de velocidad máxima
+  * Afecta a la satisfacción del cliente
+
+#### Mantenimiento
+- Mantenimiento preventivo
+  * Cambios de aceite
+  * Revisión de neumáticos
+  * Revisión de frenos
+  * Revisión general
+- Mantenimiento correctivo
+  * Reparación de averías
+  * Sustitución de piezas
+  * Reparaciones de emergencia
+- Costes de mantenimiento
+  * Piezas de recambio
+  * Mano de obra
+  * Tiempo de inactividad
+
+#### Mejoras y Personalización
+- Motor
+  * Aumento de potencia
+  * Reducción de consumo
+  * Mejora de fiabilidad
+- Chasis
+  * Mejora de suspensión
+  * Refuerzo estructural
+  * Mejora de aerodinámica
+- Cabina
+  * Comodidad del conductor
+  * Sistemas de navegación
+  * Sistemas de seguridad
+- Carga
+  * Sistemas de carga/descarga
+  * Equipamiento especializado
+  * Sistemas de control de temperatura
+
+### Restricciones y Regulaciones
+
+#### Permisos y Licencias
+- Permisos por tipo de vehículo
+- Permisos por tipo de carga
+- Permisos internacionales
+- Certificaciones especiales
+- Costes y renovaciones
+
+#### Restricciones de Circulación
+- Zonas de bajas emisiones
+- Restricciones por peso
+- Restricciones por dimensiones
+- Restricciones horarias
+- Rutas alternativas
+
+#### Normativa de Carga
+- Peso máximo por eje
+- Dimensiones máximas
+- Carga peligrosa
+- Carga perecedera
+- Documentación requerida
+
+## Modos de Juego
+
+### Modo Carrera
+- Progresión gradual de dificultad
+- Objetivos específicos por nivel
+- Sistema de reputación y clientes
+- Desbloqueo de nuevas rutas y vehículos
+- Misiones principales
+- Misiones secundarias
+- Eventos especiales
+- Logros y recompensas
+
+### Modo Libre
+- Acceso a todos los vehículos y rutas
+- Sin restricciones de tiempo
+- Enfoque en la experimentación y optimización
+- Personalización completa
+- Modo sandbox
+- Herramientas de prueba
+- Escenarios personalizados
+
+### Modo Desafío
+- Escenarios con condiciones específicas
+- Objetivos a tiempo limitado
+- Condiciones climáticas adversas
+- Restricciones de recursos
+- Desafíos diarios
+- Desafíos semanales
+- Competencias globales
+- Rankings y premios
+
+## Dificultades
+
+### Principiante
+- Tutorial completo
+- Asistencia en la gestión
+- Menos restricciones
+- Mayor margen de error
+- Ayudas visuales
+- Consejos en tiempo real
+- Sistema de guardado automático
+- Modo práctica
+
+### Intermedio
+- Gestión más compleja
+- Restricciones realistas
+- Sistema de mantenimiento más detallado
+- Competencia más agresiva
+- Menos ayudas
+- Mayor responsabilidad
+- Eventos aleatorios moderados
+- Economía más realista
+
+### Experto
+- Gestión completa de todos los aspectos
+- Condiciones climáticas realistas
+- Competencia feroz
+- Eventos aleatorios y crisis
+- Sin ayudas
+- Máxima dificultad
+- Economía volátil
+- Eventos extremos
+
+## Características Adicionales
+
+### Sistema Económico
+- Gestión de finanzas
+  * Ingresos por entregas
+  * Costes operativos
+  * Impuestos y tasas
+  * Beneficios netos
+- Inversiones en infraestructura
+  * Centros logísticos
+  * Talleres
+  * Almacenes
+  * Oficinas
+- Sistema de préstamos y créditos
+  * Préstamos bancarios
+  * Líneas de crédito
+  * Inversores
+  * Subvenciones
+- Fluctuaciones del mercado
+  * Estacionalidad
+  * Crisis económicas
+  * Oportunidades de mercado
+  * Competencia
+
+### Personal
+- Contratación de conductores
+  * Experiencia
+  * Especializaciones
+  * Salarios
+  * Beneficios
+- Formación y especialización
+  * Cursos de conducción
+  * Certificaciones
+  * Habilidades especiales
+  * Desarrollo profesional
+- Gestión de turnos
+  * Planificación
+  * Descansos
+  * Horas extra
+  * Rotaciones
+- Sistema de incentivos
+  * Bonificaciones
+  * Premios
+  * Promociones
+  * Beneficios sociales
+
+### Infraestructura
+- Construcción de centros logísticos
+  * Ubicación
+  * Capacidad
+  * Especialización
+  * Costes
+- Mejora de rutas
+  * Pavimentación
+  * Señalización
+  * Seguridad
+  * Eficiencia
+- Inversión en tecnología
+  * Sistemas de gestión
+  * Automatización
+  * Seguridad
+  * Comunicaciones
+- Gestión de almacenes
+  * Capacidad
+  * Organización
+  * Seguridad
+  * Eficiencia
+
+### Eventos Dinámicos
+- Condiciones climáticas
+  * Lluvia
+  * Nieve
+  * Niebla
+  * Viento
+- Huelgas y protestas
+  * Sindicatos
+  * Bloqueos
+  * Negociaciones
+  * Resolución
+- Cambios en la normativa
+  * Nuevas leyes
+  * Restricciones
+  * Oportunidades
+  * Adaptación
+- Oportunidades de negocio
+  * Contratos especiales
+  * Nuevas rutas
+  * Alianzas
+  * Expansión
+
+## Sistema de Progresión
+
+### Niveles de Empresa
+- Empresa local
+- Empresa regional
+- Empresa nacional
+- Empresa internacional
+- Corporación global
+
+### Reputación
+- Calificación por cliente
+- Calificación por región
+- Calificación global
+- Efectos en el negocio
+- Beneficios de alta reputación
+
+### Logros
+- Logros por categoría
+- Logros especiales
+- Recompensas
+- Desbloqueos
+- Títulos y reconocimientos
+
+## Conclusión
+Skyline Logistics ofrece una experiencia completa de simulación logística, combinando elementos de estrategia, gestión y simulación. El juego busca ofrecer una experiencia realista y desafiante, donde cada decisión tiene consecuencias en el desarrollo del negocio. La combinación de diferentes modos de juego y niveles de dificultad permite que tanto jugadores casuales como hardcore puedan disfrutar de la experiencia según sus preferencias.
+
+El juego está diseñado para ofrecer una experiencia profunda y gratificante, con múltiples capas de gestión y estrategia que se van desbloqueando a medida que el jugador progresa. La atención al detalle en cada aspecto del juego, desde la gestión de vehículos hasta la economía global, asegura una experiencia inmersiva y desafiante que mantendrá a los jugadores comprometidos durante horas. 
