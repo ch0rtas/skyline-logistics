@@ -6,6 +6,8 @@ import static util.GameSetupUtils.inicializarFlota;
 import static game.CampanaObjetivos.OBJETIVOS_CAMPANA;
 import static game.SatisfaccionClientesUtils.inicializarSatisfaccionClientes;
 import static game.CiudadUtils.normalizarNombreCiudad;
+import template.AbstractImpuestosProcessor;
+import template.ImpuestosProcessorConcreto;
 
 import java.util.Scanner;
 import java.util.Random;
@@ -21,7 +23,6 @@ import ui.MenuUI;
 import ui.BienvenidaUI;
 import ui.OpcionProcessor;
 import game.EstadisticasHelper;
-import game.ImpuestosProcessor;
 import game.GameRules;
 import decorator.IVehiculo;
 
@@ -57,6 +58,7 @@ public class JuegoLogistica {
     private PedidoGenerator pedidoGenerator;
     private static final String[] TIPOS_CARGA = {"NORMAL", "REFRIGERADO", "CONGELADO", "PELIGROSO", "ESCOLTADO", "FRÁGIL", "PERECEDERO", "ALTO_VALOR", "SERES_VIVOS"};
     private IncidentHandler incidentHandler;
+    private AbstractImpuestosProcessor impuestosProcessor;
 
     /**
      * Constructor del juego
@@ -99,6 +101,7 @@ public class JuegoLogistica {
         this.pedidoProcessor = new PedidoProcessor(this.pedidosEnCurso, this.fechaActual, this.flota, 
             this.jugador, estadisticas, this.random, this.dificultad, this);
         this.incidentHandler = new IncidentHandler(this.flota, this.random);
+        this.impuestosProcessor = new ImpuestosProcessorConcreto();
     }
     
     /**
@@ -253,7 +256,7 @@ public class JuegoLogistica {
      * Procesa el pago de impuestos
      */
     public void procesarImpuestos() {
-        ImpuestosProcessor.procesarImpuestos(jugador, dificultad, diaActual);
+        impuestosProcessor.procesarImpuestos(jugador, dificultad, diaActual);
     }
 
     /**
