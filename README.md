@@ -2,15 +2,51 @@
 
 ## Sistema de Gestión Logística Inteligente
 
-Skyline Logistics es una simulación de una plataforma integral de gestión logística, operada completamente por línea de comandos (CLI). El sistema permite gestionar envíos de mercancías entre almacenes, transportistas y clientes finales, enfrentando desafíos reales como retrasos, averías y huelgas.
+Skyline Logistics es un juego de simulación logística que pone al jugador al frente de una empresa de transporte y distribución. El objetivo principal es gestionar eficientemente una flota de vehículos para realizar entregas y expandir el negocio, todo mientras se mantiene un balance entre la rentabilidad y la satisfacción del cliente.
 
-## 📋 Requisitos
+## 📋 Características Principales
+
+- Gestión de flota de vehículos (furgonetas, camiones, tráileres)
+- Sistema de envíos con diferentes tipos de carga
+- Múltiples modos de juego (Carrera, Libre, Desafío)
+- Sistema económico detallado
+- Gestión de infraestructura y almacenes
+- Sistema de progresión y reputación
+- Eventos aleatorios y crisis
+- Diferentes niveles de dificultad
+
+## 🎮 Modos de Juego
+
+### Modo Carrera
+- Progresión gradual de dificultad
+- Sistema de reputación y clientes
+- Desbloqueo de nuevas rutas y vehículos
+- Eventos especiales
+- Logros y recompensas
+
+### Modo Libre
+- Acceso a todos los vehículos
+- Sin restricciones de tiempo
+- Enfoque en la experimentación y optimización
+- Personalización completa
+- Modo sandbox
+- Herramientas de prueba
+
+### Modo Desafío
+- Escenarios con condiciones específicas
+- Objetivos a tiempo limitado
+- Restricciones de recursos
+- Desafíos diarios
+- Competencias globales
+- Rankings y premios
+
+## 🚀 Requisitos del Sistema
 
 - Java 11 o superior
 - Terminal con soporte para caracteres UTF-8
 - 4GB RAM mínimo para simulaciones complejas
 
-## 🚀 Compilación y Ejecución
+## 📦 Compilación y Ejecución
 
 ```bash
 # Compilar el proyecto
@@ -20,21 +56,50 @@ javac -d bin src/**/*.java
 java -cp bin Main --difficulty medium
 ```
 
-## 🎮 Uso de Menús
+## 🎯 Objetivos del Juego
 
-### Menú Principal
-1. Iniciar simulación
-2. Configurar región
-3. Ver ayuda
-4. Salir
+El jugador debe convertirse en el líder del mercado logístico, gestionando una red de distribución que conecta diferentes ciudades y puntos de entrega. Para lograrlo, deberá:
+- Realizar entregas a tiempo y en perfectas condiciones
+- Gestionar eficientemente los recursos económicos
+- Mantener y mejorar la flota de vehículos
+- Expandir el negocio a nuevas rutas y territorios
+- Mantener una buena reputación con los clientes
+- Adaptarse a las condiciones del mercado y la competencia
+- Gestionar crisis y eventos inesperados
+- Optimizar rutas y recursos para maximizar beneficios
 
-### Menú de Turno
-1. Crear nuevo envío
-2. Decorar envío existente
-3. Resolver incidente
-4. Rastrear pedido
-5. Generar informe
-6. Finalizar turno
+## 🛠️ Patrones de Diseño Implementados
+
+### 1. Abstract Factory
+- Creación de vehículos y almacenes
+- `VehiculoFactory` y `AbstractVehiculoFactory`
+- Fábricas concretas para cada tipo de vehículo
+
+### 2. Decorator
+- Mejoras de vehículos
+- `IVehiculo` y `VehiculoDecorator`
+- Decoradores para diferentes mejoras
+
+### 3. Strategy
+- Procesamiento de pedidos
+- `ProcesamientoPedidoStrategy`
+- Estrategias para diferentes niveles de dificultad
+
+### 4. State
+- Estados de pedidos y vehículos
+- Manejo de diferentes estados del juego
+
+### 5. Singleton
+- Gestión de recursos globales
+- Configuración centralizada
+
+### 6. Template Method
+- Procesos estandarizados
+- Estructura base para diferentes tipos de pedidos
+
+### 7. Facade
+- Interfaz simplificada del sistema
+- Gestión de la complejidad del sistema
 
 ## 📁 Estructura del Proyecto
 
@@ -100,39 +165,41 @@ src/
 └── Main.java                     // Punto de entrada
 ```
 
-## 🔄 Flujo de Turnos
+## 📊 Sistema de Envíos
 
-1. Al iniciar un turno, se muestra la fecha y número de turno actual
-2. El usuario puede realizar múltiples acciones a través del menú
-3. Al finalizar el turno, se procesan eventos aleatorios
-4. Se muestra un resumen de los eventos ocurridos
-5. El sistema avanza al siguiente turno
+### Vehículos Disponibles
 
-## 📊 Métricas de Rendimiento
+#### Furgonetas
+- Furgonetas pequeñas (hasta 1.5 toneladas)
+- Furgonetas medianas (hasta 3.5 toneladas)
 
-- Margen de beneficio por envío
-- Tiempo medio de entrega
-- Satisfacción de clientes
-- Incidencias resueltas vs. pendientes
+#### Camiones
+- Camiones rígidos (hasta 12 toneladas)
+- Camiones articulados (hasta 26 toneladas)
 
-## 🛠️ Patrones de Diseño Implementados
+#### Tráileres
+- Tráileres estándar
+- Tráileres especializados (refrigerados, cisternas, etc.)
 
-1. **Abstract Factory** - Creación de vehículos y almacenes
-   - `VehiculoFactory` y `AbstractVehiculoFactory`
-   - Fábricas concretas para cada tipo de vehículo
+## 📈 Sistema de Progresión
 
-2. **Decorator** - Mejoras de vehículos
-   - `IVehiculo` y `VehiculoDecorator`
-   - Decoradores para diferentes mejoras
+### Reputación
+- Calificación por cliente
+- Calificación global
+- Beneficios de alta reputación
 
-3. **Strategy** - Procesamiento de pedidos
-   - `ProcesamientoPedidoStrategy`
-   - Estrategias para diferentes niveles de dificultad
+### Logros
+- Logros por categoría
+- Logros especiales
+- Recompensas
+- Desbloqueos
+- Títulos y reconocimientos
 
-4. **State** - Estados de pedidos y vehículos
+## 👥 Autores
 
-5. **Singleton** - Gestión de recursos globales
+- Luis Marquina - [GitHub](https://github.com/Luiiss44/skyline-logistics)
+- Manuel Martínez - [GitHub](https://github.com/ch0rtas/skyline-logistics)
+- Miguel Toran
 
-6. **Template Method** - Procesos estandarizados
-
-7. **Facade** - Interfaz simplificada del sistema 
+Estudiantes de la Universidad U-Tad, Grado en Ingeniería de Software  
+Asignatura: Diseño de Software 
