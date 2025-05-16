@@ -202,4 +202,4 @@ src/
 - Miguel Toran
 
 Estudiantes de la Universidad U-Tad, Grado en Ingeniería de Software  
-Asignatura: Diseño de Software 
+Asignatura: Diseño de Software
