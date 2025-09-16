@@ -197,7 +197,7 @@ src/
 
 ## 👥 Autores
 
-- Luis Marquina - [GitHub](https://github.com/Luiiss44/skyline-logisticss)
+- Luis Marquina - [GitHub](https://github.com/Luiiss44/skyline-logistics)
 - Manuel Martínez - [GitHub](https://github.com/ch0rtas/skyline-logistics)
 - Miguel Toran
 
